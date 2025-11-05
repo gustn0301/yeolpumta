@@ -24,21 +24,22 @@
             -ms-overflow-style: none;  /* IE and Edge */
             scrollbar-width: none;  /* Firefox */
         }
-        /* 타임라인 그리드 스타일 */
+        
+        /* (수정) 타임라인 그리드 스타일 - 60% 축소 */
         .timeline-grid {
             display: grid;
             grid-template-rows: repeat(288, 1fr); /* 24시간 * 12칸(5분) */
-            height: 1440px; /* 288 * 5px 높이. 스크롤 가능 */
+            height: 864px; /* (수정) 1440px * 0.6 = 864px */
         }
         .timeline-hour-label {
             grid-column: 1;
             grid-row: span 12; /* 1시간(12칸) */
-            height: 60px; /* 12 * 5px */
+            height: 36px; /* (수정) 60px * 0.6 = 36px */
         }
         .timeline-data {
             grid-column: 2;
             grid-row: span 1; /* 5분 */
-            min-height: 5px;
+            min-height: 3px; /* (수정) 5px * 0.6 = 3px */
         }
         /* 현재 시간 표시선 */
         #current-time-line {
@@ -78,10 +79,10 @@
                 </div>
             </div>
 
-            <!-- 타임라인 (가운데) -->
+            <!-- (수정) 타임라인 (가운데) - 높이 60% 반영 -->
             <div class="w-full flex-1 bg-gray-800 rounded-lg shadow-inner overflow-hidden flex mb-4 relative no-scrollbar" style="max-height: calc(100vh - 200px);">
                 <!-- 시간 레이블 -->
-                <div class="w-12 text-xs text-gray-400 text-right pr-2 sticky top-0 bg-gray-800 z-10" style="height: 1440px;">
+                <div class="w-12 text-xs text-gray-400 text-right pr-2 sticky top-0 bg-gray-800 z-10" style="height: 864px;"> <!-- (수정) 높이 864px -->
                     <!-- JS로 동적 생성 -->
                 </div>
                 <!-- 타임라인 그리드 -->
@@ -99,14 +100,10 @@
 
         <!-- 오른쪽 사이드바 (과목 리스트) -->
         <div class="w-full md:w-64 bg-gray-800 p-4 overflow-y-auto no-scrollbar flex-shrink-0 md:h-screen">
-            <!-- (수정) mt-4 추가 -->
-            <h3 class="text-lg font-semibold mb-4 mt-4">과목 리스트</h3>
+            <h3 class="text-lg font-semibold mb-4 mt-4">과목 리스트</h3> <!-- mt-4 유지 -->
             <div id="subject-list" class="space-y-1"> 
                 <!-- JS로 동적 생성 -->
             </div>
-            <!-- <button id="add-subject-btn" class="w-full mt-4 bg-gray-700 hover:bg-gray-600 text-sm py-2 rounded-md transition">
-                + 과목 추가
-            </button> -->
         </div>
 
     </div>
@@ -246,6 +243,9 @@
             "역사": "#78350F", // A (진한 갈색 - amber-900)
         };
         const subjectColors = { ...defaultSubjects };
+        
+        // (수정) 타임라인 높이 변수
+        const TIMELINE_TOTAL_HEIGHT = 864; // 1440 * 0.6
 
         // DOM 요소
         const loginScreen = document.getElementById('login-screen');
@@ -516,19 +516,19 @@
         }
         
         /**
-         * 과목 리스트를 화면에 렌더링합니다. (가장 작은 60% 버전)
+         * (수정) 과목 리스트를 화면에 렌더링합니다. (원복 - 중간 크기)
          */
         function renderSubjectList() {
             subjectListEl.innerHTML = ''; // 초기화
             for (const [name, color] of Object.entries(subjectColors)) {
                 const subjectItem = document.createElement('button');
-                // (수정) p-1, text-xs, w-2 h-2 (가장 작은 버전)
-                subjectItem.className = `w-full text-left p-1 rounded-md transition duration-200 flex items-center justify-between ${currentSubject === name ? 'ring-2 ring-white' : 'hover:bg-gray-700'}`;
+                // (수정) p-2, text-sm, w-3 h-3 (원래 크기 - 중간)
+                subjectItem.className = `w-full text-left p-2 rounded-md transition duration-200 flex items-center justify-between ${currentSubject === name ? 'ring-2 ring-white' : 'hover:bg-gray-700'}`;
                 subjectItem.dataset.name = name;
                 
                 subjectItem.innerHTML = `
-                    <span class="font-semibold text-xs">${name}</span>
-                    <span class="w-2 h-2 rounded-full" style="background-color: ${color};"></span>
+                    <span class="font-semibold text-sm">${name}</span>
+                    <span class="w-3 h-3 rounded-full" style="background-color: ${color};"></span>
                 `;
                 
                 // 과목 선택 이벤트
@@ -556,7 +556,7 @@
         }
 
         /**
-         * 타임라인의 시간 레이블을 렌더링합니다. (0시 ~ 24시)
+         * (수정) 타임라인의 시간 레이블을 렌더링합니다. (0시 ~ 24시) - 높이 60%
          */
         function renderTimelineHours() {
             const hourLabelContainer = document.querySelector('.w-12.text-xs');
@@ -610,7 +610,7 @@
         }
 
         /**
-         * 현재 시간선(빨간 실선)의 위치를 업데이트합니다.
+         * (수정) 현재 시간선(빨간 실선)의 위치를 업데이트합니다. - 높이 60%
          */
         function updateCurrentTimeLine() {
             const line = document.getElementById('current-time-line');
@@ -618,7 +618,8 @@
             
             const now = new Date();
             const totalMinutes = now.getHours() * 60 + now.getMinutes();
-            const topPosition = (totalMinutes / (24 * 60)) * 1440; // (현재 분 / 총 분) * 총 높이
+            // (수정) 총 높이를 TIMELINE_TOTAL_HEIGHT (864px)로 계산
+            const topPosition = (totalMinutes / (24 * 60)) * TIMELINE_TOTAL_HEIGHT; 
             
             line.style.top = `${topPosition}px`;
         }
