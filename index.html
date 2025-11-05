@@ -67,10 +67,9 @@
     <div id="home-screen" class="hidden flex-1 flex flex-col md:flex-row overflow-hidden">
         
         <!-- 메인 컨텐츠 (타이머 + 타임라인) -->
-        <div class="flex-1 flex flex-col justify-between items-center p-4 md:p-8 overflow-hidden"> <!-- (수정) overflow-hidden 추가 -->
+        <div class="flex-1 flex flex-col justify-between items-center p-4 md:p-8 overflow-hidden"> <!-- overflow-hidden 추가 -->
             
-            <!-- (수정) 오늘 총 공부 시간 (md:absolute 제거) -->
-            <!-- 이제 이 블록이 타임라인을 아래로 밀어냅니다. -->
+            <!-- 오늘 총 공부 시간 (md:absolute 제거) -->
             <div class="w-full flex justify-between items-center mb-4">
                 <div class="text-left">
                     <span class="text-gray-400 text-sm" id="user-display-name"></span>
@@ -82,13 +81,13 @@
             </div>
 
             <!-- 타임라인 (가운데) - 높이 60% 반영 -->
-            <!-- (수정) max-height 제거, flex-1 추가, overflow-hidden 수정 -->
-            <div class="w-full flex-1 bg-gray-800 rounded-lg shadow-inner overflow-hidden flex mb-4 relative no-scrollbar min-h-0"> <!-- min-h-0: flex-1 축소 문제 해결 -->
-                <!-- 시간 레이블 -->
-                <div class="w-12 text-xs text-gray-400 text-right pr-2 sticky top-0 bg-gray-800 z-10" style="height: 864px;"> <!-- 높이 864px -->
+            <!-- (수정) 타임라인 스크롤 컨테이너 -->
+            <div id="timeline-scroll-container" class="w-full flex-1 bg-gray-800 rounded-lg shadow-inner overflow-hidden flex mb-4 relative min-h-0"> <!-- min-h-0: flex-1 축소 문제 해결 -->
+                <!-- 시간 레이블 (고정) -->
+                <div class="w-12 text-xs text-gray-400 text-right pr-2 sticky top-0 bg-gray-800 z-10" style="height: 864px;">
                     <!-- JS로 동적 생성 -->
                 </div>
-                <!-- 타임라인 그리드 -->
+                <!-- 타임라인 그리드 (스크롤됨) -->
                 <div id="timeline-container" class="flex-1 timeline-grid relative overflow-y-auto no-scrollbar">
                     <!-- JS로 동적 생성 -->
                     <div id="current-time-line"></div>
@@ -259,6 +258,7 @@
         const userDisplayName = document.getElementById('user-display-name');
         const totalTodayStudyTimeEl = document.getElementById('total-today-study-time');
         const timelineContainer = document.getElementById('timeline-container');
+        const timelineScrollContainer = document.getElementById('timeline-scroll-container'); // (추가) 스크롤 컨테이너
         const startStudyBtn = document.getElementById('start-study-btn');
         const subjectListEl = document.getElementById('subject-list');
         const currentSubjectLabel = document.getElementById('current-subject-label');
@@ -648,7 +648,7 @@
             if (!line) return;
 
             const topPosition = parseFloat(line.style.top) || 0;
-            // (수정) 부모의 부모 (overflow-y-auto)
+            // (수정) 스크롤 대상은 timeline-container
             const container = document.getElementById('timeline-container'); 
             
             if (container) {
@@ -1014,8 +1014,8 @@
             });
             
             // 타임라인 컨테이너 클릭 시 통계 모달 열기
-            // (수정) 클릭 이벤트 대상 변경
-            document.querySelector('.w-full.flex-1.bg-gray-800').addEventListener('click', (e) => {
+            // (수정) 클릭 이벤트 대상 변경 (스크롤 컨테이너)
+            timelineScrollContainer.addEventListener('click', (e) => {
                 // 버튼 클릭시 모달이 열리는 것 방지
                 if (e.target.closest('button')) return; 
                 
