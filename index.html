@@ -25,19 +25,19 @@
             scrollbar-width: none;  /* Firefox */
         }
         
-        /* 타임라인 그리드 스타일 - 60% 축소 */
+        /* (수정) .timeline-grid는 이제 높이만 864px로 설정. */
         .timeline-grid {
             display: grid;
             grid-template-rows: repeat(288, 1fr); /* 24시간 * 12칸(5분) */
             height: 864px; /* 1440px * 0.6 = 864px */
         }
+        /* (수정) .timeline-hour-label은 grid가 아닌 일반 div. */
         .timeline-hour-label {
-            grid-column: 1;
-            grid-row: span 12; /* 1시간(12칸) */
             height: 36px; /* 60px * 0.6 = 36px */
+            /* (수정) grid-column, grid-row 제거 */
         }
         .timeline-data {
-            grid-column: 2;
+            grid-column: 1; /* (수정) 1열만 사용 */
             grid-row: span 1; /* 5분 */
             min-height: 3px; /* 5px * 0.6 = 3px */
         }
@@ -69,7 +69,7 @@
         <!-- 메인 컨텐츠 (타이머 + 타임라인) -->
         <div class="flex-1 flex flex-col justify-between items-center p-4 md:p-8 overflow-hidden"> <!-- overflow-hidden 추가 -->
             
-            <!-- 오늘 총 공부 시간 (md:absolute 제거) -->
+            <!-- 오늘 총 공부 시간 -->
             <div class="w-full flex justify-between items-center mb-4">
                 <div class="text-left">
                     <span class="text-gray-400 text-sm" id="user-display-name"></span>
@@ -80,17 +80,33 @@
                 </div>
             </div>
 
-            <!-- 타임라인 (가운데) - 높이 60% 반영 -->
-            <!-- (수정) 타임라인 스크롤 컨테이너 -->
-            <div id="timeline-scroll-container" class="w-full flex-1 bg-gray-800 rounded-lg shadow-inner overflow-hidden flex mb-4 relative min-h-0"> <!-- min-h-0: flex-1 축소 문제 해결 -->
-                <!-- 시간 레이블 (고정) -->
-                <div class="w-12 text-xs text-gray-400 text-right pr-2 sticky top-0 bg-gray-800 z-10" style="height: 864px;">
-                    <!-- JS로 동적 생성 -->
+            <!-- 
+                (수정) 타임라인 스크롤 컨테이너 
+                - flex-1 (세로 공간 채우기), min-h-0 (축소 허용)
+                - overflow-hidden (자식 요소들이 넘치는 것을 감춤)
+            -->
+            <div id="timeline-scroll-container" class="w-full flex-1 bg-gray-800 rounded-lg shadow-inner overflow-hidden flex mb-4 relative min-h-0">
+                
+                <!-- (수정) 시간 레이블 컨테이너 
+                     - flex-1 (부모 높이 상속), overflow-y-hidden (JS로 스크롤 동기화)
+                -->
+                <div id="timeline-hour-labels" class="w-12 text-xs text-gray-400 text-right pr-2 bg-gray-800 z-10 overflow-y-hidden no-scrollbar">
+                    <div style="height: 864px;"> <!-- 864px 높이의 내부 컨테이너 -->
+                        <!-- JS로 동적 생성 -->
+                    </div>
                 </div>
-                <!-- 타임라인 그리드 (스크롤됨) -->
-                <div id="timeline-container" class="flex-1 timeline-grid relative overflow-y-auto no-scrollbar">
-                    <!-- JS로 동적 생성 -->
-                    <div id="current-time-line"></div>
+
+                <!-- (수정) 타임라인 그리드 (스크롤됨) 
+                     - flex-1 (남은 너비 채우기), overflow-y-auto (이 컨테이너가 스크롤됨)
+                -->
+                <div id="timeline-container" class="flex-1 relative overflow-y-auto no-scrollbar">
+                    
+                    <!-- (수정) 실제 864px 높이를 가진 내부 그리드 컨테이너 -->
+                    <div id="timeline-grid-inner" class="timeline-grid relative">
+                        <!-- JS로 동적 생성 -->
+                        <div id="current-time-line"></div>
+                    </div>
+
                 </div>
             </div>
 
@@ -104,7 +120,7 @@
         <div class="w-full md:w-64 bg-gray-800 p-4 overflow-y-auto no-scrollbar flex-shrink-0 md:h-screen">
             <h3 class="text-lg font-semibold mb-4 mt-4">과목 리스트</h3> <!-- mt-4 유지 -->
             <div id="subject-list" class="space-y-1"> 
-                <!-- (수정) 과목 리스트 원복 (p-2, text-sm) -->
+                <!-- 과목 리스트 원복 (p-2, text-sm) -->
             </div>
         </div>
 
@@ -257,8 +273,13 @@
         const authStatus = document.getElementById('auth-status');
         const userDisplayName = document.getElementById('user-display-name');
         const totalTodayStudyTimeEl = document.getElementById('total-today-study-time');
-        const timelineContainer = document.getElementById('timeline-container');
-        const timelineScrollContainer = document.getElementById('timeline-scroll-container'); // (추가) 스크롤 컨테이너
+        
+        // (수정) 타임라인 DOM 요소
+        const timelineScrollContainer = document.getElementById('timeline-scroll-container'); 
+        const timelineHourLabels = document.getElementById('timeline-hour-labels'); // 시간 레이블 스크롤 컨테이너
+        const timelineContainer = document.getElementById('timeline-container'); // 그리드 스크롤 컨테이너
+        const timelineGridInner = document.getElementById('timeline-grid-inner'); // (추가) 실제 그리드
+        
         const startStudyBtn = document.getElementById('start-study-btn');
         const subjectListEl = document.getElementById('subject-list');
         const currentSubjectLabel = document.getElementById('current-subject-label');
@@ -267,7 +288,7 @@
         const friendsStudyGrid = document.getElementById('friends-study-grid');
         const restModal = document.getElementById('rest-modal');
         const restTimeDisplay = document.getElementById('rest-time-display');
-        const currentTimeLine = document.getElementById('current-time-line');
+        // const currentTimeLine = document.getElementById('current-time-line'); // (수정) timelineGridInner 안에 있음
 
         // 통계 모달 DOM
         const timelineModal = document.getElementById('timeline-modal');
@@ -319,13 +340,9 @@
             const [year, month, day] = kstDateStr.split('-').map(Number);
 
             // KST 자정 (YYYY-MM-DD 00:00:00 KST)
-            // new Date(year, month-1, day)는 로컬 시간 기준 자정을 생성.
-            // UTC 기준으로 KST 자정을 계산해야 함.
-            // KST 00:00:00은 UTC (전날) 15:00:00 (만약 KST가 UTC+9라면)
             const start = new Date(Date.UTC(year, month - 1, day, -9, 0, 0)); 
             
             // KST 23:59:59.999
-            // KST 23:59:59.999는 UTC (당일) 14:59:59.999
             const end = new Date(Date.UTC(year, month - 1, day, 14, 59, 59, 999)); 
             
             return { start, end, todayString: kstDateStr };
@@ -353,8 +370,6 @@
                 await setPersistence(auth, browserLocalPersistence);
                 
                 const provider = new GoogleAuthProvider();
-                // PESS 계정 강제는 어려우므로, Google 로그인으로 진행
-                // provider.setCustomParameters({ 'hd': 'pess.sc.kr' }); // PESS 도메인
                 const result = await signInWithPopup(auth, provider);
                 
                 currentUser = result.user;
@@ -447,8 +462,7 @@
             
             // 홈 화면 데이터 로드
             renderSubjectList();
-            renderTimelineHours();
-            updateCurrentTimeLine();
+            renderTimelineHours(); // (수정) 레이블 렌더링
             
             // 오늘 공부 데이터 리스너 시작
             setupHomeListeners();
@@ -570,7 +584,9 @@
          * 타임라인의 시간 레이블을 렌더링합니다. (0시 ~ 24시) - 높이 60%
          */
         function renderTimelineHours() {
-            const hourLabelContainer = document.querySelector('.w-12.text-xs');
+            // (수정) 시간 레이블을 #timeline-hour-labels > div 에 추가
+            const hourLabelContainer = document.querySelector('#timeline-hour-labels > div');
+            if (!hourLabelContainer) return;
             hourLabelContainer.innerHTML = ''; // 초기화
             for (let i = 0; i < 24; i++) {
                 const hourDiv = document.createElement('div');
@@ -585,8 +601,12 @@
          * @param {Array} sessions - Firestore study_sessions 데이터 배열
          */
         function renderTodayTimeline(sessions) {
+            // (수정) 그리드 컨테이너 #timeline-grid-inner
+            const gridInner = document.getElementById('timeline-grid-inner');
+            if (!gridInner) return;
+
             // 5분 단위 (288칸) 그리드 초기화
-            timelineContainer.innerHTML = '<div id="current-time-line"></div>'; // 현재 시간선만 남기고 초기화
+            gridInner.innerHTML = '<div id="current-time-line"></div>'; // 현재 시간선만 남기고 초기화
             const blocks = Array(288).fill(null); // 24 * 12
 
             sessions.forEach(session => {
@@ -618,7 +638,7 @@
                 if (color) {
                     blockDiv.style.backgroundColor = color;
                 }
-                timelineContainer.appendChild(blockDiv);
+                gridInner.appendChild(blockDiv); // (수정) gridInner에 추가
             });
 
             // 현재 시간선 재배치
@@ -629,7 +649,8 @@
          * 현재 시간선(빨간 실선)의 위치를 업데이트합니다. - 높이 60%
          */
         function updateCurrentTimeLine() {
-            const line = document.getElementById('current-time-line');
+            // (수정) #current-time-line은 #timeline-grid-inner 내부에 있음
+            const line = document.getElementById('current-time-line'); 
             if (!line) return;
             
             const now = new Date();
@@ -681,11 +702,6 @@
             }
 
             // 2시간이 넘었거나(3-2), 첫 공부거나, 휴식 모달에서 선택을 완료한 경우
-            // (조건 3-3 새벽 공부 로직은 KSTTodayRange와 쿼리 로직으로 대부분 커버됨)
-            // KST 기준 자정/6시를 기준으로 날짜가 바뀌므로, Firestore 쿼리가 중요.
-            // 새벽 2시간 이상 쉬면 -> 'lastStudyEndTime'이 2시간 이상 차이나므로 (3-2) 조건으로 빠짐.
-            // 새벽 2시간 이내 쉬면 -> (3-1) 조건으로 빠짐.
-            // 2시간 이상 쉬지 않고 계속되면 -> stopStudy가 호출되지 않으므로 세션이 이어짐.
             logRestAndStartStudy(); //
         }
         
@@ -762,9 +778,6 @@
                 }, { merge: true });
 
                 // 3. "total_daily_study" 업데이트 (오늘 총 공부 시간)
-                // (Firestore Function으로 처리하는 것이 더 강력하지만, 클라이언트에서 구현)
-                
-                // (수정) KST 기준으로 *시작 시간*의 날짜 문자열을 사용
                 const { todayString } = getKSTTodayRange(studyStartTime);
                 const totalStudyRef = doc(db, "users", userId, "total_daily_study", todayString);
                 
@@ -788,7 +801,6 @@
             // 4. 상태 초기화 및 홈 화면 복귀
             currentStudySessionId = null;
             studyStartTime = null;
-            // currentSubject는 유지 (다음에 이어서 하도록)
             
             showHomeScreen();
         }
@@ -817,7 +829,6 @@
             const q = query(
                 collection(db, "study_sessions"),
                 where("status", "==", "studying")
-                // where("userId", "!=", userId) // Firestore는 != 쿼리 지원 안함. 클라이언트에서 필터링.
             );
 
             friendsListener = onSnapshot(q, (snapshot) => {
@@ -1014,7 +1025,6 @@
             });
             
             // 타임라인 컨테이너 클릭 시 통계 모달 열기
-            // (수정) 클릭 이벤트 대상 변경 (스크롤 컨테이너)
             timelineScrollContainer.addEventListener('click', (e) => {
                 // 버튼 클릭시 모달이 열리는 것 방지
                 if (e.target.closest('button')) return; 
@@ -1024,6 +1034,17 @@
                 loadDailyStats(todayString);
                 timelineModal.classList.remove('hidden');
             });
+
+            // (수정) 타임라인 스크롤 동기화
+            timelineContainer.addEventListener('scroll', () => {
+                timelineHourLabels.scrollTop = timelineContainer.scrollTop;
+            });
+            // (수정) 레이블 영역에서 휠 스크롤시 메인 타임라인 스크롤
+            timelineHourLabels.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                timelineContainer.scrollTop += e.deltaY;
+            });
+
 
             // --- 공부 화면 ---
             stopStudyBtn.addEventListener('click', stopStudy);
