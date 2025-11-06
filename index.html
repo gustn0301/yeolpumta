@@ -28,18 +28,16 @@
         }
         
         .timeline-grid {
-            display: grid;
-            grid-template-rows: repeat(288, 1fr); /* 24시간 * 12칸(5분) */
+            /* (수정) 그리드 속성 대신 높이와 위치 기준만 유지 */
+            position: relative;
             height: 864px; /* 1440px * 0.6 = 864px */
         }
         .timeline-hour-label {
             height: 36px; /* 60px * 0.6 = 36px */
         }
-        .timeline-data {
-            grid-column: 1; /* 1열만 사용 */
-            grid-row: span 1; /* 5분 */
-            min-height: 3px; /* 5px * 0.6 = 3px */
-        }
+        /* (수정) 분 단위 렌더링을 위해 이 클래스는 더 이상 사용되지 않음 */
+        /* .timeline-data { ... } */
+
         /* 현재 시간 표시선 */
         #current-time-line {
             position: absolute;
@@ -47,6 +45,7 @@
             height: 2px;
             background-color: red;
             z-index: 10;
+            left: 0;
         }
     </style>
 </head>
@@ -93,7 +92,7 @@
                 <div id="timeline-container" class="flex-1 relative overflow-y-auto no-scrollbar">
                     
                     <!-- 실제 864px 높이를 가진 내부 그리드 컨테이너 -->
-                    <div id="timeline-grid-inner" class="timeline-grid relative">
+                    <div id="timeline-grid-inner" class="timeline-grid">
                         <!-- JS로 동적 생성 -->
                         <div id="current-time-line"></div>
                     </div>
@@ -169,7 +168,10 @@
                 <input type="date" id="timeline-date-picker" class="bg-gray-700 text-white rounded-md p-2">
                 <button id="close-timeline-modal" class="text-gray-400 hover:text-white text-2xl">&times;</button>
             </div>
-            <p class="text-center text-lg mb-4"><span id="modal-total-time"></span> 공부</p>
+            <p class="text-center text-lg mb-2"><span id="modal-total-time"></span> 공부</p>
+            <!-- (추가) 어제와 비교 메시지 -->
+            <p id="modal-comparison-text" class="text-center text-sm mb-4 hidden"></p>
+            
             <div class="flex-1 min-h-0">
                 <canvas id="study-pie-chart"></canvas>
             </div>
@@ -250,7 +252,6 @@
         
         let liveStatusUpdateInterval = null; 
         
-        // (추가) 친구들 실시간 타이머 저장 객체
         let friendsTimers = {};
 
         // 기본 과목
@@ -296,6 +297,7 @@
         const timelineDatePicker = document.getElementById('timeline-date-picker');
         const closeTimelineModal = document.getElementById('close-timeline-modal');
         const modalTotalTimeEl = document.getElementById('modal-total-time');
+        const modalComparisonTextEl = document.getElementById('modal-comparison-text'); // (추가)
         const modalTimelineContainer = document.getElementById('modal-timeline-container');
         const pieChartCanvas = document.getElementById('study-pie-chart');
         let studyPieChart = null;
@@ -315,6 +317,7 @@
 
         function getYYYYMMDD(dateInput) {
             const date = dateInput instanceof Timestamp ? dateInput.toDate() : dateInput;
+            // KST (UTC+9) 기준으로 날짜 문자열 생성
             const kstOffset = 9 * 60 * 60 * 1000;
             const kstDate = new Date(date.getTime() + kstOffset);
             return kstDate.toISOString().split('T')[0];
@@ -323,14 +326,25 @@
         function getKSTTodayRange(date = new Date()) {
             const kstDateStr = new Date(date.getTime() + (9 * 60 * 60 * 1000)).toISOString().split('T')[0];
             const [year, month, day] = kstDateStr.split('-').map(Number);
-            const start = new Date(Date.UTC(year, month - 1, day, -9, 0, 0)); 
-            const end = new Date(Date.UTC(year, month - 1, day, 14, 59, 59, 999)); 
+            // KST 자정(00:00)은 UTC 기준 전날 15:00
+            const start = new Date(Date.UTC(year, month - 1, day, -9, 0, 0)); // KST 00:00:00
+            // KST 23:59:59는 UTC 기준 당일 14:59:59
+            const end = new Date(Date.UTC(year, month - 1, day, 14, 59, 59, 999)); // KST 23:59:59
             return { start, end, todayString: kstDateStr };
         }
         
-        function getKSTYesterdayRange() {
-            const yesterday = new Date(new Date().getTime() - (24 * 60 * 60 * 1000));
-            return getKSTTodayRange(yesterday);
+        /**
+         * (추가) YYYY-MM-DD 형식의 날짜 문자열을 받아 그 전날의 YYYY-MM-DD를 반환
+         */
+        function getYesterdayDateString(dateString) {
+            const [year, month, day] = dateString.split('-').map(Number);
+            // KST 기준으로 날짜 객체 생성 (정오쯤으로)
+            const date = new Date(Date.UTC(year, month - 1, day, 3, 0, 0)); // 12:00 KST = 03:00 UTC
+            // 하루(24시간) 빼기
+            date.setUTCDate(date.getUTCDate() - 1); 
+            // 다시 KST 기준으로 YYYY-MM-DD 반환
+            const kstDateStr = new Date(date.getTime() + (9 * 60 * 60 * 1000)).toISOString().split('T')[0];
+            return kstDateStr;
         }
 
         // -----------------------------------------------------------------
@@ -423,9 +437,6 @@
             setupStudyListeners(); // 총 시간 리스너 포함
         }
         
-        /**
-         * (추가) 친구 타이머 정리
-         */
         function cleanupFriendsTimers() {
             for (const uid in friendsTimers) {
                 clearInterval(friendsTimers[uid]);
@@ -439,7 +450,7 @@
             if (totalTodayStudyListener) totalTodayStudyListener();
             if (liveStatusUpdateInterval) clearInterval(liveStatusUpdateInterval);
             
-            cleanupFriendsTimers(); // (추가) 친구 타이머 정리
+            cleanupFriendsTimers(); 
             
             friendsListener = null;
             todayTimelineListener = null;
@@ -521,48 +532,73 @@
             }
         }
         
+        /**
+         * (수정) 오늘 타임라인을 분 단위로 정확하게 렌더링
+         */
         function renderTodayTimeline(sessions) {
             const gridInner = document.getElementById('timeline-grid-inner');
             if (!gridInner) return;
 
-            gridInner.innerHTML = '<div id="current-time-line"></div>'; 
-            const blocks = Array(288).fill(null); 
+            gridInner.innerHTML = ''; // 모두 지우기
 
+            // 1. (수정) 5분 단위 배경선 그리기 (시각적 보조)
+            const lineFragment = document.createDocumentFragment();
+            for (let i = 0; i < 288; i++) {
+                const lineDiv = document.createElement('div');
+                lineDiv.className = 'border-b border-gray-700 opacity-30';
+                lineDiv.style.minHeight = '3px'; // 864px / 288 = 3px
+                lineDiv.style.height = '3px';
+                lineFragment.appendChild(lineDiv);
+            }
+            gridInner.appendChild(lineFragment);
+
+            // 2. (수정) 현재 시간 선 추가
+            const timeLineDiv = document.createElement('div');
+            timeLineDiv.id = 'current-time-line';
+            gridInner.appendChild(timeLineDiv);
+            
+            // 3. (수정) 세션 블록을 분 단위로 절대 위치에 렌더링
             sessions.forEach(session => {
                 const start = session.startTime.toDate();
+                // endTime이 없으면(공부 중이면) 현재 시간으로
                 const end = session.endTime ? session.endTime.toDate() : new Date(); 
                 
                 const startMinute = start.getHours() * 60 + start.getMinutes();
-                const endMinute = end.getHours() * 60 + end.getMinutes();
+                let endMinute = end.getHours() * 60 + end.getMinutes();
                 
-                const startIndex = Math.floor(startMinute / 5);
-                let endIndex = Math.ceil(endMinute / 5); 
-                
-                if (end < start) endIndex = 288;
-                
-                for (let i = startIndex; i < endIndex && i < 288; i++) {
-                    blocks[i] = session.subjectColor;
+                // 자정을 넘어가는 경우 처리
+                if (end < start || (endMinute === 0 && startMinute > 0)) {
+                    endMinute = 24 * 60; // 23:59 (1440분)
                 }
+                
+                const durationMinutes = endMinute - startMinute;
+                if (durationMinutes <= 0) return;
+                
+                // 분 단위로 top과 height 계산
+                const top = (startMinute / (24 * 60)) * TIMELINE_TOTAL_HEIGHT;
+                const height = (durationMinutes / (24 * 60)) * TIMELINE_TOTAL_HEIGHT;
+                
+                const sessionDiv = document.createElement('div');
+                sessionDiv.className = 'absolute opacity-75 rounded'; // "적당한 폭"
+                sessionDiv.style.backgroundColor = session.subjectColor;
+                sessionDiv.style.top = `${top}px`;
+                sessionDiv.style.height = `${Math.max(1, height)}px`; // 최소 1px
+                sessionDiv.style.left = '10%'; // 중앙 정렬 (양옆 10% 여백)
+                sessionDiv.style.width = '80%'; // 폭 80%
+                gridInner.appendChild(sessionDiv); 
             });
 
-            blocks.forEach((color, index) => {
-                const blockDiv = document.createElement('div');
-                blockDiv.className = 'timeline-data';
-                blockDiv.style.gridRow = `${index + 1} / span 1`;
-                if (color) {
-                    blockDiv.style.backgroundColor = color;
-                }
-                gridInner.appendChild(blockDiv); 
-            });
-
+            // 4. 현재 시간 선 위치 업데이트
             updateCurrentTimeLine();
         }
+
 
         function updateCurrentTimeLine() {
             const line = document.getElementById('current-time-line'); 
             if (!line) return;
             
             const now = new Date();
+            // (확인) 1번 요청: 분 단위 반영
             const totalMinutes = now.getHours() * 60 + now.getMinutes();
             const topPosition = (totalMinutes / (24 * 60)) * TIMELINE_TOTAL_HEIGHT; 
             line.style.top = `${topPosition}px`;
@@ -689,16 +725,12 @@
             showHomeScreen();
         }
 
-        /**
-         * 내 공부 타이머 (총 시간 + 세션 시간)
-         */
         function runMyStudyTimer() {
             if (studyTimerInterval) clearInterval(studyTimerInterval);
             if (liveStatusUpdateInterval) clearInterval(liveStatusUpdateInterval); 
 
             const sessionStartTotalSeconds = currentTotalStudySeconds;
 
-            // 1초마다 화면 타이머 업데이트
             studyTimerInterval = setInterval(() => {
                 if (!studyStartTime) return;
                 const now = new Date();
@@ -711,20 +743,15 @@
                 }
             }, 1000);
 
-            // 5초마다 Firestore live_status 업데이트
             liveStatusUpdateInterval = setInterval(() => {
                 if (!studyStartTime) return;
                 const now = new Date();
                 const sessionSeconds = Math.floor((now.getTime() - studyStartTime.getTime()) / 1000);
                 const newTotalSeconds = sessionStartTotalSeconds + sessionSeconds;
                 updateLiveStatus(newTotalSeconds); 
-            }, 5000); // 5초
+            }, 5000);
         }
 
-        /**
-         * 내 실시간 상태를 Firestore에 업데이트 (5초마다)
-         * @param {number} totalSeconds - 현재 총 공부 시간(초)
-         */
         async function updateLiveStatus(totalSeconds) {
             if (!userId) return;
             const liveRef = doc(db, "live_status", userId);
@@ -743,9 +770,6 @@
         }
 
 
-        /**
-         * (수정) 공부 화면 리스너 (친구 현황 + 총 시간)
-         */
         function setupStudyListeners() {
             if (friendsListener || totalTodayStudyListener) return; 
 
@@ -757,8 +781,6 @@
                 snapshot.forEach(doc => {
                     if (doc.id !== userId) { 
                         const data = doc.data();
-                        
-                        // (수정) doc.id를 uid로 저장
                         data.uid = doc.id; 
 
                         if (data.lastUpdated) {
@@ -769,11 +791,10 @@
                         } else {
                             data.status = "offline"; 
                         }
-                        
                         friends.push(data);
                     }
                 });
-                renderFriendsGrid(friends); // 친구 목록 렌더링
+                renderFriendsGrid(friends);
             });
 
             // B. 오늘 총 공부 시간 (리스너는 DB 기준 시간을 표시)
@@ -794,20 +815,11 @@
             });
         }
 
-        /**
-         * (수정) 친구 공부 현황 그리드를 렌더링합니다. (총 시간 + 오프라인 상태 + 실시간 타이머)
-         * @param {Array} friends - live_status 데이터 배열 (uid 포함)
-         */
         function renderFriendsGrid(friends) {
-            // 1. 기존 타이머 모두 정리
             cleanupFriendsTimers();
-            
-            // 2. 순공 시간 기준으로 정렬
             friends.sort((a, b) => (b.liveTotalSeconds || 0) - (a.liveTotalSeconds || 0));
-            
             friendsStudyGrid.innerHTML = ''; 
             
-            // 3. (수정) .slice(0, 40) 제거 -> 모든 사용자 표시
             friends.forEach(friend => {
                 const durationSeconds = friend.liveTotalSeconds || 0;
                 const isStudying = friend.status === 'studying';
@@ -817,7 +829,6 @@
                 friendDiv.className = 'bg-gray-800 p-3 rounded-lg shadow-md text-center border-2';
                 friendDiv.style.borderColor = isStudying ? subjectColor : '#4B5563'; 
                 
-                // (수정) 타이머 엘리먼트에 고유 ID 부여
                 friendDiv.innerHTML = `
                     <div class="text-sm font-semibold truncate" style="color: ${isStudying ? subjectColor : '#9CA3AF'}">
                         ${isStudying ? (friend.subjectName || '공부 중') : '오프라인'}
@@ -827,10 +838,8 @@
                 `;
                 friendsStudyGrid.appendChild(friendDiv);
 
-                // 4. (추가) 공부 중인 친구만 실시간 타이머 시작
                 if (isStudying) {
                     const startSeconds = durationSeconds;
-                    // lastUpdated 기준으로 타이머 시작
                     const startTime = friend.lastUpdated ? friend.lastUpdated.toDate().getTime() : Date.now(); 
                     
                     friendsTimers[friend.uid] = setInterval(() => {
@@ -840,7 +849,6 @@
                         if (timerEl) {
                             timerEl.textContent = formatTime(currentTotal);
                         } else {
-                            // DOM에서 사라지면 타이머 정리
                             clearInterval(friendsTimers[friend.uid]);
                             delete friendsTimers[friend.uid];
                         }
@@ -853,12 +861,15 @@
         // 8. 통계 모달 (일간)
         // -----------------------------------------------------------------
         
+        /**
+         * (수정) 일간 통계 로드 (어제와 비교)
+         */
         async function loadDailyStats(dateString) {
             const [year, month, day] = dateString.split('-').map(Number);
             const start = new Date(Date.UTC(year, month - 1, day, -9, 0, 0)); 
             const end = new Date(Date.UTC(year, month - 1, day, 14, 59, 59, 999));
 
-            // 1. 총 시간
+            // 1. 총 시간 (선택한 날짜)
             const totalStudyRef = doc(db, "users", userId, "total_daily_study", dateString);
             const totalDoc = await getDoc(totalStudyRef);
             let totalSeconds = 0;
@@ -867,7 +878,36 @@
             }
             modalTotalTimeEl.textContent = formatTime(totalSeconds);
 
-            // 2. 세션 데이터
+            // 2. (수정) 어제 총 시간 및 비교 (3번 요청)
+            const todayKSTString = getKSTTodayRange().todayString;
+            
+            // 오늘 날짜가 아닐 때만 비교
+            if (dateString !== todayKSTString) {
+                const yesterdayDateString = getYesterdayDateString(dateString);
+                const yesterdayTotalRef = doc(db, "users", userId, "total_daily_study", yesterdayDateString);
+                const yesterdayDoc = await getDoc(yesterdayTotalRef);
+                let yesterdayTotalSeconds = 0;
+                if (yesterdayDoc.exists()) yesterdayTotalSeconds = yesterdayDoc.data().totalSeconds || 0;
+                
+                const diff = totalSeconds - yesterdayTotalSeconds;
+                const diffText = formatTime(Math.abs(diff));
+                
+                if (diff > 0) {
+                    modalComparisonTextEl.textContent = `전날보다 ${diffText} 더 공부했어요.`;
+                    modalComparisonTextEl.style.color = '#22C55E'; // green-500
+                } else if (diff < 0) {
+                    modalComparisonTextEl.textContent = `전날보다 ${diffText} 덜 공부했어요.`;
+                    modalComparisonTextEl.style.color = '#EF4444'; // red-500
+                } else {
+                    modalComparisonTextEl.textContent = '전날과 공부 시간이 같아요.';
+                    modalComparisonTextEl.style.color = '#9CA3AF'; // gray-400
+                }
+                modalComparisonTextEl.classList.remove('hidden');
+            } else {
+                modalComparisonTextEl.classList.add('hidden'); // 오늘 날짜에는 숨김
+            }
+
+            // 3. 세션 데이터 (기존과 동일)
             const sessionsQuery = query(
                 collection(db, "study_sessions"),
                 where("userId", "==", userId),
@@ -878,7 +918,7 @@
             const snapshot = await getDocs(sessionsQuery);
             const sessions = snapshot.docs.map(d => d.data());
 
-            // 3. 데이터 가공
+            // 4. 데이터 가공 (기존과 동일)
             const subjectData = {}; 
             sessions.forEach(session => {
                 const subject = session.subjectName;
