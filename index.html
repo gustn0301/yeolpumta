@@ -59,9 +59,9 @@
             stroke: #9CA3AF;
         }
 
-        /* (추가) 달력 셀 스타일 */
+        /* (수정) 달력 셀 스타일 */
         .calendar-cell {
-            height: 100px;
+            height: 80px; /* 100px에서 80px로 수정 */
             padding: 4px;
             background-color: #374151; /* gray-700 */
             border-radius: 4px;
@@ -100,20 +100,20 @@
         <p id="auth-status" class="text-gray-500 mt-4 text-sm"></p>
     </div>
 
-    <!-- (수정) 2. 메인 앱 컨테이너 (하단 탭 포함) -->
+    <!-- 2. 메인 앱 컨테이너 (하단 탭 포함) -->
     <div id="main-app-container" class="hidden flex-1 flex-col overflow-hidden">
         
         <!-- 2-1. 페이지 컨텐츠 (탭에 따라 변경됨) -->
         <div id="page-content" class="flex-1 overflow-y-auto no-scrollbar">
             
-            <!-- (수정) 홈 탭 페이지 (모바일 스크롤 수정) -->
+            <!-- 홈 탭 페이지 (모바일 스크롤 수정) -->
             <div id="home-page" class="page-div flex-1 flex flex-col md:flex-row md:overflow-hidden md:h-full">
                 <!-- 메인 컨텐츠 (타이머 + 타임라인) -->
                 <div class="flex-1 flex flex-col justify-between items-center p-4 md:p-8 md:overflow-hidden">
                     
                     <!-- 오늘 총 공부 시간 -->
                     <div class="w-full flex justify-between items-center mb-4">
-                        <!-- (수정) 이름 클릭 시 로그아웃 버튼 -->
+                        <!-- 이름 클릭 시 로그아웃 버튼 -->
                         <div class="text-left relative">
                             <button class="text-gray-400 text-sm" id="user-display-name-btn"></button>
                             <button id="logout-btn-home" class="hidden absolute top-full left-0 bg-red-600 text-white px-3 py-1 rounded-md text-xs mt-1 z-20">로그아웃</button>
@@ -144,7 +144,7 @@
                         <button id="start-study-btn" class="w-full md:w-1/2 bg-gray-700 hover:bg-gray-600 text-white font-bold py-4 px-6 rounded-lg text-lg transition duration-300 shadow-lg flex-shrink-0" disabled>
                             과목을 선택해주세요.
                         </button>
-                        <!-- (추가) 실시간 공부 인원 -->
+                        <!-- 실시간 공부 인원 -->
                         <p id="studying-count-text" class="text-xs text-gray-500 mt-2 text-center hidden"></p>
                     </div>
                 </div>
@@ -157,7 +157,7 @@
                 </div>
             </div>
 
-            <!-- (추가) 그룹 탭 페이지 -->
+            <!-- 그룹 탭 페이지 -->
             <div id="group-page" class="page-div hidden p-4 md:p-8 overflow-y-auto max-w-2xl mx-auto w-full">
                 <div id="group-list-view">
                     <div class="flex justify-between items-center mb-6">
@@ -202,8 +202,8 @@
                 </div>
             </div>
 
-            <!-- (추가) 달력 탭 페이지 -->
-            <div id="calendar-page" class="page-div hidden p-4 md:p-8 overflow-y-auto">
+            <!-- 달력 탭 페이지 (수정) -->
+            <div id="calendar-page" class="page-div hidden p-4 md:p-8">
                 <div class="max-w-4xl mx-auto">
                     <h2 class="text-3xl font-bold mb-6">월간 달력</h2>
                     <div class="flex justify-between items-center mb-4 p-4 bg-gray-800 rounded-lg">
@@ -226,7 +226,7 @@
                 </div>
             </div>
 
-            <!-- (추가) MY 탭 페이지 -->
+            <!-- MY 탭 페이지 -->
             <div id="my-page" class="page-div hidden p-4 md:p-8 overflow-y-auto max-w-md mx-auto">
                 <h2 class="text-3xl font-bold mb-6">MY</h2>
                 
@@ -247,7 +247,7 @@
 
         </div>
         
-        <!-- 2-2. (추가) 하단 탭 내비게이션 -->
+        <!-- 2-2. 하단 탭 내비게이션 -->
         <div id="bottom-nav" class="flex-shrink-0 w-full bg-gray-800 border-t border-gray-700 grid grid-cols-4 gap-4 p-2">
             <!-- 홈 -->
             <button id="nav-home" class="nav-btn flex flex-col items-center justify-center p-2 rounded-lg active">
@@ -418,7 +418,8 @@
         let liveStatusUpdateInterval = null; 
         let pageTitleInterval = null; // (추가)
         
-        let friendsTimers = {};
+        // (수정) 친구 타이머 관련 변수 삭제
+        // let friendsTimers = {};
 
         // (추가) 달력 상태
         let currentCalendarDate = new Date();
@@ -691,12 +692,8 @@
             }
         }
         
-        function cleanupFriendsTimers() {
-            for (const uid in friendsTimers) {
-                clearInterval(friendsTimers[uid]);
-            }
-            friendsTimers = {};
-        }
+        // (수정) 친구 타이머 정리 함수 삭제
+        // function cleanupFriendsTimers() {}
 
         function cleanupListeners() {
             if (friendsListener) friendsListener();
@@ -709,7 +706,8 @@
             if (liveStatusUpdateInterval) clearInterval(liveStatusUpdateInterval);
             if (pageTitleInterval) clearInterval(pageTitleInterval); // (추가)
             
-            cleanupFriendsTimers(); 
+            // (수정) 친구 타이머 정리 호출 삭제
+            // cleanupFriendsTimers(); 
             
             friendsListener = null;
             todayTimelineListener = null;
@@ -758,10 +756,21 @@
                 renderTodayTimeline(snapshot.docs.map(d => d.data()));
             });
             
-            // C. (추가) 실시간 공부 인원
+            // C. (수정) 실시간 공부 인원 (30초 타임아웃 적용)
             const liveQuery = query(collection(db, "live_status"), where("status", "==", "studying"));
             studyingCountListener = onSnapshot(liveQuery, (snapshot) => {
-                const count = snapshot.size;
+                const now = Timestamp.now();
+                let count = 0;
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    if (data.lastUpdated) {
+                        const secondsSinceUpdate = now.seconds - data.lastUpdated.seconds;
+                        if (secondsSinceUpdate <= 30) { // 30초 이내에 업데이트된 경우만
+                            count++;
+                        }
+                    }
+                });
+
                 if (count > 0) {
                     studyingCountText.textContent = `현재 ${count}명이 공부하고 있습니다.`;
                     studyingCountText.classList.remove('hidden');
@@ -1073,7 +1082,7 @@
         }
 
         function renderFriendsGrid(friends) {
-            cleanupFriendsTimers();
+            // (수정) 친구 타이머 정리 함수 호출 삭제
             friends.sort((a, b) => (b.liveTotalSeconds || 0) - (a.liveTotalSeconds || 0));
             friendsStudyGrid.innerHTML = ''; 
             
@@ -1095,22 +1104,7 @@
                 `;
                 friendsStudyGrid.appendChild(friendDiv);
 
-                if (isStudying) {
-                    const startSeconds = durationSeconds;
-                    const startTime = friend.lastUpdated ? friend.lastUpdated.toDate().getTime() : Date.now(); 
-                    
-                    friendsTimers[friend.uid] = setInterval(() => {
-                        const elapsed = Math.floor((Date.now() - startTime) / 1000);
-                        const currentTotal = startSeconds + elapsed;
-                        const timerEl = document.getElementById(`friend-time-${friend.uid}`);
-                        if (timerEl) {
-                            timerEl.textContent = formatTime(currentTotal);
-                        } else {
-                            clearInterval(friendsTimers[friend.uid]);
-                            delete friendsTimers[friend.uid];
-                        }
-                    }, 1000);
-                }
+                // (수정) 실시간 타이머 예측 로직 (setInterval) 삭제
             });
         }
         
