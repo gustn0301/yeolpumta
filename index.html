@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>대건고 열품타</title>
+    <!-- (추가) Favicon -->
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='orange'%3E%3Cpath d='M12 2.69c-3.14 0-6 2.68-6 6 0 2.24 1.25 4.2 3 5.18.3.15.3.5 0 .65C6.25 15.2 3 17.15 3 20c0 1.66 1.34 3 3 3h12c1.66 0 3-1.34 3-3 0-2.85-3.25-4.8-6-5.48-.3-.15-.3-.5 0-.65 1.75-.98 3-2.94 3-5.18 0-3.32-2.86-6-6-6z'%3E%3C/path%3E%3C/svg%3E" type="image/svg+xml">
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js CDN -->
@@ -25,21 +27,19 @@
             scrollbar-width: none;  /* Firefox */
         }
         
-        /* (수정) .timeline-grid는 이제 높이만 864px로 설정. */
         .timeline-grid {
             display: grid;
             grid-template-rows: repeat(288, 1fr); /* 24시간 * 12칸(5분) */
             height: 864px; /* 1440px * 0.6 = 864px */
         }
-        /* (수정) .timeline-hour-label은 grid가 아닌 일반 div. */
         .timeline-hour-label {
             height: 36px; /* 60px * 0.6 = 36px */
-            /* (수정) grid-column, grid-row 제거 */
         }
         .timeline-data {
-            grid-column: 1; /* (수정) 1열만 사용 */
+            grid-column: 1; /* 1열만 사용 */
             grid-row: span 1; /* 5분 */
             min-height: 3px; /* 5px * 0.6 = 3px */
+            /* (수정) "폭이 적당한 막대" -> 배경색이 칠해진 div입니다. */
         }
         /* 현재 시간 표시선 */
         #current-time-line {
@@ -67,7 +67,7 @@
     <div id="home-screen" class="hidden flex-1 flex flex-col md:flex-row overflow-hidden">
         
         <!-- 메인 컨텐츠 (타이머 + 타임라인) -->
-        <div class="flex-1 flex flex-col justify-between items-center p-4 md:p-8 overflow-hidden"> <!-- overflow-hidden 추가 -->
+        <div class="flex-1 flex flex-col justify-between items-center p-4 md:p-8 overflow-hidden">
             
             <!-- 오늘 총 공부 시간 -->
             <div class="w-full flex justify-between items-center mb-4">
@@ -80,28 +80,20 @@
                 </div>
             </div>
 
-            <!-- 
-                (수정) 타임라인 스크롤 컨테이너 
-                - flex-1 (세로 공간 채우기), min-h-0 (축소 허용)
-                - overflow-hidden (자식 요소들이 넘치는 것을 감춤)
-            -->
+            <!-- 타임라인 스크롤 컨테이너 -->
             <div id="timeline-scroll-container" class="w-full flex-1 bg-gray-800 rounded-lg shadow-inner overflow-hidden flex mb-4 relative min-h-0">
                 
-                <!-- (수정) 시간 레이블 컨테이너 
-                     - flex-1 (부모 높이 상속), overflow-y-hidden (JS로 스크롤 동기화)
-                -->
+                <!-- 시간 레이블 컨테이너 -->
                 <div id="timeline-hour-labels" class="w-12 text-xs text-gray-400 text-right pr-2 bg-gray-800 z-10 overflow-y-hidden no-scrollbar">
                     <div style="height: 864px;"> <!-- 864px 높이의 내부 컨테이너 -->
                         <!-- JS로 동적 생성 -->
                     </div>
                 </div>
 
-                <!-- (수정) 타임라인 그리드 (스크롤됨) 
-                     - flex-1 (남은 너비 채우기), overflow-y-auto (이 컨테이너가 스크롤됨)
-                -->
+                <!-- 타임라인 그리드 (스크롤됨) -->
                 <div id="timeline-container" class="flex-1 relative overflow-y-auto no-scrollbar">
                     
-                    <!-- (수정) 실제 864px 높이를 가진 내부 그리드 컨테이너 -->
+                    <!-- 실제 864px 높이를 가진 내부 그리드 컨테이너 -->
                     <div id="timeline-grid-inner" class="timeline-grid relative">
                         <!-- JS로 동적 생성 -->
                         <div id="current-time-line"></div>
@@ -128,15 +120,23 @@
 
     <!-- 3. 공부 시작 화면 -->
     <div id="study-screen" class="hidden flex-1 flex flex-col p-4 md:p-8 overflow-hidden">
-        <!-- 상단 내 정보 및 중지 버튼 -->
-        <div class="flex justify-between items-center mb-6">
+        <!-- (수정) 상단 내 정보 및 중지 버튼 (총 시간 추가) -->
+        <div class="flex justify-between items-start mb-6"> <!-- items-center -> items-start -->
             <div class="text-left">
                 <span id="current-subject-label" class="text-xl font-semibold"></span>
                 <h1 id="my-study-timer" class="text-5xl md:text-7xl font-bold tracking-tighter">00:00:00</h1>
             </div>
-            <button id="stop-study-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg text-lg transition duration-300 shadow-lg">
-                중지
-            </button>
+            
+            <!-- (수정) 중지 버튼 + 오늘 총 시간 -->
+            <div class="text-right flex-shrink-0">
+                <button id="stop-study-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg text-lg transition duration-300 shadow-lg mb-2">
+                    중지
+                </button>
+                <div class="text-right">
+                    <span class="text-gray-400 text-sm">오늘 총 공부 시간</span>
+                    <h2 id="total-today-study-time-in-study" class="text-xl font-bold">00:00:00</h2>
+                </div>
+            </div>
         </div>
 
         <!-- 친구들 공부 현황 -->
@@ -274,11 +274,10 @@
         const userDisplayName = document.getElementById('user-display-name');
         const totalTodayStudyTimeEl = document.getElementById('total-today-study-time');
         
-        // (수정) 타임라인 DOM 요소
         const timelineScrollContainer = document.getElementById('timeline-scroll-container'); 
-        const timelineHourLabels = document.getElementById('timeline-hour-labels'); // 시간 레이블 스크롤 컨테이너
-        const timelineContainer = document.getElementById('timeline-container'); // 그리드 스크롤 컨테이너
-        const timelineGridInner = document.getElementById('timeline-grid-inner'); // (추가) 실제 그리드
+        const timelineHourLabels = document.getElementById('timeline-hour-labels'); 
+        const timelineContainer = document.getElementById('timeline-container'); 
+        const timelineGridInner = document.getElementById('timeline-grid-inner'); 
         
         const startStudyBtn = document.getElementById('start-study-btn');
         const subjectListEl = document.getElementById('subject-list');
@@ -288,7 +287,9 @@
         const friendsStudyGrid = document.getElementById('friends-study-grid');
         const restModal = document.getElementById('rest-modal');
         const restTimeDisplay = document.getElementById('rest-time-display');
-        // const currentTimeLine = document.getElementById('current-time-line'); // (수정) timelineGridInner 안에 있음
+        
+        // (추가) 공부 화면의 총 시간
+        const totalTodayStudyTimeInStudyEl = document.getElementById('total-today-study-time-in-study');
 
         // 통계 모달 DOM
         const timelineModal = document.getElementById('timeline-modal');
@@ -462,7 +463,8 @@
             
             // 홈 화면 데이터 로드
             renderSubjectList();
-            renderTimelineHours(); // (수정) 레이블 렌더링
+            renderTimelineHours(); 
+            updateCurrentTimeLine(); // (수정) 리스너 전 즉시 호출
             
             // 오늘 공부 데이터 리스너 시작
             setupHomeListeners();
@@ -480,7 +482,7 @@
             cleanupListeners();
             
             // 공부 화면 리스너 시작
-            setupStudyListeners();
+            setupStudyListeners(); // (수정) 여기서 총 시간 리스너도 시작
         }
         
         /**
@@ -518,11 +520,14 @@
             // A. 오늘 하루 총 공부 시간 (total_daily_study)
             const totalStudyRef = doc(db, "users", userId, "total_daily_study", todayString);
             totalTodayStudyListener = onSnapshot(totalStudyRef, (doc) => {
+                let totalSeconds = 0;
                 if (doc.exists()) {
-                    const data = doc.data();
-                    totalTodayStudyTimeEl.textContent = formatTime(data.totalSeconds || 0);
-                } else {
-                    totalTodayStudyTimeEl.textContent = "00:00:00";
+                    totalSeconds = doc.data().totalSeconds || 0;
+                }
+                totalTodayStudyTimeEl.textContent = formatTime(totalSeconds);
+                // (수정) 공부 화면도 업데이트
+                if (totalTodayStudyTimeInStudyEl) {
+                    totalTodayStudyTimeInStudyEl.textContent = formatTime(totalSeconds);
                 }
             });
 
@@ -584,7 +589,6 @@
          * 타임라인의 시간 레이블을 렌더링합니다. (0시 ~ 24시) - 높이 60%
          */
         function renderTimelineHours() {
-            // (수정) 시간 레이블을 #timeline-hour-labels > div 에 추가
             const hourLabelContainer = document.querySelector('#timeline-hour-labels > div');
             if (!hourLabelContainer) return;
             hourLabelContainer.innerHTML = ''; // 초기화
@@ -601,7 +605,6 @@
          * @param {Array} sessions - Firestore study_sessions 데이터 배열
          */
         function renderTodayTimeline(sessions) {
-            // (수정) 그리드 컨테이너 #timeline-grid-inner
             const gridInner = document.getElementById('timeline-grid-inner');
             if (!gridInner) return;
 
@@ -638,7 +641,7 @@
                 if (color) {
                     blockDiv.style.backgroundColor = color;
                 }
-                gridInner.appendChild(blockDiv); // (수정) gridInner에 추가
+                gridInner.appendChild(blockDiv); 
             });
 
             // 현재 시간선 재배치
@@ -649,13 +652,12 @@
          * 현재 시간선(빨간 실선)의 위치를 업데이트합니다. - 높이 60%
          */
         function updateCurrentTimeLine() {
-            // (수정) #current-time-line은 #timeline-grid-inner 내부에 있음
             const line = document.getElementById('current-time-line'); 
             if (!line) return;
             
             const now = new Date();
+            // (수정) "몇분인지까지 신경써서" -> .getMinutes()로 분까지 정확히 계산
             const totalMinutes = now.getHours() * 60 + now.getMinutes();
-            // 총 높이를 TIMELINE_TOTAL_HEIGHT (864px)로 계산
             const topPosition = (totalMinutes / (24 * 60)) * TIMELINE_TOTAL_HEIGHT; 
             
             line.style.top = `${topPosition}px`;
@@ -669,11 +671,9 @@
             if (!line) return;
 
             const topPosition = parseFloat(line.style.top) || 0;
-            // (수정) 스크롤 대상은 timeline-container
             const container = document.getElementById('timeline-container'); 
             
             if (container) {
-                 // 뷰포트의 중앙에 오도록 스크롤
                 const containerHeight = container.clientHeight;
                 container.scrollTop = topPosition - (containerHeight / 2);
             }
@@ -692,17 +692,14 @@
             studyStartTime = new Date();
             
             // (조건 3-1) 휴식 체크
-            // 마지막 공부 종료 시간이 있고, 2시간 이내인가?
             if (lastStudyEndTime && (studyStartTime.getTime() - lastStudyEndTime.getTime()) < 2 * 60 * 60 * 1000) {
                 const restSeconds = Math.floor((studyStartTime.getTime() - lastStudyEndTime.getTime()) / 1000);
                 showRestModal(restSeconds);
-                // 모달에서 이유를 선택하면 (logRestAndStartStudy) 공부가 시작됨.
-                // 여기서는 일단 리턴.
                 return;
             }
 
-            // 2시간이 넘었거나(3-2), 첫 공부거나, 휴식 모달에서 선택을 완료한 경우
-            logRestAndStartStudy(); //
+            // (조건 3-2) 2시간이 넘었거나 첫 공부
+            logRestAndStartStudy();
         }
         
         /**
@@ -713,10 +710,8 @@
             
             // 휴식 사유가 있다면 기록
             if (restReason && lastStudyEndTime) {
-                // TODO: 휴식 기록을 study_sessions에 별도 타입으로 저장
                 console.log("휴식 기록:", restReason, formatTime(Math.floor((new Date().getTime() - lastStudyEndTime.getTime()) / 1000)));
-                // 편의상 여기서는 로그만 남기고, 실제로는 Firestore에 저장해야 함.
-                // addDoc(collection(db, "study_sessions"), { ... type: 'rest' ... });
+                // TODO: 휴식 세션도 study_sessions에 'rest' 타입으로 저장
             }
             
             try {
@@ -820,12 +815,13 @@
         }
 
         /**
-         * 공부 화면의 실시간 리스너 (친구 현황)
+         * (수정) 공부 화면의 실시간 리스너 (친구 현황 + 총 시간)
          */
         function setupStudyListeners() {
-            if (friendsListener) return; // 중복 방지
+            // (수정) totalTodayStudyListener도 체크
+            if (friendsListener || totalTodayStudyListener) return; 
 
-            // "study_sessions"에서 현재 공부 중인('studying') 친구들 찾기
+            // A. "study_sessions"에서 현재 공부 중인('studying') 친구들 찾기
             const q = query(
                 collection(db, "study_sessions"),
                 where("status", "==", "studying")
@@ -839,6 +835,22 @@
                     }
                 });
                 renderFriendsGrid(friends);
+            });
+
+            // B. (추가) 오늘 하루 총 공부 시간 (total_daily_study)
+            const { todayString } = getKSTTodayRange();
+            const totalStudyRef = doc(db, "users", userId, "total_daily_study", todayString);
+            
+            totalTodayStudyListener = onSnapshot(totalStudyRef, (doc) => {
+                let totalSeconds = 0;
+                if (doc.exists()) {
+                    totalSeconds = doc.data().totalSeconds || 0;
+                }
+                // (수정) 홈 화면과 공부 화면 양쪽 모두 업데이트
+                totalTodayStudyTimeEl.textContent = formatTime(totalSeconds);
+                if (totalTodayStudyTimeInStudyEl) { 
+                    totalTodayStudyTimeInStudyEl.textContent = formatTime(totalSeconds);
+                }
             });
         }
 
@@ -862,7 +874,11 @@
                 const durationSeconds = Math.floor((now.getTime() - friend.startTime.toDate().getTime()) / 1000);
                 
                 const friendDiv = document.createElement('div');
-                friendDiv.className = 'bg-gray-800 p-3 rounded-lg shadow-md text-center';
+                // (수정) border-2 추가
+                friendDiv.className = 'bg-gray-800 p-3 rounded-lg shadow-md text-center border-2';
+                // (수정) borderColor 스타일 추가
+                friendDiv.style.borderColor = friend.subjectColor || '#4B5563'; // 기본색 gray-600
+                
                 friendDiv.innerHTML = `
                     <div class="text-sm font-semibold truncate" style="color: ${friend.subjectColor || '#FFFFFF'}">
                         ${friend.subjectName}
@@ -1010,7 +1026,6 @@
         // 9. 이벤트 리스너 바인딩 (DOM 로드 후)
         // -----------------------------------------------------------------
         
-        // ** (오류 수정) DOM이 완전히 로드된 후에 스크립트 실행 **
         window.addEventListener('DOMContentLoaded', () => {
 
             // --- 인증 ---
@@ -1026,7 +1041,7 @@
             
             // 타임라인 컨테이너 클릭 시 통계 모달 열기
             timelineScrollContainer.addEventListener('click', (e) => {
-                // 버튼 클릭시 모달이 열리는 것 방지
+                // (수정) "일정표를 클릭했을 때"
                 if (e.target.closest('button')) return; 
                 
                 const { todayString } = getKSTTodayRange();
@@ -1035,11 +1050,10 @@
                 timelineModal.classList.remove('hidden');
             });
 
-            // (수정) 타임라인 스크롤 동기화
+            // 타임라인 스크롤 동기화
             timelineContainer.addEventListener('scroll', () => {
                 timelineHourLabels.scrollTop = timelineContainer.scrollTop;
             });
-            // (수정) 레이블 영역에서 휠 스크롤시 메인 타임라인 스크롤
             timelineHourLabels.addEventListener('wheel', (e) => {
                 e.preventDefault();
                 timelineContainer.scrollTop += e.deltaY;
@@ -1054,7 +1068,6 @@
                 btn.addEventListener('click', () => {
                     const reason = btn.dataset.reason;
                     restModal.classList.add('hidden');
-                    // 휴식 기록 후 공부 시작
                     logRestAndStartStudy(reason);
                 });
             });
