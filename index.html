@@ -415,6 +415,7 @@
         let invitationListener = null; // (추가)
         
         let currentTotalStudySeconds = 0; 
+        let isNicknameRequired = false; // (추가) 닉네임 설정 강제 플래그
         
         let liveStatusUpdateInterval = null; 
         let pageTitleInterval = null; // (추가)
@@ -567,8 +568,7 @@
                 currentUser = result.user;
                 userId = currentUser.uid;
                 authStatus.textContent = `${currentUser.displayName}님, 환영합니다.`;
-                await initializeUserData(currentUser);
-                showMainApp(); // (수정)
+                // (수정) initializeUserData는 onAuthStateChanged에서 처리
             } catch (error) {
                 console.error("Google 로그인 실패:", error);
                 authStatus.textContent = `로그인 실패: ${error.message}`;
@@ -581,21 +581,22 @@
             const userDoc = await getDoc(userRef);
 
             if (!userDoc.exists()) {
-                // (수정) 닉네임 필드 추가
-                const defaultNickname = user.displayName || `user${user.uid.substring(0, 5)}`;
-                await setDoc(userRef, {
+                // (수정) 닉네임 null, isNicknameSet: false로 설정
+                const userData = {
                     uid: user.uid,
                     displayName: user.displayName, // Google Name
-                    nickname: defaultNickname, // 고유 닉네임 (기본값)
+                    nickname: null, // (수정) 고유 닉네임 (null로 설정)
+                    isNicknameSet: false, // (추가) 닉네임 설정 플래그
                     email: user.email,
                     createdAt: Timestamp.now(),
                     subjects: defaultSubjects, 
                     totalStudyTime: 0 
-                });
-                currentNickname = defaultNickname;
+                };
+                await setDoc(userRef, userData);
+                currentNickname = null;
             } else {
                 const userData = userDoc.data();
-                currentNickname = userData.nickname || userData.displayName || `user${user.uid.substring(0, 5)}`;
+                currentNickname = userData.nickname; // (수정) DB에 있는 닉네임 그대로 사용
                 if (userData.subjects) {
                     Object.assign(subjectColors, userData.subjects);
                 }
@@ -608,21 +609,59 @@
                     currentUser = user;
                     userId = user.uid;
                     authStatus.textContent = `${currentUser.displayName}님, 자동 로그인되었습니다.`;
+                    
+                    // (수정) 유저 데이터 초기화 후 닉네임 설정 여부 확인
                     await initializeUserData(user);
-                    showMainApp(); // (수정)
+                    
+                    const userDoc = await getDoc(doc(db, "users", userId));
+                    const userData = userDoc.data();
+                    currentNickname = userData.nickname;
+                    const isNicknameSet = userData.isNicknameSet || false;
+
+                    showMainApp(); // (수정) 앱을 먼저 표시
+
+                    if (!isNicknameSet) {
+                        isNicknameRequired = true; // (추가) 탭 이동 제한
+                        showTab('my'); // (수정) MY 탭으로 강제 이동
+                        
+                        // (추가) MY 탭에 안내 메시지 표시
+                        nicknameInput.value = userData.displayName || ''; // Google 이름 기본 제안
+                        nicknameStatus.textContent = '환영합니다! 그룹 기능을 사용하려면 먼저 닉네임을 설정해주세요.';
+                        nicknameStatus.style.color = '#EAB308'; // yellow-500
+                        
+                        // (추가) 다른 탭 비활성화
+                        updateTabDisabledState(true);
+                    } else {
+                        isNicknameRequired = false;
+                        showTab('home'); // (수정) 닉네임 있으면 홈으로
+                        updateTabDisabledState(false);
+                        userDisplayNameBtn.textContent = `${currentNickname}님`; // (추가) 닉네임 표시
+                    }
+                    
                 } else {
                     currentUser = null;
                     userId = null;
                     currentNickname = null;
+                    isNicknameRequired = false; // (추가) 로그아웃 시 리셋
                     showLoginScreen();
+                    updateTabDisabledState(false); // (추가) 로그아웃 시 리셋
                 }
             });
         }
         
         async function handleLogout() {
             try {
+                // (추가) 오프라인 상태로 먼저 업데이트
+                if (userId) {
+                    const liveRef = doc(db, "live_status", userId);
+                    await setDoc(liveRef, {
+                        status: "offline",
+                        lastUpdated: Timestamp.now()
+                    }, { merge: true });
+                }
+                
                 await auth.signOut();
-                // onAuthStateChanged가 나머지를 처리
+                // onAuthStateChanged가 화면 전환 등 나머지를 처리
             } catch (error) {
                 console.error("로그아웃 실패:", error);
             }
@@ -645,7 +684,9 @@
             mainAppContainer.classList.remove('hidden'); // (수정)
             studyScreen.classList.add('hidden');
             document.title = "대건고 열품타";
-            userDisplayNameBtn.textContent = `${currentNickname}님`; // (수정)
+            
+            // (수정) 닉네임이 설정된 경우에만 표시, 안됐으면 빈칸
+            userDisplayNameBtn.textContent = currentNickname ? `${currentNickname}님` : ''; 
             
             renderSubjectList();
             renderTimelineHours(); 
@@ -653,7 +694,7 @@
             setupHomeListeners();
             setTimeout(scrollTimelineToCurrent, 100);
             
-            showTab('home'); // 기본 탭
+            // showTab('home'); // (삭제) 이 로직은 onAuthStateChanged로 이동
         }
 
         function showStudyScreen() {
@@ -665,6 +706,14 @@
         }
         
         function showTab(tabName) {
+            // (추가) 닉네임 설정이 필요한 경우 'MY' 탭 외에 이동 제한
+            if (isNicknameRequired && tabName !== 'my') {
+                console.log("닉네임 설정이 필요하여 탭 이동이 제한됩니다.");
+                nicknameStatus.textContent = '다른 탭을 사용하려면 먼저 닉네임을 저장해주세요.';
+                nicknameStatus.style.color = '#EF4444'; // red-500
+                return; 
+            }
+            
             // 1. 모든 페이지 숨기기
             document.querySelectorAll('.page-div').forEach(page => page.classList.add('hidden'));
             
@@ -693,8 +742,20 @@
             }
         }
         
-        // (수정) 친구 타이머 정리 함수 삭제
-        // function cleanupFriendsTimers() {}
+        // (추가) 탭 비활성화/활성화 시각적 처리
+        function updateTabDisabledState(isDisabled) {
+            const tabsToDisable = ['nav-home', 'nav-group', 'nav-calendar'];
+            tabsToDisable.forEach(tabId => {
+                const tab = document.getElementById(tabId);
+                if (tab) {
+                    if (isDisabled) {
+                        tab.classList.add('opacity-50', 'cursor-not-allowed');
+                    } else {
+                        tab.classList.remove('opacity-50', 'cursor-not-allowed');
+                    }
+                }
+            });
+        }
 
         function cleanupListeners() {
             if (friendsListener) friendsListener();
@@ -706,9 +767,6 @@
             
             if (liveStatusUpdateInterval) clearInterval(liveStatusUpdateInterval);
             if (pageTitleInterval) clearInterval(pageTitleInterval); // (추가)
-            
-            // (수정) 친구 타이머 정리 호출 삭제
-            // cleanupFriendsTimers(); 
             
             friendsListener = null;
             todayTimelineListener = null;
@@ -727,6 +785,7 @@
 
         function setupHomeListeners() {
             if (todayTimelineListener || totalTodayStudyListener || studyingCountListener) return;
+            if (!userId) return; // (추가) userId가 없으면 리스너 설정 안함
             
             const { start, end, todayString } = getKSTTodayRange();
 
@@ -1043,6 +1102,7 @@
 
         function setupStudyListeners() {
             if (friendsListener || totalTodayStudyListener) return; 
+            if (!userId) return; // (추가)
 
             // A. 친구 현황
             const q = query(collection(db, "live_status"));
@@ -1235,6 +1295,7 @@
         function loadGroupsAndInvites() {
             if (groupListener) groupListener();
             if (invitationListener) invitationListener();
+            if (!userId) return; // (추가)
 
             // A. 내 그룹 목록
             const groupsQuery = query(collection(db, "groups"), where("members", "array-contains", userId));
@@ -1502,6 +1563,7 @@
         // -----------------------------------------------------------------
         
         async function loadMyPage() {
+            if (!userId) return; // (추가)
             const userRef = doc(db, "users", userId);
             const userDoc = await getDoc(userRef);
             if (userDoc.exists()) {
@@ -1540,11 +1602,26 @@
             
             // 4. 저장
             try {
-                await setDoc(doc(db, "users", userId), { nickname: newNickname }, { merge: true });
+                // (수정) isNicknameSet 플래그를 true로 설정
+                await setDoc(doc(db, "users", userId), { 
+                    nickname: newNickname, 
+                    isNicknameSet: true 
+                }, { merge: true });
+                
                 currentNickname = newNickname;
-                nicknameStatus.textContent = '닉네임이 저장되었습니다.';
+                nicknameStatus.textContent = '닉네임이 저장되었습니다. 홈 화면으로 이동합니다.';
                 nicknameStatus.style.color = 'green';
                 userDisplayNameBtn.textContent = `${currentNickname}님`;
+                
+                // (추가) 닉네임 설정 완료, 탭 제한 해제
+                isNicknameRequired = false;
+                updateTabDisabledState(false);
+                
+                // (추가) 1초 후 홈으로 이동
+                setTimeout(() => {
+                    showTab('home');
+                }, 1000);
+                
             } catch (e) {
                 console.error("닉네임 저장 실패:", e);
                 nicknameStatus.textContent = '저장에 실패했습니다. 다시 시도해주세요.';
@@ -1599,7 +1676,7 @@
             closeTimelineModal.addEventListener('click', () => timelineModal.classList.add('hidden'));
             timelineDatePicker.addEventListener('change', (e) => loadDailyStats(e.target.value));
 
-            // (추가) 하단 탭
+            // (수정) 하단 탭 (isNicknameRequired 확인 로직은 showTab 함수로 이동)
             document.getElementById('nav-home').addEventListener('click', () => showTab('home'));
             document.getElementById('nav-group').addEventListener('click', () => showTab('group'));
             document.getElementById('nav-calendar').addEventListener('click', () => showTab('calendar'));
