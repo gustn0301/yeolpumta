@@ -106,10 +106,10 @@
         <!-- 2-1. 페이지 컨텐츠 (탭에 따라 변경됨) -->
         <div id="page-content" class="flex-1 overflow-y-auto no-scrollbar">
             
-            <!-- (수정) 홈 탭 페이지 -->
-            <div id="home-page" class="page-div flex-1 flex flex-col md:flex-row overflow-hidden h-full">
+            <!-- (수정) 홈 탭 페이지 (모바일 스크롤 수정) -->
+            <div id="home-page" class="page-div flex-1 flex flex-col md:flex-row md:overflow-hidden md:h-full">
                 <!-- 메인 컨텐츠 (타이머 + 타임라인) -->
-                <div class="flex-1 flex flex-col justify-between items-center p-4 md:p-8 overflow-hidden">
+                <div class="flex-1 flex flex-col justify-between items-center p-4 md:p-8 md:overflow-hidden">
                     
                     <!-- 오늘 총 공부 시간 -->
                     <div class="w-full flex justify-between items-center mb-4">
@@ -150,7 +150,7 @@
                 </div>
 
                 <!-- 오른쪽 사이드바 (과목 리스트) -->
-                <div class="w-full md:w-64 bg-gray-800 p-4 overflow-y-auto no-scrollbar flex-shrink-0 md:h-full">
+                <div class="w-full md:w-64 bg-gray-800 p-4 md:overflow-y-auto no-scrollbar flex-shrink-0 md:h-full">
                     <h3 class="text-lg font-semibold mb-4 mt-4">과목 리스트</h3>
                     <div id="subject-list" class="space-y-1"> 
                     </div>
@@ -1325,6 +1325,10 @@
                 groupAdminPanel.classList.add('hidden');
             }
             
+            // (추가) 초대 버튼에 현재 그룹 ID 저장
+            inviteMemberBtn.dataset.currentGroupId = groupId;
+            disbandGroupBtn.dataset.currentGroupId = groupId;
+            
             // 멤버 목록 렌더링
             groupMemberList.innerHTML = '';
             group.members.forEach(memberId => {
@@ -1342,6 +1346,25 @@
                 }
                 groupMemberList.appendChild(memberDiv);
             });
+        }
+        
+        async function handleKickMember(groupId, memberId) {
+            if (!confirm("정말로 이 멤버를 추방하시겠습니까?")) return;
+            try {
+                const groupRef = doc(db, "groups", groupId);
+                await setDoc(groupRef, {
+                    members: arrayRemove(memberId),
+                    [`memberInfo.${memberId}`]: null // 혹은 deleteField()
+                }, { merge: true });
+            } catch (e) { console.error("멤버 추방 실패:", e); }
+        }
+        
+        async function handleDisbandGroup(groupId) {
+            if (!confirm("정말로 이 그룹을 해산하시겠습니까? 되돌릴 수 없습니다.")) return;
+            try {
+                // (미구현) 실제로는 그룹 및 관련 초대장 모두 삭제 필요
+                console.warn("그룹 해산 로직 필요", groupId);
+            } catch (e) { console.error("그룹 해산 실패:", e); }
         }
         
         async function handleInviteMember(groupId) {
@@ -1608,9 +1631,12 @@
                 groupListView.classList.remove('hidden');
             });
             inviteMemberBtn.addEventListener('click', () => {
-                // 현재 열린 그룹의 ID를 찾아야 함
                 const currentGroupId = inviteMemberBtn.dataset.currentGroupId; 
                 if (currentGroupId) handleInviteMember(currentGroupId);
+            });
+            disbandGroupBtn.addEventListener('click', () => {
+                 const currentGroupId = disbandGroupBtn.dataset.currentGroupId; 
+                 if (currentGroupId) handleDisbandGroup(currentGroupId);
             });
             
             // (추가) 그룹 초대 수락/거절 (이벤트 위임)
