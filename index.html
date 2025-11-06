@@ -39,7 +39,6 @@
             grid-column: 1; /* 1열만 사용 */
             grid-row: span 1; /* 5분 */
             min-height: 3px; /* 5px * 0.6 = 3px */
-            /* (수정) "폭이 적당한 막대" -> 배경색이 칠해진 div입니다. */
         }
         /* 현재 시간 표시선 */
         #current-time-line {
@@ -110,7 +109,7 @@
 
         <!-- 오른쪽 사이드바 (과목 리스트) -->
         <div class="w-full md:w-64 bg-gray-800 p-4 overflow-y-auto no-scrollbar flex-shrink-0 md:h-screen">
-            <h3 class="text-lg font-semibold mb-4 mt-4">과목 리스트</h3> <!-- mt-4 유지 -->
+            <h3 class="text-lg font-semibold mb-4 mt-4">과목 리스트</h3>
             <div id="subject-list" class="space-y-1"> 
                 <!-- 과목 리스트 원복 (p-2, text-sm) -->
             </div>
@@ -120,20 +119,22 @@
 
     <!-- 3. 공부 시작 화면 -->
     <div id="study-screen" class="hidden flex-1 flex flex-col p-4 md:p-8 overflow-hidden">
-        <!-- (수정) 상단 내 정보 및 중지 버튼 (총 시간 추가) -->
-        <div class="flex justify-between items-start mb-6"> <!-- items-center -> items-start -->
+        <!-- 상단 내 정보 및 중지 버튼 (총 시간 추가) -->
+        <div class="flex justify-between items-start mb-6"> 
             <div class="text-left">
                 <span id="current-subject-label" class="text-xl font-semibold"></span>
+                <!-- (수정) 이 타이머가 이제 '총 시간'을 표시합니다. -->
                 <h1 id="my-study-timer" class="text-5xl md:text-7xl font-bold tracking-tighter">00:00:00</h1>
             </div>
             
-            <!-- (수정) 중지 버튼 + 오늘 총 시간 -->
+            <!-- 중지 버튼 + 오늘 총 시간 -->
             <div class="text-right flex-shrink-0">
                 <button id="stop-study-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg text-lg transition duration-300 shadow-lg mb-2">
                     중지
                 </button>
                 <div class="text-right">
                     <span class="text-gray-400 text-sm">오늘 총 공부 시간</span>
+                    <!-- (수정) 이 타이머도 '총 시간'을 실시간 표시합니다. -->
                     <h2 id="total-today-study-time-in-study" class="text-xl font-bold">00:00:00</h2>
                 </div>
             </div>
@@ -192,7 +193,7 @@
             signInWithPopup, 
             onAuthStateChanged, 
             setPersistence, 
-            browserLocalPersistence, // 이틀 이상 로그인 유지
+            browserLocalPersistence, 
             signInWithCustomToken,
             signInAnonymously
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -209,14 +210,13 @@
             addDoc, 
             Timestamp,
             getDocs,
-            setLogLevel // 디버그 로그
+            setLogLevel
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // -----------------------------------------------------------------
-        // 1. Firebase 설정 (제공해주신 값으로 수정)
+        // 1. Firebase 설정
         // -----------------------------------------------------------------
         
-        // Your web app's Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyCEB6l20bQ1wk91If9ixCFKwRyscBgQK78",
             authDomain: "yeolpumta-dg.firebaseapp.com",
@@ -226,30 +226,30 @@
             appId: "1:106655381615:web:23179c40c091ab17cef59a"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        setLogLevel('Debug'); // Firestore 디버그 로그 활성화
+        setLogLevel('Debug'); 
 
-        // Canvas 환경 변수 (제공된 코드를 사용하기 위해 선언)
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'yeolpumta-dg'; // fallback
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'yeolpumta-dg';
 
         // -----------------------------------------------------------------
         // 2. 전역 변수 및 상태 관리
         // -----------------------------------------------------------------
-        let currentUser = null; // 현재 로그인한 유저 정보
-        let userId = null; // 현재 로그인한 유저 ID
-        let currentSubject = null; // 현재 선택한 과목
-        let studyStartTime = null; // 공부 시작 시간 (Date 객체)
-        let studyTimerInterval = null; // 내 공부 타이머 interval
-        let lastStudyEndTime = null; // 마지막 공부 종료 시간 (휴식 체크용)
-        let currentStudySessionId = null; // 현재 공부 세션 ID (Firestore 문서 ID)
+        let currentUser = null; 
+        let userId = null; 
+        let currentSubject = null; 
+        let studyStartTime = null; 
+        let studyTimerInterval = null; 
+        let lastStudyEndTime = null; 
+        let currentStudySessionId = null; 
         
-        // 실시간 친구 현황 리스너
         let friendsListener = null;
-        let todayTimelineListener = null; // 오늘 타임라인 리스너
-        let totalTodayStudyListener = null; // 오늘 총 공부시간 리스너
+        let todayTimelineListener = null; 
+        let totalTodayStudyListener = null; 
+        
+        // (추가) 타이머 시작 시점의 총 공부 시간 (초)
+        let currentTotalStudySeconds = 0; 
 
         // 기본 과목
         const defaultSubjects = {
@@ -262,7 +262,6 @@
         };
         const subjectColors = { ...defaultSubjects };
         
-        // 타임라인 높이 변수 (60%)
         const TIMELINE_TOTAL_HEIGHT = 864; // 1440 * 0.6
 
         // DOM 요소
@@ -288,7 +287,6 @@
         const restModal = document.getElementById('rest-modal');
         const restTimeDisplay = document.getElementById('rest-time-display');
         
-        // (추가) 공부 화면의 총 시간
         const totalTodayStudyTimeInStudyEl = document.getElementById('total-today-study-time-in-study');
 
         // 통계 모달 DOM
@@ -304,10 +302,6 @@
         // 3. 유틸리티 함수
         // -----------------------------------------------------------------
 
-        /** * 초를 HH:MM:SS 형식의 문자열로 변환합니다.
-         * @param {number} totalSeconds - 총 초
-         * @returns {string} HH:MM:SS
-         */
         function formatTime(totalSeconds) {
             const hours = Math.floor(totalSeconds / 3600);
             const minutes = Math.floor((totalSeconds % 3600) / 60);
@@ -317,41 +311,21 @@
                 .join(':');
         }
 
-        /** * Firestore Timestamp를 YYYY-MM-DD 형식의 문자열로 변환합니다. (KST 기준)
-         * @param {Date | Timestamp} dateInput - Date 객체 또는 Firestore Timestamp
-         * @returns {string} YYYY-MM-DD
-         */
         function getYYYYMMDD(dateInput) {
             const date = dateInput instanceof Timestamp ? dateInput.toDate() : dateInput;
-            
-            // KST (UTC+9)
             const kstOffset = 9 * 60 * 60 * 1000;
             const kstDate = new Date(date.getTime() + kstOffset);
-            
             return kstDate.toISOString().split('T')[0];
         }
 
-        /** * 현재 KST 기준 날짜의 시작과 끝 Timestamp를 반환합니다.
-         * @param {Date} date - 기준이 될 Date 객체 (기본값: new Date())
-         * @returns {{start: Date, end: Date, todayString: string}}
-         */
         function getKSTTodayRange(date = new Date()) {
-            // KST (UTC+9) 오프셋을 적용하여 KST 기준 날짜 문자열을 구합니다.
             const kstDateStr = new Date(date.getTime() + (9 * 60 * 60 * 1000)).toISOString().split('T')[0];
             const [year, month, day] = kstDateStr.split('-').map(Number);
-
-            // KST 자정 (YYYY-MM-DD 00:00:00 KST)
             const start = new Date(Date.UTC(year, month - 1, day, -9, 0, 0)); 
-            
-            // KST 23:59:59.999
             const end = new Date(Date.UTC(year, month - 1, day, 14, 59, 59, 999)); 
-            
             return { start, end, todayString: kstDateStr };
         }
         
-        /** * KST 기준 어제 날짜의 시작과 끝 Timestamp를 반환합니다. (새벽 공부 체크용)
-         * @returns {{start: Date, end: Date, todayString: string}}
-         */
         function getKSTYesterdayRange() {
             const yesterday = new Date(new Date().getTime() - (24 * 60 * 60 * 1000));
             return getKSTTodayRange(yesterday);
@@ -361,56 +335,38 @@
         // 4. Firebase 인증 (Authentication)
         // -----------------------------------------------------------------
         
-        /**
-         * PESS 계정(Google)으로 로그인합니다.
-         */
         async function signInWithGoogle() {
             authStatus.textContent = '로그인 시도 중...';
             try {
-                // 로그인 유지 설정 (이틀)
                 await setPersistence(auth, browserLocalPersistence);
-                
                 const provider = new GoogleAuthProvider();
                 const result = await signInWithPopup(auth, provider);
-                
                 currentUser = result.user;
                 userId = currentUser.uid;
                 authStatus.textContent = `${currentUser.displayName}님, 환영합니다.`;
-                
-                // Firestore에 유저 정보 저장 (최초 1회)
                 await initializeUserData(currentUser);
-                
-                // 화면 전환
                 showHomeScreen();
-
             } catch (error) {
                 console.error("Google 로그인 실패:", error);
                 authStatus.textContent = `로그인 실패: ${error.message}`;
             }
         }
 
-        /**
-         * 유저 데이터를 Firestore에 초기화합니다. (최초 로그인 시)
-         * @param {User} user - Firebase Auth 유저 객체
-         */
         async function initializeUserData(user) {
             if (!user) return;
-            
             const userRef = doc(db, "users", user.uid);
             const userDoc = await getDoc(userRef);
 
             if (!userDoc.exists()) {
-                // 유저 문서가 없으면 생성 (최초 로그인)
                 await setDoc(userRef, {
                     uid: user.uid,
                     displayName: user.displayName,
                     email: user.email,
                     createdAt: Timestamp.now(),
-                    subjects: defaultSubjects, // 기본 과목 세팅
-                    totalStudyTime: 0 // 전체 누적
+                    subjects: defaultSubjects, 
+                    totalStudyTime: 0 
                 });
             } else {
-                // 유저 문서가 있으면, 저장된 과목 정보 로드
                 const userData = userDoc.data();
                 if (userData.subjects) {
                     Object.assign(subjectColors, userData.subjects);
@@ -418,24 +374,15 @@
             }
         }
 
-        /**
-         * Firebase Auth 상태 변경을 감지합니다. (자동 로그인 처리)
-         */
         function observeAuthState() {
             onAuthStateChanged(auth, async (user) => {
                 if (user) {
-                    // 유저가 로그인되어 있음 (자동 로그인)
                     currentUser = user;
                     userId = user.uid;
                     authStatus.textContent = `${currentUser.displayName}님, 자동 로그인되었습니다.`;
-                    
-                    // 유저 데이터 초기화 (과목 정보 등 로드)
                     await initializeUserData(user);
-                    
-                    // 화면 전환
                     showHomeScreen();
                 } else {
-                    // 유저가 로그아웃되어 있음
                     currentUser = null;
                     userId = null;
                     showLoginScreen();
@@ -451,25 +398,18 @@
             loginScreen.classList.remove('hidden');
             homeScreen.classList.add('hidden');
             studyScreen.classList.add('hidden');
-            cleanupListeners(); // 모든 리스너 정리
+            cleanupListeners();
         }
 
         function showHomeScreen() {
             loginScreen.classList.add('hidden');
             homeScreen.classList.remove('hidden');
             studyScreen.classList.add('hidden');
-            
             userDisplayName.textContent = `${currentUser.displayName}님`;
-            
-            // 홈 화면 데이터 로드
             renderSubjectList();
             renderTimelineHours(); 
-            updateCurrentTimeLine(); // (수정) 리스너 전 즉시 호출
-            
-            // 오늘 공부 데이터 리스너 시작
+            updateCurrentTimeLine(); // 즉시 호출
             setupHomeListeners();
-            
-            // 타임라인 현재 시간으로 스크롤 (잠시 후 실행)
             setTimeout(scrollTimelineToCurrent, 100);
         }
 
@@ -477,30 +417,17 @@
             loginScreen.classList.add('hidden');
             homeScreen.classList.add('hidden');
             studyScreen.classList.remove('hidden');
-            
-            // 홈 화면 리스너 정리
             cleanupListeners();
-            
-            // 공부 화면 리스너 시작
-            setupStudyListeners(); // (수정) 여기서 총 시간 리스너도 시작
+            setupStudyListeners(); // 총 시간 리스너 포함
         }
         
-        /**
-         * 모든 Firestore 리스너를 정리합니다. (화면 전환 또는 로그아웃 시)
-         */
         function cleanupListeners() {
-            if (friendsListener) {
-                friendsListener();
-                friendsListener = null;
-            }
-            if (todayTimelineListener) {
-                todayTimelineListener();
-                todayTimelineListener = null;
-            }
-            if (totalTodayStudyListener) {
-                totalTodayStudyListener();
-                totalTodayStudyListener = null;
-            }
+            if (friendsListener) friendsListener();
+            if (todayTimelineListener) todayTimelineListener();
+            if (totalTodayStudyListener) totalTodayStudyListener();
+            friendsListener = null;
+            todayTimelineListener = null;
+            totalTodayStudyListener = null;
         }
 
 
@@ -508,11 +435,7 @@
         // 6. 홈 화면 (과목, 타임라인)
         // -----------------------------------------------------------------
 
-        /**
-         * 홈 화면의 실시간 리스너들을 설정합니다.
-         */
         function setupHomeListeners() {
-            // 이미 리스너가 있다면 중복 실행 방지
             if (todayTimelineListener || totalTodayStudyListener) return;
             
             const { start, end, todayString } = getKSTTodayRange();
@@ -524,8 +447,10 @@
                 if (doc.exists()) {
                     totalSeconds = doc.data().totalSeconds || 0;
                 }
+                // (수정) 전역 변수에 총 시간 저장
+                currentTotalStudySeconds = totalSeconds;
+                
                 totalTodayStudyTimeEl.textContent = formatTime(totalSeconds);
-                // (수정) 공부 화면도 업데이트
                 if (totalTodayStudyTimeInStudyEl) {
                     totalTodayStudyTimeInStudyEl.textContent = formatTime(totalSeconds);
                 }
@@ -540,58 +465,38 @@
             );
             
             todayTimelineListener = onSnapshot(sessionsQuery, (snapshot) => {
-                // 타임라인 그리기
                 renderTodayTimeline(snapshot.docs.map(d => d.data()));
             });
         }
         
-        /**
-         * 과목 리스트를 화면에 렌더링합니다. (원복 - 중간 크기)
-         */
         function renderSubjectList() {
-            subjectListEl.innerHTML = ''; // 초기화
+            subjectListEl.innerHTML = ''; 
             for (const [name, color] of Object.entries(subjectColors)) {
                 const subjectItem = document.createElement('button');
-                // (수정) p-2, text-sm, w-3 h-3 (중간 크기)
                 subjectItem.className = `w-full text-left p-2 rounded-md transition duration-200 flex items-center justify-between ${currentSubject === name ? 'ring-2 ring-white' : 'hover:bg-gray-700'}`;
                 subjectItem.dataset.name = name;
-                
                 subjectItem.innerHTML = `
                     <span class="font-semibold text-sm">${name}</span>
                     <span class="w-3 h-3 rounded-full" style="background-color: ${color};"></span>
                 `;
-                
-                // 과목 선택 이벤트
-                subjectItem.addEventListener('click', () => {
-                    selectSubject(name);
-                });
-                
+                subjectItem.addEventListener('click', () => selectSubject(name));
                 subjectListEl.appendChild(subjectItem);
             }
         }
         
-        /**
-         * 과목을 선택합니다.
-         * @param {string} name - 선택한 과목 이름
-         */
         function selectSubject(name) {
             currentSubject = name;
             startStudyBtn.disabled = false;
             startStudyBtn.textContent = `${name} 공부 시작하기`;
             startStudyBtn.style.backgroundColor = subjectColors[name];
-            startStudyBtn.style.color = "#FFFFFF"; // 흰색 텍스트
-            
-            // 선택된 과목 시각적 표시
+            startStudyBtn.style.color = "#FFFFFF";
             renderSubjectList();
         }
 
-        /**
-         * 타임라인의 시간 레이블을 렌더링합니다. (0시 ~ 24시) - 높이 60%
-         */
         function renderTimelineHours() {
             const hourLabelContainer = document.querySelector('#timeline-hour-labels > div');
             if (!hourLabelContainer) return;
-            hourLabelContainer.innerHTML = ''; // 초기화
+            hourLabelContainer.innerHTML = ''; 
             for (let i = 0; i < 24; i++) {
                 const hourDiv = document.createElement('div');
                 hourDiv.className = 'timeline-hour-label flex items-start justify-end';
@@ -600,40 +505,30 @@
             }
         }
         
-        /**
-         * 오늘 공부한 기록을 타임라인에 렌더링합니다.
-         * @param {Array} sessions - Firestore study_sessions 데이터 배열
-         */
         function renderTodayTimeline(sessions) {
             const gridInner = document.getElementById('timeline-grid-inner');
             if (!gridInner) return;
 
-            // 5분 단위 (288칸) 그리드 초기화
-            gridInner.innerHTML = '<div id="current-time-line"></div>'; // 현재 시간선만 남기고 초기화
-            const blocks = Array(288).fill(null); // 24 * 12
+            gridInner.innerHTML = '<div id="current-time-line"></div>'; 
+            const blocks = Array(288).fill(null); 
 
             sessions.forEach(session => {
                 const start = session.startTime.toDate();
-                // endTime이 null (공부 중)이면 현재 시간으로
                 const end = session.endTime ? session.endTime.toDate() : new Date(); 
                 
                 const startMinute = start.getHours() * 60 + start.getMinutes();
                 const endMinute = end.getHours() * 60 + end.getMinutes();
                 
                 const startIndex = Math.floor(startMinute / 5);
-                let endIndex = Math.ceil(endMinute / 5); // 올림
+                let endIndex = Math.ceil(endMinute / 5); 
                 
-                // KST 자정 넘어가는 경우 (endTime이 다음날인 경우)
-                if (end < start) {
-                    endIndex = 288; // 자정까지 채움
-                }
+                if (end < start) endIndex = 288;
                 
                 for (let i = startIndex; i < endIndex && i < 288; i++) {
                     blocks[i] = session.subjectColor;
                 }
             });
 
-            // DOM에 렌더링
             blocks.forEach((color, index) => {
                 const blockDiv = document.createElement('div');
                 blockDiv.className = 'timeline-data';
@@ -644,35 +539,24 @@
                 gridInner.appendChild(blockDiv); 
             });
 
-            // 현재 시간선 재배치
             updateCurrentTimeLine();
         }
 
-        /**
-         * 현재 시간선(빨간 실선)의 위치를 업데이트합니다. - 높이 60%
-         */
         function updateCurrentTimeLine() {
             const line = document.getElementById('current-time-line'); 
             if (!line) return;
             
             const now = new Date();
-            // (수정) "몇분인지까지 신경써서" -> .getMinutes()로 분까지 정확히 계산
             const totalMinutes = now.getHours() * 60 + now.getMinutes();
             const topPosition = (totalMinutes / (24 * 60)) * TIMELINE_TOTAL_HEIGHT; 
-            
             line.style.top = `${topPosition}px`;
         }
 
-        /**
-         * 타임라인 컨테이너를 현재 시간으로 자동 스크롤합니다.
-         */
         function scrollTimelineToCurrent() {
             const line = document.getElementById('current-time-line');
             if (!line) return;
-
             const topPosition = parseFloat(line.style.top) || 0;
             const container = document.getElementById('timeline-container'); 
-            
             if (container) {
                 const containerHeight = container.clientHeight;
                 container.scrollTop = topPosition - (containerHeight / 2);
@@ -683,88 +567,59 @@
         // 7. 공부 시작 화면 (타이머, 친구 현황)
         // -----------------------------------------------------------------
 
-        /**
-         * 공부 시작 로직
-         */
         async function startStudy() {
             if (!currentSubject) return;
-
             studyStartTime = new Date();
             
-            // (조건 3-1) 휴식 체크
             if (lastStudyEndTime && (studyStartTime.getTime() - lastStudyEndTime.getTime()) < 2 * 60 * 60 * 1000) {
                 const restSeconds = Math.floor((studyStartTime.getTime() - lastStudyEndTime.getTime()) / 1000);
                 showRestModal(restSeconds);
                 return;
             }
-
-            // (조건 3-2) 2시간이 넘었거나 첫 공부
             logRestAndStartStudy();
         }
         
-        /**
-         * (휴식 모달 선택 후) 실제 공부 시작 로직
-         * @param {string} restReason - 휴식 사유 (예: "#휴식")
-         */
         async function logRestAndStartStudy(restReason = null) {
-            
-            // 휴식 사유가 있다면 기록
             if (restReason && lastStudyEndTime) {
                 console.log("휴식 기록:", restReason, formatTime(Math.floor((new Date().getTime() - lastStudyEndTime.getTime()) / 1000)));
-                // TODO: 휴식 세션도 study_sessions에 'rest' 타입으로 저장
             }
             
             try {
-                // 1. "study_sessions"에 새 문서 생성 (실시간 현황용)
                 const sessionData = {
                     userId: userId,
                     displayName: currentUser.displayName,
                     subjectName: currentSubject,
                     subjectColor: subjectColors[currentSubject],
                     startTime: Timestamp.fromDate(studyStartTime),
-                    endTime: null, // 공부 중
+                    endTime: null, 
                     status: 'studying'
                 };
-                
                 const docRef = await addDoc(collection(db, "study_sessions"), sessionData);
                 currentStudySessionId = docRef.id;
-
-                // 2. 화면 전환 및 타이머 시작
                 currentSubjectLabel.textContent = currentSubject;
                 showStudyScreen();
-                runMyStudyTimer();
-
+                runMyStudyTimer(); // (수정) 이 함수가 이제 총 시간을 계산
             } catch (error) {
                 console.error("공부 시작 세션 생성 실패:", error);
             }
         }
         
-        /**
-         * 휴식 사유 선택 모달 표시
-         * @param {number} restSeconds - 휴식한 총 초
-         */
         function showRestModal(restSeconds) {
             restTimeDisplay.textContent = formatTime(restSeconds);
             restModal.classList.remove('hidden');
         }
 
-        /**
-         * 공부 중지 로직
-         */
         async function stopStudy() {
             if (!currentStudySessionId) return;
 
             const studyEndTime = new Date();
-            lastStudyEndTime = studyEndTime; // 휴식 체크를 위해 종료 시간 저장
-
+            lastStudyEndTime = studyEndTime; 
             const studyDurationSeconds = Math.floor((studyEndTime.getTime() - studyStartTime.getTime()) / 1000);
 
-            // 1. 타이머 중지
             clearInterval(studyTimerInterval);
             studyTimerInterval = null;
 
             try {
-                // 2. "study_sessions" 문서 업데이트 (endTime 기록)
                 const sessionRef = doc(db, "study_sessions", currentStudySessionId);
                 await setDoc(sessionRef, {
                     endTime: Timestamp.fromDate(studyEndTime),
@@ -772,7 +627,6 @@
                     durationSeconds: studyDurationSeconds
                 }, { merge: true });
 
-                // 3. "total_daily_study" 업데이트 (오늘 총 공부 시간)
                 const { todayString } = getKSTTodayRange(studyStartTime);
                 const totalStudyRef = doc(db, "users", userId, "total_daily_study", todayString);
                 
@@ -782,51 +636,63 @@
                     currentTotal = docSnap.data().totalSeconds || 0;
                 }
                 
+                // (수정) DB에는 '이번 세션' 시간만 더함
                 await setDoc(totalStudyRef, {
                     totalSeconds: currentTotal + studyDurationSeconds,
                     date: todayString,
                     userId: userId
                 }, { merge: true });
+                
+                // 리스너가 currentTotalStudySeconds를 자동으로 업데이트할 것임.
 
-            } catch (error)
-{
+            } catch (error) {
                 console.error("공부 중지 업데이트 실패:", error);
             }
 
-            // 4. 상태 초기화 및 홈 화면 복귀
             currentStudySessionId = null;
             studyStartTime = null;
-            
             showHomeScreen();
         }
 
         /**
-         * 내 공부 타이머를 1초마다 업데이트합니다.
+         * (수정) 내 공부 타이머 (총 시간 + 세션 시간)
          */
         function runMyStudyTimer() {
             if (studyTimerInterval) clearInterval(studyTimerInterval);
 
+            // 타이머가 시작하는 시점의 총 공부 시간을 저장.
+            const sessionStartTotalSeconds = currentTotalStudySeconds;
+
             studyTimerInterval = setInterval(() => {
                 if (!studyStartTime) return;
                 const now = new Date();
-                const diffSeconds = Math.floor((now.getTime() - studyStartTime.getTime()) / 1000);
-                myStudyTimer.textContent = formatTime(diffSeconds);
+                // 이번 세션에서 흐른 시간
+                const sessionSeconds = Math.floor((now.getTime() - studyStartTime.getTime()) / 1000);
+                
+                // 실시간 총 공부 시간 = (시작 시 총 시간) + (현재 세션 시간)
+                const newTotalSeconds = sessionStartTotalSeconds + sessionSeconds;
+
+                // 1. 왼쪽 상단 큰 타이머 업데이트
+                myStudyTimer.textContent = formatTime(newTotalSeconds);
+                
+                // 2. 오른쪽 상단 작은 타이머도 함께 업데이트
+                if (totalTodayStudyTimeInStudyEl) {
+                    totalTodayStudyTimeInStudyEl.textContent = formatTime(newTotalSeconds);
+                }
             }, 1000);
         }
 
         /**
-         * (수정) 공부 화면의 실시간 리스너 (친구 현황 + 총 시간)
+         * (수정) 공부 화면 리스너 (친구 현황 + 총 시간)
          */
         function setupStudyListeners() {
-            // (수정) totalTodayStudyListener도 체크
             if (friendsListener || totalTodayStudyListener) return; 
 
-            // A. "study_sessions"에서 현재 공부 중인('studying') 친구들 찾기
+            // A. 친구 현황
             const q = query(
                 collection(db, "study_sessions"),
                 where("status", "==", "studying")
             );
-
             friendsListener = onSnapshot(q, (snapshot) => {
                 const friends = [];
                 snapshot.forEach(doc => {
@@ -837,7 +703,7 @@
                 renderFriendsGrid(friends);
             });
 
-            // B. (추가) 오늘 하루 총 공부 시간 (total_daily_study)
+            // B. 오늘 총 공부 시간 (리스너는 DB 기준 시간을 표시)
             const { todayString } = getKSTTodayRange();
             const totalStudyRef = doc(db, "users", userId, "total_daily_study", todayString);
             
@@ -846,20 +712,23 @@
                 if (doc.exists()) {
                     totalSeconds = doc.data().totalSeconds || 0;
                 }
-                // (수정) 홈 화면과 공부 화면 양쪽 모두 업데이트
+                // (수정) 전역 변수 업데이트 (타이머 시작 시 사용)
+                currentTotalStudySeconds = totalSeconds;
+                
                 totalTodayStudyTimeEl.textContent = formatTime(totalSeconds);
-                if (totalTodayStudyTimeInStudyEl) { 
+                
+                // (수정) studyTimerInterval이 돌고 있지 않을 때만 DB 시간으로 설정
+                // (타이머가 돌고 있다면, 타이머가 실시간 시간을 표시하므로 덮어쓰지 않음)
+                if (!studyTimerInterval && totalTodayStudyTimeInStudyEl) { 
                     totalTodayStudyTimeInStudyEl.textContent = formatTime(totalSeconds);
                 }
             });
         }
 
         /**
-         * 친구 공부 현황 그리드를 렌더링합니다.
-         * @param {Array} friends - 공부 중인 친구들 데이터 배열
+         * 친구 공부 현황 그리드를 렌더링합니다. (과목 색 테두리)
          */
         function renderFriendsGrid(friends) {
-            // (조건 3) 공부 많이 한 순서로 정렬
             const now = new Date();
             friends.sort((a, b) => {
                 const durationA = now.getTime() - a.startTime.toDate().getTime();
@@ -867,9 +736,8 @@
                 return durationB - durationA; // 내림차순
             });
             
-            friendsStudyGrid.innerHTML = ''; // 초기화
+            friendsStudyGrid.innerHTML = ''; 
             
-            // 4 x 10 그리드 (최대 40명)
             friends.slice(0, 40).forEach(friend => {
                 const durationSeconds = Math.floor((now.getTime() - friend.startTime.toDate().getTime()) / 1000);
                 
@@ -894,18 +762,12 @@
         // 8. 통계 모달 (일간)
         // -----------------------------------------------------------------
         
-        /**
-         * 특정 날짜의 통계 데이터를 불러옵니다.
-         * @param {string} dateString - YYYY-MM-DD
-         */
         async function loadDailyStats(dateString) {
             const [year, month, day] = dateString.split('-').map(Number);
-            
-            // KST 기준 해당 날짜의 시작과 끝
-            const start = new Date(Date.UTC(year, month - 1, day, -9, 0, 0)); // KST 00:00
-            const end = new Date(Date.UTC(year, month - 1, day, 14, 59, 59, 999)); // KST 23:59:59
+            const start = new Date(Date.UTC(year, month - 1, day, -9, 0, 0)); 
+            const end = new Date(Date.UTC(year, month - 1, day, 14, 59, 59, 999));
 
-            // 1. 총 시간 가져오기
+            // 1. 총 시간
             const totalStudyRef = doc(db, "users", userId, "total_daily_study", dateString);
             const totalDoc = await getDoc(totalStudyRef);
             let totalSeconds = 0;
@@ -914,45 +776,34 @@
             }
             modalTotalTimeEl.textContent = formatTime(totalSeconds);
 
-            // 2. 세션 데이터 가져오기 (파이 차트 및 타임라인용)
+            // 2. 세션 데이터
             const sessionsQuery = query(
                 collection(db, "study_sessions"),
                 where("userId", "==", userId),
-                where("status", "==", "finished"), // 완료된 세션만
+                where("status", "==", "finished"), 
                 where("startTime", ">=", start),
                 where("startTime", "<=", end)
             );
-            
             const snapshot = await getDocs(sessionsQuery);
             const sessions = snapshot.docs.map(d => d.data());
 
-            // 3. 데이터 가공 (과목별 합계)
-            const subjectData = {}; // { "국어": 1200, "수학": 1800 }
-            
+            // 3. 데이터 가공
+            const subjectData = {}; 
             sessions.forEach(session => {
                 const subject = session.subjectName;
                 const duration = session.durationSeconds || 0;
-                if (!subjectData[subject]) {
-                    subjectData[subject] = 0;
-                }
+                if (!subjectData[subject]) subjectData[subject] = 0;
                 subjectData[subject] += duration;
             });
             
-            // 4. 원그래프 렌더링
             renderPieChart(subjectData);
-            
-            // 5. 모달 타임라인 렌더링
             renderModalTimeline(sessions);
         }
 
-        /**
-         * 원그래프(Pie Chart)를 렌더링합니다.
-         * @param {object} subjectData - { "과목명": 총 초 }
-         */
         function renderPieChart(subjectData) {
             const labels = Object.keys(subjectData);
             const data = Object.values(subjectData);
-            const backgroundColors = labels.map(label => subjectColors[label] || '#9CA3AF'); // 모르는 과목은 gray
+            const backgroundColors = labels.map(label => subjectColors[label] || '#9CA3AF'); 
             
             const chartData = {
                 labels: labels.map((label, i) => `${label} (${formatTime(data[i])})`),
@@ -963,12 +814,10 @@
                 }]
             };
 
-            if (studyPieChart) {
-                studyPieChart.destroy(); // 기존 차트 파괴
-            }
+            if (studyPieChart) studyPieChart.destroy();
             
             studyPieChart = new Chart(pieChartCanvas, {
-                type: 'pie', // 원그래프
+                type: 'pie', 
                 data: chartData,
                 options: {
                     responsive: true,
@@ -976,41 +825,28 @@
                     plugins: {
                         legend: {
                             position: 'bottom',
-                            labels: {
-                                color: 'white', // 범례 텍스트 색상
-                                boxWidth: 20
-                            }
+                            labels: { color: 'white', boxWidth: 20 }
                         }
                     }
                 }
             });
         }
         
-        /**
-         * 모달 내의 상세 타임라인을 렌더링합니다.
-         * @param {Array} sessions - 해당 날짜의 세션 목록
-         */
         function renderModalTimeline(sessions) {
-            // 시간순 정렬
             sessions.sort((a, b) => a.startTime.toDate().getTime() - b.startTime.toDate().getTime());
-            
-            modalTimelineContainer.innerHTML = ''; // 초기화
+            modalTimelineContainer.innerHTML = ''; 
             if (sessions.length === 0) {
                 modalTimelineContainer.innerHTML = '<p class="text-gray-400 text-center">이 날은 공부 기록이 없습니다.</p>';
                 return;
             }
-
             sessions.forEach(session => {
                 const start = session.startTime.toDate();
                 const end = session.endTime.toDate();
                 const duration = session.durationSeconds || 0;
-                
                 const startTimeStr = start.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
                 const endTimeStr = end.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
-                
                 const timelineItem = document.createElement('div');
                 timelineItem.className = 'flex items-center space-x-3 mb-2';
-                
                 timelineItem.innerHTML = `
                     <span class="w-5 h-5 rounded-full flex-shrink-0" style="background-color: ${session.subjectColor}"></span>
                     <span class="font-semibold text-white w-24 truncate">${session.subjectName}</span>
@@ -1021,36 +857,26 @@
             });
         }
 
-
         // -----------------------------------------------------------------
         // 9. 이벤트 리스너 바인딩 (DOM 로드 후)
         // -----------------------------------------------------------------
         
         window.addEventListener('DOMContentLoaded', () => {
-
-            // --- 인증 ---
             loginBtn.addEventListener('click', signInWithGoogle);
-            observeAuthState(); // 앱 시작 시 인증 상태 확인
+            observeAuthState(); 
 
-            // --- 홈 화면 ---
             startStudyBtn.addEventListener('click', () => {
-                if (currentSubject) {
-                    startStudy();
-                }
+                if (currentSubject) startStudy();
             });
             
-            // 타임라인 컨테이너 클릭 시 통계 모달 열기
             timelineScrollContainer.addEventListener('click', (e) => {
-                // (수정) "일정표를 클릭했을 때"
                 if (e.target.closest('button')) return; 
-                
                 const { todayString } = getKSTTodayRange();
                 timelineDatePicker.value = todayString;
                 loadDailyStats(todayString);
                 timelineModal.classList.remove('hidden');
             });
 
-            // 타임라인 스크롤 동기화
             timelineContainer.addEventListener('scroll', () => {
                 timelineHourLabels.scrollTop = timelineContainer.scrollTop;
             });
@@ -1059,11 +885,8 @@
                 timelineContainer.scrollTop += e.deltaY;
             });
 
-
-            // --- 공부 화면 ---
             stopStudyBtn.addEventListener('click', stopStudy);
 
-            // --- 휴식 모달 ---
             document.querySelectorAll('.rest-reason-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const reason = btn.dataset.reason;
@@ -1072,7 +895,6 @@
                 });
             });
 
-            // --- 통계 모달 ---
             closeTimelineModal.addEventListener('click', () => {
                 timelineModal.classList.add('hidden');
             });
@@ -1081,11 +903,7 @@
                 loadDailyStats(e.target.value);
             });
 
-            // --- 기타 ---
-            // 1분마다 현재 시간선 업데이트
             setInterval(updateCurrentTimeLine, 60 * 1000);
-            
-            // 홈 화면 로드 시 타임라인 스크롤 (showHomeScreen에서 호출)
         });
 
     </script>
