@@ -248,8 +248,10 @@
         let todayTimelineListener = null; 
         let totalTodayStudyListener = null; 
         
-        // (추가) 타이머 시작 시점의 총 공부 시간 (초)
-        let currentTotalStudySeconds = 0; 
+        let currentTotalStudySeconds = 0; // 총 공부 시간 (초)
+        
+        // (추가) 실시간 상태 업데이트용
+        let liveStatusUpdateInterval = null; 
 
         // 기본 과목
         const defaultSubjects = {
@@ -425,9 +427,11 @@
             if (friendsListener) friendsListener();
             if (todayTimelineListener) todayTimelineListener();
             if (totalTodayStudyListener) totalTodayStudyListener();
+            if (liveStatusUpdateInterval) clearInterval(liveStatusUpdateInterval); // (추가)
             friendsListener = null;
             todayTimelineListener = null;
             totalTodayStudyListener = null;
+            liveStatusUpdateInterval = null; // (추가)
         }
 
 
@@ -447,7 +451,6 @@
                 if (doc.exists()) {
                     totalSeconds = doc.data().totalSeconds || 0;
                 }
-                // (수정) 전역 변수에 총 시간 저장
                 currentTotalStudySeconds = totalSeconds;
                 
                 totalTodayStudyTimeEl.textContent = formatTime(totalSeconds);
@@ -585,6 +588,7 @@
             }
             
             try {
+                // 1. study_sessions에 기록
                 const sessionData = {
                     userId: userId,
                     displayName: currentUser.displayName,
@@ -596,11 +600,17 @@
                 };
                 const docRef = await addDoc(collection(db, "study_sessions"), sessionData);
                 currentStudySessionId = docRef.id;
+                
+                // 2. 화면 전환 및 타이머 시작
                 currentSubjectLabel.textContent = currentSubject;
                 showStudyScreen();
-                runMyStudyTimer(); // (수정) 이 함수가 이제 총 시간을 계산
+                runMyStudyTimer(); // 총 시간 타이머 시작
+                
+                // 3. (추가) live_status 즉시 업데이트
+                await updateLiveStatus(currentTotalStudySeconds);
+
             } catch (error) {
-                console.error("공부 시작 세션 생성 실패:", error);
+                console.error("공부 시작 세션/상태 생성 실패:", error);
             }
         }
         
@@ -616,10 +626,14 @@
             lastStudyEndTime = studyEndTime; 
             const studyDurationSeconds = Math.floor((studyEndTime.getTime() - studyStartTime.getTime()) / 1000);
 
-            clearInterval(studyTimerInterval);
+            // 1. (수정) 모든 인터벌 중지
+            if (studyTimerInterval) clearInterval(studyTimerInterval);
+            if (liveStatusUpdateInterval) clearInterval(liveStatusUpdateInterval);
             studyTimerInterval = null;
+            liveStatusUpdateInterval = null;
 
             try {
+                // 2. "study_sessions" 문서 업데이트
                 const sessionRef = doc(db, "study_sessions", currentStudySessionId);
                 await setDoc(sessionRef, {
                     endTime: Timestamp.fromDate(studyEndTime),
@@ -627,6 +641,7 @@
                     durationSeconds: studyDurationSeconds
                 }, { merge: true });
 
+                // 3. "total_daily_study" 업데이트
                 const { todayString } = getKSTTodayRange(studyStartTime);
                 const totalStudyRef = doc(db, "users", userId, "total_daily_study", todayString);
                 
@@ -636,19 +651,26 @@
                     currentTotal = docSnap.data().totalSeconds || 0;
                 }
                 
-                // (수정) DB에는 '이번 세션' 시간만 더함
+                const finalTotalSeconds = currentTotal + studyDurationSeconds;
                 await setDoc(totalStudyRef, {
-                    totalSeconds: currentTotal + studyDurationSeconds,
+                    totalSeconds: finalTotalSeconds,
                     date: todayString,
                     userId: userId
                 }, { merge: true });
                 
-                // 리스너가 currentTotalStudySeconds를 자동으로 업데이트할 것임.
+                // 4. (추가) live_status를 'offline'으로 업데이트
+                const liveRef = doc(db, "live_status", userId);
+                await setDoc(liveRef, {
+                    status: "offline",
+                    liveTotalSeconds: finalTotalSeconds, // 마지막 총 시간
+                    lastUpdated: Timestamp.now()
+                }, { merge: true });
 
             } catch (error) {
-                console.error("공부 중지 업데이트 실패:", error);
+                console.error("공부 중지/상태 업데이트 실패:", error);
             }
 
+            // 5. 홈 화면 복귀
             currentStudySessionId = null;
             studyStartTime = null;
             showHomeScreen();
@@ -659,28 +681,55 @@
          */
         function runMyStudyTimer() {
             if (studyTimerInterval) clearInterval(studyTimerInterval);
+            if (liveStatusUpdateInterval) clearInterval(liveStatusUpdateInterval); // (추가)
 
-            // 타이머가 시작하는 시점의 총 공부 시간을 저장.
             const sessionStartTotalSeconds = currentTotalStudySeconds;
 
+            // 1초마다 화면 타이머 업데이트
             studyTimerInterval = setInterval(() => {
                 if (!studyStartTime) return;
                 const now = new Date();
-                // 이번 세션에서 흐른 시간
                 const sessionSeconds = Math.floor((now.getTime() - studyStartTime.getTime()) / 1000);
-                
-                // 실시간 총 공부 시간 = (시작 시 총 시간) + (현재 세션 시간)
                 const newTotalSeconds = sessionStartTotalSeconds + sessionSeconds;
 
-                // 1. 왼쪽 상단 큰 타이머 업데이트
                 myStudyTimer.textContent = formatTime(newTotalSeconds);
-                
-                // 2. 오른쪽 상단 작은 타이머도 함께 업데이트
                 if (totalTodayStudyTimeInStudyEl) {
                     totalTodayStudyTimeInStudyEl.textContent = formatTime(newTotalSeconds);
                 }
             }, 1000);
+
+            // (추가) 5초마다 Firestore live_status 업데이트
+            liveStatusUpdateInterval = setInterval(() => {
+                if (!studyStartTime) return;
+                const now = new Date();
+                const sessionSeconds = Math.floor((now.getTime() - studyStartTime.getTime()) / 1000);
+                const newTotalSeconds = sessionStartTotalSeconds + sessionSeconds;
+                // 비동기로 DB 업데이트 (실패해도 타이머는 계속 감)
+                updateLiveStatus(newTotalSeconds); 
+            }, 5000); // 5초
         }
+
+        /**
+         * (추가) 내 실시간 상태를 Firestore에 업데이트 (5초마다)
+         * @param {number} totalSeconds - 현재 총 공부 시간(초)
+         */
+        async function updateLiveStatus(totalSeconds) {
+            if (!userId) return;
+            const liveRef = doc(db, "live_status", userId);
+            try {
+                await setDoc(liveRef, {
+                    displayName: currentUser.displayName,
+                    subjectName: currentSubject, // (추가)
+                    status: "studying",
+                    subjectColor: subjectColors[currentSubject],
+                    liveTotalSeconds: totalSeconds,
+                    lastUpdated: Timestamp.now()
+                }, { merge: true });
+            } catch (e) {
+                console.warn("Live status update failed", e);
+            }
+        }
+
 
         /**
          * (수정) 공부 화면 리스너 (친구 현황 + 총 시간)
@@ -688,19 +737,30 @@
         function setupStudyListeners() {
             if (friendsListener || totalTodayStudyListener) return; 
 
-            // A. 친구 현황
-            const q = query(
-                collection(db, "study_sessions"),
-                where("status", "==", "studying")
-            );
+            // A. (수정) 친구 현황 (live_status 컬렉션)
+            // 'live_status' 컬렉션 전체를 실시간으로 구독
+            const q = query(collection(db, "live_status"));
             friendsListener = onSnapshot(q, (snapshot) => {
                 const friends = [];
+                const now = Timestamp.now();
                 snapshot.forEach(doc => {
-                    if (doc.data().userId !== userId) {
-                        friends.push(doc.data());
+                    if (doc.id !== userId) { // 내가 아닌 유저만
+                        const data = doc.data();
+                        
+                        // (추가) 30초 이상 업데이트 없으면 오프라인 간주
+                        if (data.lastUpdated) {
+                            const secondsSinceUpdate = now.seconds - data.lastUpdated.seconds;
+                            if (secondsSinceUpdate > 30) {
+                                data.status = "offline";
+                            }
+                        } else {
+                            data.status = "offline"; // lastUpdated 필드가 없으면 오프라인
+                        }
+                        
+                        friends.push(data);
                     }
                 });
-                renderFriendsGrid(friends);
+                renderFriendsGrid(friends); // 친구 목록 렌더링
             });
 
             // B. 오늘 총 공부 시간 (리스너는 DB 기준 시간을 표시)
@@ -712,13 +772,10 @@
                 if (doc.exists()) {
                     totalSeconds = doc.data().totalSeconds || 0;
                 }
-                // (수정) 전역 변수 업데이트 (타이머 시작 시 사용)
                 currentTotalStudySeconds = totalSeconds;
-                
                 totalTodayStudyTimeEl.textContent = formatTime(totalSeconds);
                 
-                // (수정) studyTimerInterval이 돌고 있지 않을 때만 DB 시간으로 설정
-                // (타이머가 돌고 있다면, 타이머가 실시간 시간을 표시하므로 덮어쓰지 않음)
+                // studyTimerInterval이 돌고 있지 않을 때(즉, 공부 중이 아닐 때)만 DB 시간으로 설정
                 if (!studyTimerInterval && totalTodayStudyTimeInStudyEl) { 
                     totalTodayStudyTimeInStudyEl.textContent = formatTime(totalSeconds);
                 }
@@ -726,30 +783,30 @@
         }
 
         /**
-         * 친구 공부 현황 그리드를 렌더링합니다. (과목 색 테두리)
+         * (수정) 친구 공부 현황 그리드를 렌더링합니다. (총 시간 + 오프라인 상태)
+         * @param {Array} friends - live_status 데이터 배열
          */
         function renderFriendsGrid(friends) {
-            const now = new Date();
-            friends.sort((a, b) => {
-                const durationA = now.getTime() - a.startTime.toDate().getTime();
-                const durationB = now.getTime() - b.startTime.toDate().getTime();
-                return durationB - durationA; // 내림차순
-            });
+            // (수정) liveTotalSeconds (순공 시간) 기준으로 정렬
+            friends.sort((a, b) => (b.liveTotalSeconds || 0) - (a.liveTotalSeconds || 0));
             
             friendsStudyGrid.innerHTML = ''; 
             
             friends.slice(0, 40).forEach(friend => {
-                const durationSeconds = Math.floor((now.getTime() - friend.startTime.toDate().getTime()) / 1000);
+                // (수정) DB에서 직접 liveTotalSeconds를 가져옴
+                const durationSeconds = friend.liveTotalSeconds || 0;
+                const isStudying = friend.status === 'studying';
+                const subjectColor = friend.subjectColor || '#FFFFFF';
                 
                 const friendDiv = document.createElement('div');
-                // (수정) border-2 추가
                 friendDiv.className = 'bg-gray-800 p-3 rounded-lg shadow-md text-center border-2';
-                // (수정) borderColor 스타일 추가
-                friendDiv.style.borderColor = friend.subjectColor || '#4B5563'; // 기본색 gray-600
+                
+                // (수정) 상태에 따라 테두리 색 변경 (회색 또는 과목색)
+                friendDiv.style.borderColor = isStudying ? subjectColor : '#4B5563'; // 아닐 땐 gray-600
                 
                 friendDiv.innerHTML = `
-                    <div class="text-sm font-semibold truncate" style="color: ${friend.subjectColor || '#FFFFFF'}">
-                        ${friend.subjectName}
+                    <div class="text-sm font-semibold truncate" style="color: ${isStudying ? subjectColor : '#9CA3AF'}">
+                        ${isStudying ? (friend.subjectName || '공부 중') : '오프라인'}
                     </div>
                     <div class="text-xs text-gray-400 truncate mb-1">${friend.displayName}</div>
                     <div class="text-lg font-bold">${formatTime(durationSeconds)}</div>
