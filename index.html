@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 기본 타이틀 -->
     <title>대건고 열품타</title>
-    <!-- (추가) Favicon -->
+    <!-- Favicon -->
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='orange'%3E%3Cpath d='M12 2.69c-3.14 0-6 2.68-6 6 0 2.24 1.25 4.2 3 5.18.3.15.3.5 0 .65C6.25 15.2 3 17.15 3 20c0 1.66 1.34 3 3 3h12c1.66 0 3-1.34 3-3 0-2.85-3.25-4.8-6-5.48-.3-.15-.3-.5 0-.65 1.75-.98 3-2.94 3-5.18 0-3.32-2.86-6-6-6z'%3E%3C/path%3E%3C/svg%3E" type="image/svg+xml">
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -28,16 +29,12 @@
         }
         
         .timeline-grid {
-            /* (수정) 그리드 속성 대신 높이와 위치 기준만 유지 */
             position: relative;
             height: 864px; /* 1440px * 0.6 = 864px */
         }
         .timeline-hour-label {
             height: 36px; /* 60px * 0.6 = 36px */
         }
-        /* (수정) 분 단위 렌더링을 위해 이 클래스는 더 이상 사용되지 않음 */
-        /* .timeline-data { ... } */
-
         /* 현재 시간 표시선 */
         #current-time-line {
             position: absolute;
@@ -46,6 +43,48 @@
             background-color: red;
             z-index: 10;
             left: 0;
+        }
+        /* (추가) 하단 탭 활성/비활성 스타일 */
+        .nav-btn {
+            color: #9CA3AF; /* gray-400 */
+            transition: color 0.2s;
+        }
+        .nav-btn.active {
+            color: #FFFFFF; /* white */
+        }
+        .nav-btn.active svg {
+            stroke: #FFFFFF;
+        }
+        .nav-btn svg {
+            stroke: #9CA3AF;
+        }
+
+        /* (추가) 달력 셀 스타일 */
+        .calendar-cell {
+            height: 100px;
+            padding: 4px;
+            background-color: #374151; /* gray-700 */
+            border-radius: 4px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .calendar-cell.other-month {
+            background-color: #1F2937; /* gray-800 */
+            opacity: 0.5;
+        }
+        .calendar-cell .day-number {
+            font-weight: 600;
+            text-align: left;
+        }
+        .calendar-cell .day-time {
+            font-size: 0.8rem;
+            text-align: right;
+        }
+        .calendar-cell .day-diff {
+            font-size: 0.7rem;
+            text-align: right;
         }
     </style>
 </head>
@@ -61,57 +100,175 @@
         <p id="auth-status" class="text-gray-500 mt-4 text-sm"></p>
     </div>
 
-    <!-- 2. 홈 화면 (로그인 후) -->
-    <div id="home-screen" class="hidden flex-1 flex flex-col md:flex-row overflow-hidden">
+    <!-- (수정) 2. 메인 앱 컨테이너 (하단 탭 포함) -->
+    <div id="main-app-container" class="hidden flex-1 flex-col overflow-hidden">
         
-        <!-- 메인 컨텐츠 (타이머 + 타임라인) -->
-        <div class="flex-1 flex flex-col justify-between items-center p-4 md:p-8 overflow-hidden">
+        <!-- 2-1. 페이지 컨텐츠 (탭에 따라 변경됨) -->
+        <div id="page-content" class="flex-1 overflow-y-auto no-scrollbar">
             
-            <!-- 오늘 총 공부 시간 -->
-            <div class="w-full flex justify-between items-center mb-4">
-                <div class="text-left">
-                    <span class="text-gray-400 text-sm" id="user-display-name"></span>
-                </div>
-                <div class="text-right">
-                    <span class="text-gray-400 text-sm">오늘 총 공부 시간</span>
-                    <h2 id="total-today-study-time" class="text-2xl font-bold">00:00:00</h2>
-                </div>
-            </div>
-
-            <!-- 타임라인 스크롤 컨테이너 -->
-            <div id="timeline-scroll-container" class="w-full flex-1 bg-gray-800 rounded-lg shadow-inner overflow-hidden flex mb-4 relative min-h-0">
-                
-                <!-- 시간 레이블 컨테이너 -->
-                <div id="timeline-hour-labels" class="w-12 text-xs text-gray-400 text-right pr-2 bg-gray-800 z-10 overflow-y-hidden no-scrollbar">
-                    <div style="height: 864px;"> <!-- 864px 높이의 내부 컨테이너 -->
-                        <!-- JS로 동적 생성 -->
-                    </div>
-                </div>
-
-                <!-- 타임라인 그리드 (스크롤됨) -->
-                <div id="timeline-container" class="flex-1 relative overflow-y-auto no-scrollbar">
+            <!-- (수정) 홈 탭 페이지 -->
+            <div id="home-page" class="page-div flex-1 flex flex-col md:flex-row overflow-hidden h-full">
+                <!-- 메인 컨텐츠 (타이머 + 타임라인) -->
+                <div class="flex-1 flex flex-col justify-between items-center p-4 md:p-8 overflow-hidden">
                     
-                    <!-- 실제 864px 높이를 가진 내부 그리드 컨테이너 -->
-                    <div id="timeline-grid-inner" class="timeline-grid">
-                        <!-- JS로 동적 생성 -->
-                        <div id="current-time-line"></div>
+                    <!-- 오늘 총 공부 시간 -->
+                    <div class="w-full flex justify-between items-center mb-4">
+                        <!-- (수정) 이름 클릭 시 로그아웃 버튼 -->
+                        <div class="text-left relative">
+                            <button class="text-gray-400 text-sm" id="user-display-name-btn"></button>
+                            <button id="logout-btn-home" class="hidden absolute top-full left-0 bg-red-600 text-white px-3 py-1 rounded-md text-xs mt-1 z-20">로그아웃</button>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-gray-400 text-sm">오늘 총 공부 시간</span>
+                            <h2 id="total-today-study-time" class="text-2xl font-bold">00:00:00</h2>
+                        </div>
                     </div>
 
+                    <!-- 타임라인 스크롤 컨테이너 -->
+                    <div id="timeline-scroll-container" class="w-full flex-1 bg-gray-800 rounded-lg shadow-inner overflow-hidden flex mb-4 relative min-h-0">
+                        <!-- 시간 레이블 컨테이너 -->
+                        <div id="timeline-hour-labels" class="w-12 text-xs text-gray-400 text-right pr-2 bg-gray-800 z-10 overflow-y-hidden no-scrollbar">
+                            <div style="height: 864px;"> <!-- 864px 높이의 내부 컨테이너 -->
+                            </div>
+                        </div>
+                        <!-- 타임라인 그리드 (스크롤됨) -->
+                        <div id="timeline-container" class="flex-1 relative overflow-y-auto no-scrollbar">
+                            <div id="timeline-grid-inner" class="timeline-grid">
+                                <div id="current-time-line"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 하단 타이머 시작 버튼 -->
+                    <div class="w-full text-center">
+                        <button id="start-study-btn" class="w-full md:w-1/2 bg-gray-700 hover:bg-gray-600 text-white font-bold py-4 px-6 rounded-lg text-lg transition duration-300 shadow-lg flex-shrink-0" disabled>
+                            과목을 선택해주세요.
+                        </button>
+                        <!-- (추가) 실시간 공부 인원 -->
+                        <p id="studying-count-text" class="text-xs text-gray-500 mt-2 text-center hidden"></p>
+                    </div>
+                </div>
+
+                <!-- 오른쪽 사이드바 (과목 리스트) -->
+                <div class="w-full md:w-64 bg-gray-800 p-4 overflow-y-auto no-scrollbar flex-shrink-0 md:h-full">
+                    <h3 class="text-lg font-semibold mb-4 mt-4">과목 리스트</h3>
+                    <div id="subject-list" class="space-y-1"> 
+                    </div>
                 </div>
             </div>
 
-            <!-- 하단 타이머 시작 버튼 -->
-            <button id="start-study-btn" class="w-full md:w-1/2 bg-gray-700 hover:bg-gray-600 text-white font-bold py-4 px-6 rounded-lg text-lg transition duration-300 shadow-lg flex-shrink-0" disabled>
-                과목을 선택해주세요.
-            </button>
-        </div>
+            <!-- (추가) 그룹 탭 페이지 -->
+            <div id="group-page" class="page-div hidden p-4 md:p-8 overflow-y-auto max-w-2xl mx-auto w-full">
+                <div id="group-list-view">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-3xl font-bold">그룹</h2>
+                        <button id="add-group-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg">+ 그룹 추가</button>
+                    </div>
+                    
+                    <div id="group-list-container" class="space-y-3">
+                        <p class="text-gray-400 text-center">참여 중인 그룹이 없습니다.</p>
+                        <!-- JS로 동적 생성 -->
+                    </div>
+                    
+                    <div id="invitation-container" class="mt-8">
+                        <h3 class="text-2xl font-bold mb-4">받은 초대</h3>
+                        <div id="invitation-list" class="space-y-2">
+                            <p class="text-gray-400 text-center">받은 초대가 없습니다.</p>
+                            <!-- JS로 동적 생성 -->
+                        </div>
+                    </div>
+                </div>
 
-        <!-- 오른쪽 사이드바 (과목 리스트) -->
-        <div class="w-full md:w-64 bg-gray-800 p-4 overflow-y-auto no-scrollbar flex-shrink-0 md:h-screen">
-            <h3 class="text-lg font-semibold mb-4 mt-4">과목 리스트</h3>
-            <div id="subject-list" class="space-y-1"> 
-                <!-- 과목 리스트 원복 (p-2, text-sm) -->
+                <div id="group-detail-view" class="hidden mt-8">
+                    <button id="back-to-group-list-btn" class="text-blue-400 mb-4">&lt; 모든 그룹으로</button>
+                    <h3 id="group-detail-name" class="text-2xl font-bold mb-4"></h3>
+                    
+                    <div id="group-admin-panel" class="hidden mb-4 p-4 bg-gray-800 rounded-lg">
+                        <h4 class="text-lg font-semibold mb-2">그룹 관리 (그룹장)</h4>
+                        <div class="flex space-x-2 mb-2">
+                            <input type="text" id="invite-member-name-input" placeholder="초대할 유저 닉네임" class="flex-1 bg-gray-700 p-2 rounded-md text-white">
+                            <button id="invite-member-btn" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg">초대</button>
+                        </div>
+                        <p id="invite-status" class="text-sm mt-2"></p>
+                        <div class="flex space-x-2 mt-4">
+                            <button id="disband-group-btn" class="bg-red-700 hover:bg-red-800 px-4 py-2 rounded-lg text-sm">그룹 해산</button>
+                        </div>
+                    </div>
+                    
+                    <h4 class="text-lg font-semibold mb-2">멤버</h4>
+                    <div id="group-member-list" class="space-y-2">
+                        <!-- JS로 동적 생성 -->
+                    </div>
+                </div>
             </div>
+
+            <!-- (추가) 달력 탭 페이지 -->
+            <div id="calendar-page" class="page-div hidden p-4 md:p-8 overflow-y-auto">
+                <div class="max-w-4xl mx-auto">
+                    <h2 class="text-3xl font-bold mb-6">월간 달력</h2>
+                    <div class="flex justify-between items-center mb-4 p-4 bg-gray-800 rounded-lg">
+                        <button id="prev-month-btn" class="text-2xl p-2 rounded-full hover:bg-gray-700">&lt;</button>
+                        <h3 id="current-month-year" class="text-xl font-semibold"></h3>
+                        <button id="next-month-btn" class="text-2xl p-2 rounded-full hover:bg-gray-700">&gt;</button>
+                    </div>
+                    <div class="grid grid-cols-7 gap-2 text-center font-semibold mb-2 text-gray-400">
+                        <div class="py-2">일</div>
+                        <div class="py-2">월</div>
+                        <div class="py-2">화</div>
+                        <div class="py-2">수</div>
+                        <div class="py-2">목</div>
+                        <div class="py-2">금</div>
+                        <div class="py-2">토</div>
+                    </div>
+                    <div id="calendar-grid" class="grid grid-cols-7 gap-2">
+                        <!-- JS로 동적 생성 -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- (추가) MY 탭 페이지 -->
+            <div id="my-page" class="page-div hidden p-4 md:p-8 overflow-y-auto max-w-md mx-auto">
+                <h2 class="text-3xl font-bold mb-6">MY</h2>
+                
+                <div class="mb-6 p-4 bg-gray-800 rounded-lg">
+                    <label for="nickname-input" class="block text-sm font-medium text-gray-400 mb-2">닉네임 설정</label>
+                    <div class="flex space-x-2">
+                        <input type="text" id="nickname-input" placeholder="고유한 닉네임을 입력하세요" class="flex-1 bg-gray-700 p-2 rounded-md text-white">
+                        <button id="save-nickname-btn" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg">저장</button>
+                    </div>
+                    <p id="nickname-status" class="text-sm mt-2"></p>
+                </div>
+                
+                <div class="space-y-3">
+                    <button id="logout-btn-my" class="w-full text-left p-3 bg-gray-800 hover:bg-gray-700 rounded-lg text-red-500 font-semibold">로그아웃</button>
+                    <button id="delete-account-btn" class="w-full text-left p-3 bg-gray-800 hover:bg-gray-700 rounded-lg text-red-700 font-semibold">계정 탈퇴 (미구현)</button>
+                </div>
+            </div>
+
+        </div>
+        
+        <!-- 2-2. (추가) 하단 탭 내비게이션 -->
+        <div id="bottom-nav" class="flex-shrink-0 w-full bg-gray-800 border-t border-gray-700 grid grid-cols-4 gap-4 p-2">
+            <!-- 홈 -->
+            <button id="nav-home" class="nav-btn flex flex-col items-center justify-center p-2 rounded-lg active">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                <span class="text-xs font-medium mt-1">홈</span>
+            </button>
+            <!-- 그룹 -->
+            <button id="nav-group" class="nav-btn flex flex-col items-center justify-center p-2 rounded-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                <span class="text-xs font-medium mt-1">그룹</span>
+            </button>
+            <!-- 달력 -->
+            <button id="nav-calendar" class="nav-btn flex flex-col items-center justify-center p-2 rounded-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <span class="text-xs font-medium mt-1">달력</span>
+            </button>
+            <!-- MY -->
+            <button id="nav-my" class="nav-btn flex flex-col items-center justify-center p-2 rounded-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <span class="text-xs font-medium mt-1">MY</span>
+            </button>
         </div>
 
     </div>
@@ -148,7 +305,9 @@
 
     <!-- 모달: 휴식 사유 선택 -->
     <div id="rest-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
-        <div class="bg-gray-800 rounded-lg p-6 shadow-xl w-full max-w-sm text-center">
+        <div class="bg-gray-800 rounded-lg p-6 shadow-xl w-full max-w-sm text-center relative">
+            <!-- (추가) X 닫기 버튼 -->
+            <button id="close-rest-modal" class="absolute top-2 right-4 text-gray-400 text-2xl">&times;</button>
             <h2 class="text-xl font-semibold mb-2">휴식 시간</h2>
             <p id="rest-time-display" class="text-3xl font-bold mb-6"></p>
             <p class="text-gray-400 mb-4">휴식 사유를 선택해주세요.</p>
@@ -169,7 +328,6 @@
                 <button id="close-timeline-modal" class="text-gray-400 hover:text-white text-2xl">&times;</button>
             </div>
             <p class="text-center text-lg mb-2"><span id="modal-total-time"></span> 공부</p>
-            <!-- (추가) 어제와 비교 메시지 -->
             <p id="modal-comparison-text" class="text-center text-sm mb-4 hidden"></p>
             
             <div class="flex-1 min-h-0">
@@ -210,7 +368,10 @@
             addDoc, 
             Timestamp,
             getDocs,
-            setLogLevel
+            setLogLevel,
+            arrayUnion,
+            arrayRemove,
+            writeBatch
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // -----------------------------------------------------------------
@@ -238,6 +399,7 @@
         // -----------------------------------------------------------------
         let currentUser = null; 
         let userId = null; 
+        let currentNickname = null; // (추가)
         let currentSubject = null; 
         let studyStartTime = null; 
         let studyTimerInterval = null; 
@@ -247,61 +409,107 @@
         let friendsListener = null;
         let todayTimelineListener = null; 
         let totalTodayStudyListener = null; 
+        let studyingCountListener = null; // (추가)
+        let groupListener = null; // (추가)
+        let invitationListener = null; // (추가)
         
-        let currentTotalStudySeconds = 0; // 총 공부 시간 (초)
+        let currentTotalStudySeconds = 0; 
         
         let liveStatusUpdateInterval = null; 
+        let pageTitleInterval = null; // (추가)
         
         let friendsTimers = {};
 
+        // (추가) 달력 상태
+        let currentCalendarDate = new Date();
+        let calendarDataCache = {}; // 월간 데이터 캐시
+
+        // (추가) 비속어 필터
+        const profanityList = ["바보", "멍청이", "xx"]; 
+
         // 기본 과목
         const defaultSubjects = {
-            "국어": "#EF4444", // red-500
-            "수학": "#EAB308", // yellow-500
-            "영어": "#8B5CF6", // violet-500
-            "사회": "#22C55E", // green-500
-            "과학": "#3B82F6", // blue-500
-            "역사": "#78350F", // A (진한 갈색 - amber-900)
+            "국어": "#EF4444", 
+            "수학": "#EAB308", 
+            "영어": "#8B5CF6", 
+            "사회": "#22C55E", 
+            "과학": "#3B82F6", 
+            "역사": "#78350F",
         };
         const subjectColors = { ...defaultSubjects };
         
-        const TIMELINE_TOTAL_HEIGHT = 864; // 1440 * 0.6
+        const TIMELINE_TOTAL_HEIGHT = 864;
 
         // DOM 요소
         const loginScreen = document.getElementById('login-screen');
-        const homeScreen = document.getElementById('home-screen');
+        const mainAppContainer = document.getElementById('main-app-container'); // (수정)
         const studyScreen = document.getElementById('study-screen');
         const loginBtn = document.getElementById('login-btn');
         const authStatus = document.getElementById('auth-status');
-        const userDisplayName = document.getElementById('user-display-name');
-        const totalTodayStudyTimeEl = document.getElementById('total-today-study-time');
         
+        // (수정) 홈 탭 DOM
+        const homePage = document.getElementById('home-page');
+        const userDisplayNameBtn = document.getElementById('user-display-name-btn'); // (수정)
+        const logoutBtnHome = document.getElementById('logout-btn-home'); // (추가)
+        const totalTodayStudyTimeEl = document.getElementById('total-today-study-time');
         const timelineScrollContainer = document.getElementById('timeline-scroll-container'); 
         const timelineHourLabels = document.getElementById('timeline-hour-labels'); 
         const timelineContainer = document.getElementById('timeline-container'); 
         const timelineGridInner = document.getElementById('timeline-grid-inner'); 
-        
         const startStudyBtn = document.getElementById('start-study-btn');
+        const studyingCountText = document.getElementById('studying-count-text'); // (추가)
         const subjectListEl = document.getElementById('subject-list');
+        
+        // (추가) 그룹 탭 DOM
+        const groupPage = document.getElementById('group-page');
+        const addGroupBtn = document.getElementById('add-group-btn');
+        const groupListView = document.getElementById('group-list-view');
+        const groupDetailView = document.getElementById('group-detail-view');
+        const groupListContainer = document.getElementById('group-list-container');
+        const invitationList = document.getElementById('invitation-list');
+        const backToGroupListBtn = document.getElementById('back-to-group-list-btn');
+        const groupDetailName = document.getElementById('group-detail-name');
+        const groupAdminPanel = document.getElementById('group-admin-panel');
+        const inviteMemberNameInput = document.getElementById('invite-member-name-input');
+        const inviteMemberBtn = document.getElementById('invite-member-btn');
+        const inviteStatus = document.getElementById('invite-status');
+        const disbandGroupBtn = document.getElementById('disband-group-btn');
+        const groupMemberList = document.getElementById('group-member-list');
+
+        // (추가) 달력 탭 DOM
+        const calendarPage = document.getElementById('calendar-page');
+        const prevMonthBtn = document.getElementById('prev-month-btn');
+        const nextMonthBtn = document.getElementById('next-month-btn');
+        const currentMonthYear = document.getElementById('current-month-year');
+        const calendarGrid = document.getElementById('calendar-grid');
+
+        // (추가) MY 탭 DOM
+        const myPage = document.getElementById('my-page');
+        const nicknameInput = document.getElementById('nickname-input');
+        const saveNicknameBtn = document.getElementById('save-nickname-btn');
+        const nicknameStatus = document.getElementById('nickname-status');
+        const logoutBtnMy = document.getElementById('logout-btn-my');
+
+        // 공부 화면 DOM
         const currentSubjectLabel = document.getElementById('current-subject-label');
         const myStudyTimer = document.getElementById('my-study-timer');
         const stopStudyBtn = document.getElementById('stop-study-btn');
         const friendsStudyGrid = document.getElementById('friends-study-grid');
-        const restModal = document.getElementById('rest-modal');
-        const restTimeDisplay = document.getElementById('rest-time-display');
-        
         const totalTodayStudyTimeInStudyEl = document.getElementById('total-today-study-time-in-study');
 
-        // 통계 모달 DOM
+        // 모달 DOM
+        const restModal = document.getElementById('rest-modal');
+        const closeRestModalBtn = document.getElementById('close-rest-modal'); // (추가)
+        const restTimeDisplay = document.getElementById('rest-time-display');
         const timelineModal = document.getElementById('timeline-modal');
         const timelineDatePicker = document.getElementById('timeline-date-picker');
         const closeTimelineModal = document.getElementById('close-timeline-modal');
         const modalTotalTimeEl = document.getElementById('modal-total-time');
-        const modalComparisonTextEl = document.getElementById('modal-comparison-text'); // (추가)
+        const modalComparisonTextEl = document.getElementById('modal-comparison-text');
         const modalTimelineContainer = document.getElementById('modal-timeline-container');
         const pieChartCanvas = document.getElementById('study-pie-chart');
         let studyPieChart = null;
-
+        
         // -----------------------------------------------------------------
         // 3. 유틸리티 함수
         // -----------------------------------------------------------------
@@ -314,10 +522,15 @@
                 .map(v => v.toString().padStart(2, '0'))
                 .join(':');
         }
+        
+        function formatTimeHM(totalSeconds) {
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            return `${hours}시간 ${minutes}분`;
+        }
 
         function getYYYYMMDD(dateInput) {
             const date = dateInput instanceof Timestamp ? dateInput.toDate() : dateInput;
-            // KST (UTC+9) 기준으로 날짜 문자열 생성
             const kstOffset = 9 * 60 * 60 * 1000;
             const kstDate = new Date(date.getTime() + kstOffset);
             return kstDate.toISOString().split('T')[0];
@@ -326,23 +539,15 @@
         function getKSTTodayRange(date = new Date()) {
             const kstDateStr = new Date(date.getTime() + (9 * 60 * 60 * 1000)).toISOString().split('T')[0];
             const [year, month, day] = kstDateStr.split('-').map(Number);
-            // KST 자정(00:00)은 UTC 기준 전날 15:00
-            const start = new Date(Date.UTC(year, month - 1, day, -9, 0, 0)); // KST 00:00:00
-            // KST 23:59:59는 UTC 기준 당일 14:59:59
-            const end = new Date(Date.UTC(year, month - 1, day, 14, 59, 59, 999)); // KST 23:59:59
+            const start = new Date(Date.UTC(year, month - 1, day, -9, 0, 0)); 
+            const end = new Date(Date.UTC(year, month - 1, day, 14, 59, 59, 999));
             return { start, end, todayString: kstDateStr };
         }
         
-        /**
-         * (추가) YYYY-MM-DD 형식의 날짜 문자열을 받아 그 전날의 YYYY-MM-DD를 반환
-         */
         function getYesterdayDateString(dateString) {
             const [year, month, day] = dateString.split('-').map(Number);
-            // KST 기준으로 날짜 객체 생성 (정오쯤으로)
-            const date = new Date(Date.UTC(year, month - 1, day, 3, 0, 0)); // 12:00 KST = 03:00 UTC
-            // 하루(24시간) 빼기
+            const date = new Date(Date.UTC(year, month - 1, day, 3, 0, 0));
             date.setUTCDate(date.getUTCDate() - 1); 
-            // 다시 KST 기준으로 YYYY-MM-DD 반환
             const kstDateStr = new Date(date.getTime() + (9 * 60 * 60 * 1000)).toISOString().split('T')[0];
             return kstDateStr;
         }
@@ -361,7 +566,7 @@
                 userId = currentUser.uid;
                 authStatus.textContent = `${currentUser.displayName}님, 환영합니다.`;
                 await initializeUserData(currentUser);
-                showHomeScreen();
+                showMainApp(); // (수정)
             } catch (error) {
                 console.error("Google 로그인 실패:", error);
                 authStatus.textContent = `로그인 실패: ${error.message}`;
@@ -374,16 +579,21 @@
             const userDoc = await getDoc(userRef);
 
             if (!userDoc.exists()) {
+                // (수정) 닉네임 필드 추가
+                const defaultNickname = user.displayName || `user${user.uid.substring(0, 5)}`;
                 await setDoc(userRef, {
                     uid: user.uid,
-                    displayName: user.displayName,
+                    displayName: user.displayName, // Google Name
+                    nickname: defaultNickname, // 고유 닉네임 (기본값)
                     email: user.email,
                     createdAt: Timestamp.now(),
                     subjects: defaultSubjects, 
                     totalStudyTime: 0 
                 });
+                currentNickname = defaultNickname;
             } else {
                 const userData = userDoc.data();
+                currentNickname = userData.nickname || userData.displayName || `user${user.uid.substring(0, 5)}`;
                 if (userData.subjects) {
                     Object.assign(subjectColors, userData.subjects);
                 }
@@ -397,44 +607,88 @@
                     userId = user.uid;
                     authStatus.textContent = `${currentUser.displayName}님, 자동 로그인되었습니다.`;
                     await initializeUserData(user);
-                    showHomeScreen();
+                    showMainApp(); // (수정)
                 } else {
                     currentUser = null;
                     userId = null;
+                    currentNickname = null;
                     showLoginScreen();
                 }
             });
         }
+        
+        async function handleLogout() {
+            try {
+                await auth.signOut();
+                // onAuthStateChanged가 나머지를 처리
+            } catch (error) {
+                console.error("로그아웃 실패:", error);
+            }
+        }
 
         // -----------------------------------------------------------------
-        // 5. 화면 전환
+        // 5. 화면 전환 및 탭 로직 (수정)
         // -----------------------------------------------------------------
 
         function showLoginScreen() {
             loginScreen.classList.remove('hidden');
-            homeScreen.classList.add('hidden');
+            mainAppContainer.classList.add('hidden'); // (수정)
             studyScreen.classList.add('hidden');
+            document.title = "대건고 열품타";
             cleanupListeners();
         }
 
-        function showHomeScreen() {
+        function showMainApp() {
             loginScreen.classList.add('hidden');
-            homeScreen.classList.remove('hidden');
+            mainAppContainer.classList.remove('hidden'); // (수정)
             studyScreen.classList.add('hidden');
-            userDisplayName.textContent = `${currentUser.displayName}님`;
+            document.title = "대건고 열품타";
+            userDisplayNameBtn.textContent = `${currentNickname}님`; // (수정)
+            
             renderSubjectList();
             renderTimelineHours(); 
-            updateCurrentTimeLine(); // 즉시 호출
+            updateCurrentTimeLine();
             setupHomeListeners();
             setTimeout(scrollTimelineToCurrent, 100);
+            
+            showTab('home'); // 기본 탭
         }
 
         function showStudyScreen() {
             loginScreen.classList.add('hidden');
-            homeScreen.classList.add('hidden');
+            mainAppContainer.classList.add('hidden'); // (수정)
             studyScreen.classList.remove('hidden');
             cleanupListeners();
-            setupStudyListeners(); // 총 시간 리스너 포함
+            setupStudyListeners();
+        }
+        
+        function showTab(tabName) {
+            // 1. 모든 페이지 숨기기
+            document.querySelectorAll('.page-div').forEach(page => page.classList.add('hidden'));
+            
+            // 2. 요청된 페이지만 보이기
+            const activePage = document.getElementById(`${tabName}-page`);
+            if (activePage) {
+                activePage.classList.remove('hidden');
+            }
+            
+            // 3. 모든 탭 버튼 비활성화
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            
+            // 4. 활성 탭 버튼 활성화
+            const activeBtn = document.getElementById(`nav-${tabName}`);
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+            }
+            
+            // 5. (추가) 탭별 데이터 로드
+            if (tabName === 'calendar') {
+                renderCalendar(currentCalendarDate); 
+            } else if (tabName === 'my') {
+                loadMyPage();
+            } else if (tabName === 'group') {
+                loadGroupsAndInvites();
+            }
         }
         
         function cleanupFriendsTimers() {
@@ -448,14 +702,23 @@
             if (friendsListener) friendsListener();
             if (todayTimelineListener) todayTimelineListener();
             if (totalTodayStudyListener) totalTodayStudyListener();
+            if (studyingCountListener) studyingCountListener(); // (추가)
+            if (groupListener) groupListener(); // (추가)
+            if (invitationListener) invitationListener(); // (추가)
+            
             if (liveStatusUpdateInterval) clearInterval(liveStatusUpdateInterval);
+            if (pageTitleInterval) clearInterval(pageTitleInterval); // (추가)
             
             cleanupFriendsTimers(); 
             
             friendsListener = null;
             todayTimelineListener = null;
             totalTodayStudyListener = null;
+            studyingCountListener = null;
+            groupListener = null;
+            invitationListener = null;
             liveStatusUpdateInterval = null; 
+            pageTitleInterval = null;
         }
 
 
@@ -464,11 +727,11 @@
         // -----------------------------------------------------------------
 
         function setupHomeListeners() {
-            if (todayTimelineListener || totalTodayStudyListener) return;
+            if (todayTimelineListener || totalTodayStudyListener || studyingCountListener) return;
             
             const { start, end, todayString } = getKSTTodayRange();
 
-            // A. 오늘 하루 총 공부 시간 (total_daily_study)
+            // A. 오늘 총 공부 시간
             const totalStudyRef = doc(db, "users", userId, "total_daily_study", todayString);
             totalTodayStudyListener = onSnapshot(totalStudyRef, (doc) => {
                 let totalSeconds = 0;
@@ -483,7 +746,7 @@
                 }
             });
 
-            // B. 오늘 하루 타임라인 (study_sessions)
+            // B. 오늘 타임라인
             const sessionsQuery = query(
                 collection(db, "study_sessions"),
                 where("userId", "==", userId),
@@ -493,6 +756,18 @@
             
             todayTimelineListener = onSnapshot(sessionsQuery, (snapshot) => {
                 renderTodayTimeline(snapshot.docs.map(d => d.data()));
+            });
+            
+            // C. (추가) 실시간 공부 인원
+            const liveQuery = query(collection(db, "live_status"), where("status", "==", "studying"));
+            studyingCountListener = onSnapshot(liveQuery, (snapshot) => {
+                const count = snapshot.size;
+                if (count > 0) {
+                    studyingCountText.textContent = `현재 ${count}명이 공부하고 있습니다.`;
+                    studyingCountText.classList.remove('hidden');
+                } else {
+                    studyingCountText.classList.add('hidden');
+                }
             });
         }
         
@@ -532,73 +807,53 @@
             }
         }
         
-        /**
-         * (수정) 오늘 타임라인을 분 단위로 정확하게 렌더링
-         */
         function renderTodayTimeline(sessions) {
             const gridInner = document.getElementById('timeline-grid-inner');
             if (!gridInner) return;
-
-            gridInner.innerHTML = ''; // 모두 지우기
-
-            // 1. (수정) 5분 단위 배경선 그리기 (시각적 보조)
+            gridInner.innerHTML = ''; 
             const lineFragment = document.createDocumentFragment();
             for (let i = 0; i < 288; i++) {
                 const lineDiv = document.createElement('div');
                 lineDiv.className = 'border-b border-gray-700 opacity-30';
-                lineDiv.style.minHeight = '3px'; // 864px / 288 = 3px
+                lineDiv.style.minHeight = '3px';
                 lineDiv.style.height = '3px';
                 lineFragment.appendChild(lineDiv);
             }
             gridInner.appendChild(lineFragment);
-
-            // 2. (수정) 현재 시간 선 추가
             const timeLineDiv = document.createElement('div');
             timeLineDiv.id = 'current-time-line';
             gridInner.appendChild(timeLineDiv);
             
-            // 3. (수정) 세션 블록을 분 단위로 절대 위치에 렌더링
             sessions.forEach(session => {
                 const start = session.startTime.toDate();
-                // endTime이 없으면(공부 중이면) 현재 시간으로
                 const end = session.endTime ? session.endTime.toDate() : new Date(); 
-                
                 const startMinute = start.getHours() * 60 + start.getMinutes();
                 let endMinute = end.getHours() * 60 + end.getMinutes();
-                
-                // 자정을 넘어가는 경우 처리
                 if (end < start || (endMinute === 0 && startMinute > 0)) {
-                    endMinute = 24 * 60; // 23:59 (1440분)
+                    endMinute = 24 * 60;
                 }
-                
                 const durationMinutes = endMinute - startMinute;
                 if (durationMinutes <= 0) return;
                 
-                // 분 단위로 top과 height 계산
                 const top = (startMinute / (24 * 60)) * TIMELINE_TOTAL_HEIGHT;
                 const height = (durationMinutes / (24 * 60)) * TIMELINE_TOTAL_HEIGHT;
                 
                 const sessionDiv = document.createElement('div');
-                sessionDiv.className = 'absolute opacity-75 rounded'; // "적당한 폭"
+                sessionDiv.className = 'absolute opacity-75 rounded';
                 sessionDiv.style.backgroundColor = session.subjectColor;
                 sessionDiv.style.top = `${top}px`;
-                sessionDiv.style.height = `${Math.max(1, height)}px`; // 최소 1px
-                sessionDiv.style.left = '10%'; // 중앙 정렬 (양옆 10% 여백)
-                sessionDiv.style.width = '80%'; // 폭 80%
+                sessionDiv.style.height = `${Math.max(1, height)}px`;
+                sessionDiv.style.left = '10%';
+                sessionDiv.style.width = '80%';
                 gridInner.appendChild(sessionDiv); 
             });
-
-            // 4. 현재 시간 선 위치 업데이트
             updateCurrentTimeLine();
         }
-
 
         function updateCurrentTimeLine() {
             const line = document.getElementById('current-time-line'); 
             if (!line) return;
-            
             const now = new Date();
-            // (확인) 1번 요청: 분 단위 반영
             const totalMinutes = now.getHours() * 60 + now.getMinutes();
             const topPosition = (totalMinutes / (24 * 60)) * TIMELINE_TOTAL_HEIGHT; 
             line.style.top = `${topPosition}px`;
@@ -637,10 +892,9 @@
             }
             
             try {
-                // 1. study_sessions에 기록
                 const sessionData = {
                     userId: userId,
-                    displayName: currentUser.displayName,
+                    displayName: currentNickname, // (수정) 닉네임 사용
                     subjectName: currentSubject,
                     subjectColor: subjectColors[currentSubject],
                     startTime: Timestamp.fromDate(studyStartTime),
@@ -650,14 +904,10 @@
                 const docRef = await addDoc(collection(db, "study_sessions"), sessionData);
                 currentStudySessionId = docRef.id;
                 
-                // 2. 화면 전환 및 타이머 시작
                 currentSubjectLabel.textContent = currentSubject;
                 showStudyScreen();
-                runMyStudyTimer(); // 총 시간 타이머 시작
-                
-                // 3. live_status 즉시 업데이트
+                runMyStudyTimer();
                 await updateLiveStatus(currentTotalStudySeconds);
-
             } catch (error) {
                 console.error("공부 시작 세션/상태 생성 실패:", error);
             }
@@ -675,14 +925,15 @@
             lastStudyEndTime = studyEndTime; 
             const studyDurationSeconds = Math.floor((studyEndTime.getTime() - studyStartTime.getTime()) / 1000);
 
-            // 1. 모든 인터벌 중지
             if (studyTimerInterval) clearInterval(studyTimerInterval);
             if (liveStatusUpdateInterval) clearInterval(liveStatusUpdateInterval);
+            if (pageTitleInterval) clearInterval(pageTitleInterval); // (추가)
             studyTimerInterval = null;
             liveStatusUpdateInterval = null;
+            pageTitleInterval = null;
+            document.title = "대건고 열품타"; // (추가)
 
             try {
-                // 2. "study_sessions" 문서 업데이트
                 const sessionRef = doc(db, "study_sessions", currentStudySessionId);
                 await setDoc(sessionRef, {
                     endTime: Timestamp.fromDate(studyEndTime),
@@ -690,7 +941,6 @@
                     durationSeconds: studyDurationSeconds
                 }, { merge: true });
 
-                // 3. "total_daily_study" 업데이트
                 const { todayString } = getKSTTodayRange(studyStartTime);
                 const totalStudyRef = doc(db, "users", userId, "total_daily_study", todayString);
                 
@@ -707,11 +957,10 @@
                     userId: userId
                 }, { merge: true });
                 
-                // 4. live_status를 'offline'으로 업데이트
                 const liveRef = doc(db, "live_status", userId);
                 await setDoc(liveRef, {
                     status: "offline",
-                    liveTotalSeconds: finalTotalSeconds, // 마지막 총 시간
+                    liveTotalSeconds: finalTotalSeconds,
                     lastUpdated: Timestamp.now()
                 }, { merge: true });
 
@@ -719,28 +968,41 @@
                 console.error("공부 중지/상태 업데이트 실패:", error);
             }
 
-            // 5. 홈 화면 복귀
             currentStudySessionId = null;
             studyStartTime = null;
-            showHomeScreen();
+            showMainApp(); // (수정)
         }
 
         function runMyStudyTimer() {
             if (studyTimerInterval) clearInterval(studyTimerInterval);
             if (liveStatusUpdateInterval) clearInterval(liveStatusUpdateInterval); 
+            if (pageTitleInterval) clearInterval(pageTitleInterval);
 
             const sessionStartTotalSeconds = currentTotalStudySeconds;
 
-            studyTimerInterval = setInterval(() => {
+            const timerLogic = () => {
                 if (!studyStartTime) return;
                 const now = new Date();
                 const sessionSeconds = Math.floor((now.getTime() - studyStartTime.getTime()) / 1000);
                 const newTotalSeconds = sessionStartTotalSeconds + sessionSeconds;
 
-                myStudyTimer.textContent = formatTime(newTotalSeconds);
+                const timeStr = formatTime(newTotalSeconds);
+                myStudyTimer.textContent = timeStr;
                 if (totalTodayStudyTimeInStudyEl) {
-                    totalTodayStudyTimeInStudyEl.textContent = formatTime(newTotalSeconds);
+                    totalTodayStudyTimeInStudyEl.textContent = timeStr;
                 }
+                document.title = `열공중 ${timeStr}`; // (추가)
+            };
+
+            timerLogic(); // 1초 기다리지 않고 즉시 실행
+            studyTimerInterval = setInterval(timerLogic, 1000);
+            
+            // (수정) 탭 타이틀 업데이트용 인터벌 분리 (더 자주)
+            pageTitleInterval = setInterval(() => {
+                const now = new Date();
+                const sessionSeconds = Math.floor((now.getTime() - studyStartTime.getTime()) / 1000);
+                const newTotalSeconds = sessionStartTotalSeconds + sessionSeconds;
+                document.title = `열공중 ${formatTime(newTotalSeconds)}`;
             }, 1000);
 
             liveStatusUpdateInterval = setInterval(() => {
@@ -757,7 +1019,7 @@
             const liveRef = doc(db, "live_status", userId);
             try {
                 await setDoc(liveRef, {
-                    displayName: currentUser.displayName,
+                    displayName: currentNickname, // (수정) 닉네임 사용
                     subjectName: currentSubject, 
                     status: "studying",
                     subjectColor: subjectColors[currentSubject],
@@ -769,11 +1031,10 @@
             }
         }
 
-
         function setupStudyListeners() {
             if (friendsListener || totalTodayStudyListener) return; 
 
-            // A. 친구 현황 (live_status 컬렉션)
+            // A. 친구 현황
             const q = query(collection(db, "live_status"));
             friendsListener = onSnapshot(q, (snapshot) => {
                 const friends = [];
@@ -782,12 +1043,9 @@
                     if (doc.id !== userId) { 
                         const data = doc.data();
                         data.uid = doc.id; 
-
                         if (data.lastUpdated) {
                             const secondsSinceUpdate = now.seconds - data.lastUpdated.seconds;
-                            if (secondsSinceUpdate > 30) {
-                                data.status = "offline";
-                            }
+                            if (secondsSinceUpdate > 30) data.status = "offline";
                         } else {
                             data.status = "offline"; 
                         }
@@ -797,15 +1055,14 @@
                 renderFriendsGrid(friends);
             });
 
-            // B. 오늘 총 공부 시간 (리스너는 DB 기준 시간을 표시)
+            // B. 오늘 총 공부 시간
             const { todayString } = getKSTTodayRange();
             const totalStudyRef = doc(db, "users", userId, "total_daily_study", todayString);
             
             totalTodayStudyListener = onSnapshot(totalStudyRef, (doc) => {
                 let totalSeconds = 0;
-                if (doc.exists()) {
-                    totalSeconds = doc.data().totalSeconds || 0;
-                }
+                if (doc.exists()) totalSeconds = doc.data().totalSeconds || 0;
+                
                 currentTotalStudySeconds = totalSeconds;
                 totalTodayStudyTimeEl.textContent = formatTime(totalSeconds);
                 
@@ -861,27 +1118,20 @@
         // 8. 통계 모달 (일간)
         // -----------------------------------------------------------------
         
-        /**
-         * (수정) 일간 통계 로드 (어제와 비교)
-         */
         async function loadDailyStats(dateString) {
             const [year, month, day] = dateString.split('-').map(Number);
             const start = new Date(Date.UTC(year, month - 1, day, -9, 0, 0)); 
             const end = new Date(Date.UTC(year, month - 1, day, 14, 59, 59, 999));
 
-            // 1. 총 시간 (선택한 날짜)
+            // 1. 총 시간
             const totalStudyRef = doc(db, "users", userId, "total_daily_study", dateString);
             const totalDoc = await getDoc(totalStudyRef);
             let totalSeconds = 0;
-            if (totalDoc.exists()) {
-                totalSeconds = totalDoc.data().totalSeconds || 0;
-            }
+            if (totalDoc.exists()) totalSeconds = totalDoc.data().totalSeconds || 0;
             modalTotalTimeEl.textContent = formatTime(totalSeconds);
 
-            // 2. (수정) 어제 총 시간 및 비교 (3번 요청)
+            // 2. 어제와 비교
             const todayKSTString = getKSTTodayRange().todayString;
-            
-            // 오늘 날짜가 아닐 때만 비교
             if (dateString !== todayKSTString) {
                 const yesterdayDateString = getYesterdayDateString(dateString);
                 const yesterdayTotalRef = doc(db, "users", userId, "total_daily_study", yesterdayDateString);
@@ -890,24 +1140,24 @@
                 if (yesterdayDoc.exists()) yesterdayTotalSeconds = yesterdayDoc.data().totalSeconds || 0;
                 
                 const diff = totalSeconds - yesterdayTotalSeconds;
-                const diffText = formatTime(Math.abs(diff));
+                const diffText = formatTimeHM(Math.abs(diff));
                 
                 if (diff > 0) {
                     modalComparisonTextEl.textContent = `전날보다 ${diffText} 더 공부했어요.`;
-                    modalComparisonTextEl.style.color = '#22C55E'; // green-500
+                    modalComparisonTextEl.style.color = '#22C55E';
                 } else if (diff < 0) {
                     modalComparisonTextEl.textContent = `전날보다 ${diffText} 덜 공부했어요.`;
-                    modalComparisonTextEl.style.color = '#EF4444'; // red-500
+                    modalComparisonTextEl.style.color = '#EF4444';
                 } else {
                     modalComparisonTextEl.textContent = '전날과 공부 시간이 같아요.';
-                    modalComparisonTextEl.style.color = '#9CA3AF'; // gray-400
+                    modalComparisonTextEl.style.color = '#9CA3AF';
                 }
                 modalComparisonTextEl.classList.remove('hidden');
             } else {
-                modalComparisonTextEl.classList.add('hidden'); // 오늘 날짜에는 숨김
+                modalComparisonTextEl.classList.add('hidden');
             }
 
-            // 3. 세션 데이터 (기존과 동일)
+            // 3. 세션 데이터
             const sessionsQuery = query(
                 collection(db, "study_sessions"),
                 where("userId", "==", userId),
@@ -918,7 +1168,7 @@
             const snapshot = await getDocs(sessionsQuery);
             const sessions = snapshot.docs.map(d => d.data());
 
-            // 4. 데이터 가공 (기존과 동일)
+            // 4. 데이터 가공
             const subjectData = {}; 
             sessions.forEach(session => {
                 const subject = session.subjectName;
@@ -944,9 +1194,7 @@
                     hoverOffset: 4
                 }]
             };
-
             if (studyPieChart) studyPieChart.destroy();
-            
             studyPieChart = new Chart(pieChartCanvas, {
                 type: 'pie', 
                 data: chartData,
@@ -954,10 +1202,7 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: { color: 'white', boxWidth: 20 }
-                        }
+                        legend: { position: 'bottom', labels: { color: 'white', boxWidth: 20 } }
                     }
                 }
             });
@@ -989,17 +1234,318 @@
         }
 
         // -----------------------------------------------------------------
-        // 9. 이벤트 리스너 바인딩 (DOM 로드 후)
+        // 9. (추가) 그룹 탭 로직
+        // -----------------------------------------------------------------
+        
+        function loadGroupsAndInvites() {
+            if (groupListener) groupListener();
+            if (invitationListener) invitationListener();
+
+            // A. 내 그룹 목록
+            const groupsQuery = query(collection(db, "groups"), where("members", "array-contains", userId));
+            groupListener = onSnapshot(groupsQuery, (snapshot) => {
+                if (snapshot.empty) {
+                    groupListContainer.innerHTML = '<p class="text-gray-400 text-center">참여 중인 그룹이 없습니다.</p>';
+                    return;
+                }
+                groupListContainer.innerHTML = '';
+                snapshot.forEach(doc => {
+                    const group = doc.data();
+                    const groupDiv = document.createElement('div');
+                    groupDiv.className = 'p-4 bg-gray-800 rounded-lg flex justify-between items-center';
+                    groupDiv.innerHTML = `
+                        <div>
+                            <span class="font-semibold text-lg">${group.name}</span>
+                            <span class="text-sm text-gray-400 ml-2">멤버 ${group.members.length}명</span>
+                        </div>
+                        <button class="view-group-btn text-blue-400 text-sm" data-group-id="${doc.id}">보기</button>
+                    `;
+                    groupListContainer.appendChild(groupDiv);
+                    
+                    groupDiv.querySelector('.view-group-btn').addEventListener('click', () => {
+                        showGroupDetail(doc.id, group);
+                    });
+                });
+            });
+
+            // B. 나에게 온 초대
+            const invitesQuery = query(collection(db, "invitations"), where("toUserId", "==", userId), where("status", "==", "pending"));
+            invitationListener = onSnapshot(invitesQuery, (snapshot) => {
+                if (snapshot.empty) {
+                    invitationList.innerHTML = '<p class="text-gray-400 text-center">받은 초대가 없습니다.</p>';
+                    return;
+                }
+                invitationList.innerHTML = '';
+                snapshot.forEach(doc => {
+                    const invite = doc.data();
+                    const inviteDiv = document.createElement('div');
+                    inviteDiv.className = 'p-4 bg-gray-800 rounded-lg flex justify-between items-center';
+                    inviteDiv.innerHTML = `
+                        <div>
+                            <span class="font-semibold">${invite.groupName}</span>
+                            <span class="text-sm text-gray-400"> (from: ${invite.fromUserNickname})</span>
+                        </div>
+                        <div class="space-x-2">
+                            <button class="accept-invite-btn bg-green-600 px-3 py-1 rounded-md text-sm" data-invite-id="${doc.id}" data-group-id="${invite.groupId}">수락</button>
+                            <button class="decline-invite-btn bg-red-600 px-3 py-1 rounded-md text-sm" data-invite-id="${doc.id}">거절</button>
+                        </div>
+                    `;
+                    invitationList.appendChild(inviteDiv);
+                });
+            });
+        }
+        
+        async function handleAddGroup() {
+            const groupName = prompt("새 그룹 이름을 입력하세요:");
+            if (groupName && groupName.trim() !== "") {
+                try {
+                    await addDoc(collection(db, "groups"), {
+                        name: groupName.trim(),
+                        creatorId: userId,
+                        creatorNickname: currentNickname,
+                        members: [userId],
+                        memberInfo: {
+                            [userId]: currentNickname
+                        },
+                        createdAt: Timestamp.now()
+                    });
+                } catch (e) { console.error("그룹 생성 실패:", e); }
+            }
+        }
+        
+        function showGroupDetail(groupId, group) {
+            groupListView.classList.add('hidden');
+            groupDetailView.classList.remove('hidden');
+            groupDetailName.textContent = group.name;
+            
+            // 그룹장인지 확인
+            if (group.creatorId === userId) {
+                groupAdminPanel.classList.remove('hidden');
+            } else {
+                groupAdminPanel.classList.add('hidden');
+            }
+            
+            // 멤버 목록 렌더링
+            groupMemberList.innerHTML = '';
+            group.members.forEach(memberId => {
+                const nickname = group.memberInfo[memberId] || '...';
+                const memberDiv = document.createElement('div');
+                memberDiv.className = 'p-3 bg-gray-700 rounded-md flex justify-between items-center';
+                memberDiv.innerHTML = `<span>${nickname}</span>`;
+                
+                if (group.creatorId === userId && memberId !== userId) {
+                    const kickBtn = document.createElement('button');
+                    kickBtn.className = 'text-red-500 text-xs';
+                    kickBtn.textContent = '추방';
+                    kickBtn.onclick = () => handleKickMember(groupId, memberId);
+                    memberDiv.appendChild(kickBtn);
+                }
+                groupMemberList.appendChild(memberDiv);
+            });
+        }
+        
+        async function handleInviteMember(groupId) {
+            const nickname = inviteMemberNameInput.value.trim();
+            if (!nickname) return;
+            
+            // 1. 닉네임으로 유저 찾기
+            const q = query(collection(db, "users"), where("nickname", "==", nickname));
+            const userSnap = await getDocs(q);
+            
+            if (userSnap.empty) {
+                inviteStatus.textContent = "해당 닉네임의 유저를 찾을 수 없습니다.";
+                return;
+            }
+            
+            const targetUser = userSnap.docs[0].data();
+            const targetUserId = targetUser.uid;
+            
+            if (targetUserId === userId) {
+                inviteStatus.textContent = "자기 자신을 초대할 수 없습니다.";
+                return;
+            }
+            
+            // 2. 초대장 생성
+            try {
+                await addDoc(collection(db, "invitations"), {
+                    groupId: groupId,
+                    groupName: groupDetailName.textContent,
+                    fromUserId: userId,
+                    fromUserNickname: currentNickname,
+                    toUserId: targetUserId,
+                    toUserNickname: targetUser.nickname,
+                    status: "pending",
+                    createdAt: Timestamp.now()
+                });
+                inviteStatus.textContent = `${nickname}님을 초대했습니다.`;
+                inviteMemberNameInput.value = '';
+            } catch(e) {
+                console.error("초대 실패:", e);
+                inviteStatus.textContent = "초대에 실패했습니다.";
+            }
+        }
+
+        // -----------------------------------------------------------------
+        // 10. (추가) 달력 탭 로직
+        // -----------------------------------------------------------------
+        
+        async function renderCalendar(date) {
+            currentMonthYear.textContent = `${date.getFullYear()}년 ${date.getMonth() + 1}월`;
+            calendarGrid.innerHTML = ''; // 비우기
+            
+            const year = date.getFullYear();
+            const month = date.getMonth(); // 0-11
+            
+            const firstDayOfMonth = new Date(year, month, 1);
+            const lastDayOfMonth = new Date(year, month + 1, 0);
+            
+            const startDayOfWeek = firstDayOfMonth.getDay(); // 0(일) - 6(토)
+            const totalDays = lastDayOfMonth.getDate(); // 30, 31 등
+            
+            // A. 데이터 가져오기 (이번 달 + 저번 달 마지막 날)
+            const monthStartDateStr = `${year}-${(month + 1).toString().padStart(2, '0')}-01`;
+            const monthEndDateStr = `${year}-${(month + 1).toString().padStart(2, '0')}-${totalDays.toString().padStart(2, '0')}`;
+            const prevMonthLastDate = new Date(year, month, 0);
+            const prevMonthLastDateStr = getYYYYMMDD(prevMonthLastDate);
+
+            const data = await getMonthlyStudyData(monthStartDateStr, monthEndDateStr, prevMonthLastDateStr);
+
+            // B. 빈 칸 채우기 (저번 달)
+            for (let i = 0; i < startDayOfWeek; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'calendar-cell other-month';
+                calendarGrid.appendChild(cell);
+            }
+            
+            // C. 날짜 채우기 (이번 달)
+            for (let day = 1; day <= totalDays; day++) {
+                const cell = document.createElement('div');
+                cell.className = 'calendar-cell';
+                
+                const currentDateStr = `${year}-${(month + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+                
+                const todayTime = data[currentDateStr] || 0;
+                
+                // 전날 데이터 (1일인 경우 저번 달 마지막 날 데이터)
+                const yesterdayStr = (day === 1) ? prevMonthLastDateStr : `${year}-${(month + 1).toString().padStart(2, '0')}-${(day - 1).toString().padStart(2, '0')}`;
+                const yesterdayTime = data[yesterdayStr] || 0;
+                
+                const diff = todayTime - yesterdayTime;
+                let diffText = '';
+                let diffColor = 'text-gray-400';
+                
+                if (diff > 0) {
+                    diffText = `(+${formatTimeHM(diff)})`;
+                    diffColor = 'text-green-500';
+                } else if (diff < 0) {
+                    diffText = `(${formatTimeHM(diff)})`;
+                    diffColor = 'text-red-500';
+                }
+
+                cell.innerHTML = `
+                    <div class="day-number">${day}</div>
+                    <div>
+                        <div class="day-time">${todayTime > 0 ? formatTimeHM(todayTime) : ''}</div>
+                        <div class="day-diff ${diffColor}">${diffText}</div>
+                    </div>
+                `;
+                calendarGrid.appendChild(cell);
+            }
+        }
+        
+        async function getMonthlyStudyData(startDate, endDate, prevDate) {
+            const cacheKey = `${startDate}-${endDate}`;
+            if (calendarDataCache[cacheKey]) return calendarDataCache[cacheKey];
+            
+            const data = {};
+            const datesToFetch = [prevDate];
+            const [year, month] = startDate.split('-').map(Number);
+            const daysInMonth = new Date(year, month, 0).getDate();
+            for(let i=1; i<=daysInMonth; i++) {
+                datesToFetch.push(`${year}-${month.toString().padStart(2, '0')}-${i.toString().padStart(2, '0')}`);
+            }
+
+            // Firestore 'in' 쿼리는 최대 30개 아이템
+            // 31일 + 1일(전날) = 32개. 두 번에 나눠서 쿼리
+            const q1 = query(collection(db, "users", userId, "total_daily_study"), where('date', 'in', datesToFetch.slice(0, 30)));
+            const q2 = query(collection(db, "users", userId, "total_daily_study"), where('date', 'in', datesToFetch.slice(30)));
+            
+            const [snap1, snap2] = await Promise.all([getDocs(q1), getDocs(q2)]);
+            
+            snap1.forEach(doc => data[doc.id] = doc.data().totalSeconds || 0);
+            snap2.forEach(doc => data[doc.id] = doc.data().totalSeconds || 0);
+
+            calendarDataCache[cacheKey] = data; // 캐시 저장
+            return data;
+        }
+
+        // -----------------------------------------------------------------
+        // 11. (추가) MY 탭 로직
+        // -----------------------------------------------------------------
+        
+        async function loadMyPage() {
+            const userRef = doc(db, "users", userId);
+            const userDoc = await getDoc(userRef);
+            if (userDoc.exists()) {
+                currentNickname = userDoc.data().nickname || '';
+                nicknameInput.value = currentNickname;
+            }
+        }
+        
+        async function saveNickname() {
+            const newNickname = nicknameInput.value.trim();
+            nicknameStatus.textContent = '저장 중...';
+            
+            // 1. 유효성 검사
+            if (newNickname.length < 2 || newNickname.length > 15) {
+                nicknameStatus.textContent = '닉네임은 2자 이상 15자 이하로 설정해주세요.';
+                nicknameStatus.style.color = 'red';
+                return;
+            }
+            
+            // 2. 비속어 검사
+            if (profanityList.some(word => newNickname.includes(word))) {
+                nicknameStatus.textContent = '해당 닉네임으로 설정 할 수 없습니다.';
+                nicknameStatus.style.color = 'red';
+                return;
+            }
+            
+            // 3. 중복 검사
+            const q = query(collection(db, "users"), where("nickname", "==", newNickname));
+            const snap = await getDocs(q);
+            
+            if (!snap.empty && snap.docs[0].id !== userId) {
+                nicknameStatus.textContent = '해당 닉네임으로 설정 할 수 없습니다.';
+                nicknameStatus.style.color = 'red';
+                return;
+            }
+            
+            // 4. 저장
+            try {
+                await setDoc(doc(db, "users", userId), { nickname: newNickname }, { merge: true });
+                currentNickname = newNickname;
+                nicknameStatus.textContent = '닉네임이 저장되었습니다.';
+                nicknameStatus.style.color = 'green';
+                userDisplayNameBtn.textContent = `${currentNickname}님`;
+            } catch (e) {
+                console.error("닉네임 저장 실패:", e);
+                nicknameStatus.textContent = '저장에 실패했습니다. 다시 시도해주세요.';
+                nicknameStatus.style.color = 'red';
+            }
+        }
+
+        // -----------------------------------------------------------------
+        // 12. 이벤트 리스너 바인딩 (DOM 로드 후)
         // -----------------------------------------------------------------
         
         window.addEventListener('DOMContentLoaded', () => {
             loginBtn.addEventListener('click', signInWithGoogle);
             observeAuthState(); 
 
+            // 홈 탭
             startStudyBtn.addEventListener('click', () => {
                 if (currentSubject) startStudy();
             });
-            
             timelineScrollContainer.addEventListener('click', (e) => {
                 if (e.target.closest('button')) return; 
                 const { todayString } = getKSTTodayRange();
@@ -1007,17 +1553,17 @@
                 loadDailyStats(todayString);
                 timelineModal.classList.remove('hidden');
             });
+            timelineContainer.addEventListener('scroll', () => timelineHourLabels.scrollTop = timelineContainer.scrollTop);
+            timelineHourLabels.addEventListener('wheel', (e) => { e.preventDefault(); timelineContainer.scrollTop += e.deltaY; });
+            
+            // (추가) 홈 탭 로그아웃
+            userDisplayNameBtn.addEventListener('click', () => logoutBtnHome.classList.toggle('hidden'));
+            logoutBtnHome.addEventListener('click', handleLogout);
 
-            timelineContainer.addEventListener('scroll', () => {
-                timelineHourLabels.scrollTop = timelineContainer.scrollTop;
-            });
-            timelineHourLabels.addEventListener('wheel', (e) => {
-                e.preventDefault();
-                timelineContainer.scrollTop += e.deltaY;
-            });
-
+            // 공부 화면
             stopStudyBtn.addEventListener('click', stopStudy);
 
+            // 휴식 모달
             document.querySelectorAll('.rest-reason-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const reason = btn.dataset.reason;
@@ -1025,15 +1571,78 @@
                     logRestAndStartStudy(reason);
                 });
             });
+            // (추가) 휴식 모달 닫기
+            closeRestModalBtn.addEventListener('click', () => {
+                restModal.classList.add('hidden');
+                studyStartTime = null; // 새 공부 시작 취소
+            });
 
-            closeTimelineModal.addEventListener('click', () => {
-                timelineModal.classList.add('hidden');
+            // 통계 모달
+            closeTimelineModal.addEventListener('click', () => timelineModal.classList.add('hidden'));
+            timelineDatePicker.addEventListener('change', (e) => loadDailyStats(e.target.value));
+
+            // (추가) 하단 탭
+            document.getElementById('nav-home').addEventListener('click', () => showTab('home'));
+            document.getElementById('nav-group').addEventListener('click', () => showTab('group'));
+            document.getElementById('nav-calendar').addEventListener('click', () => showTab('calendar'));
+            document.getElementById('nav-my').addEventListener('click', () => showTab('my'));
+
+            // (추가) 달력 탭
+            prevMonthBtn.addEventListener('click', () => {
+                currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
+                renderCalendar(currentCalendarDate);
+            });
+            nextMonthBtn.addEventListener('click', () => {
+                currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
+                renderCalendar(currentCalendarDate);
+            });
+
+            // (추가) MY 탭
+            saveNicknameBtn.addEventListener('click', saveNickname);
+            logoutBtnMy.addEventListener('click', handleLogout);
+            
+            // (추가) 그룹 탭
+            addGroupBtn.addEventListener('click', handleAddGroup);
+            backToGroupListBtn.addEventListener('click', () => {
+                groupDetailView.classList.add('hidden');
+                groupListView.classList.remove('hidden');
+            });
+            inviteMemberBtn.addEventListener('click', () => {
+                // 현재 열린 그룹의 ID를 찾아야 함
+                const currentGroupId = inviteMemberBtn.dataset.currentGroupId; 
+                if (currentGroupId) handleInviteMember(currentGroupId);
             });
             
-            timelineDatePicker.addEventListener('change', (e) => {
-                loadDailyStats(e.target.value);
+            // (추가) 그룹 초대 수락/거절 (이벤트 위임)
+            invitationList.addEventListener('click', async (e) => {
+                const inviteId = e.target.dataset.inviteId;
+                if (!inviteId) return;
+                
+                const inviteRef = doc(db, "invitations", inviteId);
+                
+                if (e.target.classList.contains('accept-invite-btn')) {
+                    const groupId = e.target.dataset.groupId;
+                    const groupRef = doc(db, "groups", groupId);
+                    try {
+                        const batch = writeBatch(db);
+                        // 1. 그룹에 멤버 추가
+                        batch.update(groupRef, {
+                            members: arrayUnion(userId),
+                            [`memberInfo.${userId}`]: currentNickname
+                        });
+                        // 2. 초대장 상태 변경
+                        batch.update(inviteRef, { status: "accepted" });
+                        await batch.commit();
+                    } catch (e) { console.error("초대 수락 실패:", e); }
+                    
+                } else if (e.target.classList.contains('decline-invite-btn')) {
+                    try {
+                        await setDoc(inviteRef, { status: "declined" }, { merge: true });
+                    } catch (e) { console.error("초대 거절 실패:", e); }
+                }
             });
 
+            // 1분마다 현재 시간 선 업데이트
             setInterval(updateCurrentTimeLine, 60 * 1000);
         });
 
