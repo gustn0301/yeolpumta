@@ -756,7 +756,7 @@
                 renderTodayTimeline(snapshot.docs.map(d => d.data()));
             });
             
-            // C. (수정) 실시간 공부 인원 (30초 타임아웃 적용)
+            // C. (수정) 실시간 공부 인원 (2초 타임아웃 적용)
             const liveQuery = query(collection(db, "live_status"), where("status", "==", "studying"));
             studyingCountListener = onSnapshot(liveQuery, (snapshot) => {
                 const now = Timestamp.now();
@@ -765,7 +765,7 @@
                     const data = doc.data();
                     if (data.lastUpdated) {
                         const secondsSinceUpdate = now.seconds - data.lastUpdated.seconds;
-                        if (secondsSinceUpdate <= 30) { // 30초 이내에 업데이트된 경우만
+                        if (secondsSinceUpdate <= 2) { // (수정) 2초 이내에 업데이트된 경우만
                             count++;
                         }
                     }
@@ -1020,7 +1020,7 @@
                 const sessionSeconds = Math.floor((now.getTime() - studyStartTime.getTime()) / 1000);
                 const newTotalSeconds = sessionStartTotalSeconds + sessionSeconds;
                 updateLiveStatus(newTotalSeconds); 
-            }, 5000);
+            }, 1000); // (수정) 5초에서 1초로 변경
         }
 
         async function updateLiveStatus(totalSeconds) {
