@@ -61,8 +61,8 @@
 
         /* (수정) 달력 셀 스타일 */
         .calendar-cell {
-            height: 64px; /* 80px에서 64px로 추가 수정 */
-            padding: 4px;
+            height: 52px; /* 64px에서 52px로 추가 수정 */
+            padding: 2px; /* 4px에서 2px로 */
             background-color: #374151; /* gray-700 */
             border-radius: 4px;
             overflow: hidden;
@@ -75,15 +75,16 @@
             opacity: 0.5;
         }
         .calendar-cell .day-number {
-            font-weight: 600;
+            font-weight: 500; /* 600에서 500으로 */
             text-align: left;
+            font-size: 0.9rem; /* 폰트 크기 약간 조정 */
         }
         .calendar-cell .day-time {
-            font-size: 0.75rem; /* 0.8rem에서 0.75rem로 */
+            font-size: 0.7rem; /* 0.75rem에서 0.7rem로 */
             text-align: right;
         }
         .calendar-cell .day-diff {
-            font-size: 0.65rem; /* 0.7rem에서 0.65rem로 */
+            font-size: 0.6rem; /* 0.65rem에서 0.6rem로 */
             text-align: right;
         }
     </style>
@@ -157,8 +158,8 @@
                 </div>
             </div>
 
-            <!-- 그룹 탭 페이지 -->
-            <div id="group-page" class="page-div hidden p-4 md:p-8 overflow-y-auto max-w-2xl mx-auto w-full">
+            <!-- 그룹 탭 페이지 (수정: overflow-y-auto 제거) -->
+            <div id="group-page" class="page-div hidden p-4 md:p-8 max-w-2xl mx-auto w-full">
                 <div id="group-list-view">
                     <div class="flex justify-between items-center mb-6">
                         <h2 class="text-3xl font-bold">그룹</h2>
@@ -220,14 +221,14 @@
                         <div class="py-2">금</div>
                         <div class="py-2">토</div>
                     </div>
-                    <div id="calendar-grid" class="grid grid-cols-7 gap-2">
+                    <div id="calendar-grid" class="grid grid-cols-7 gap-1 md:gap-2"> <!-- (수정) gap-2에서 gap-1 md:gap-2로 -->
                         <!-- JS로 동적 생성 -->
                     </div>
                 </div>
             </div>
 
-            <!-- MY 탭 페이지 (수정) -->
-            <div id="my-page" class="page-div hidden p-4 md:p-8 overflow-y-auto max-w-md mx-auto">
+            <!-- MY 탭 페이지 (수정: overflow-y-auto 제거) -->
+            <div id="my-page" class="page-div hidden p-4 md:p-8 max-w-md mx-auto">
                 <h2 class="text-3xl font-bold mb-6">MY</h2>
                 
                 <div class="mb-6 p-4 bg-gray-800 rounded-lg">
