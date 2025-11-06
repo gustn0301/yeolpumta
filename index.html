@@ -123,7 +123,6 @@
         <div class="flex justify-between items-start mb-6"> 
             <div class="text-left">
                 <span id="current-subject-label" class="text-xl font-semibold"></span>
-                <!-- (수정) 이 타이머가 이제 '총 시간'을 표시합니다. -->
                 <h1 id="my-study-timer" class="text-5xl md:text-7xl font-bold tracking-tighter">00:00:00</h1>
             </div>
             
@@ -134,7 +133,6 @@
                 </button>
                 <div class="text-right">
                     <span class="text-gray-400 text-sm">오늘 총 공부 시간</span>
-                    <!-- (수정) 이 타이머도 '총 시간'을 실시간 표시합니다. -->
                     <h2 id="total-today-study-time-in-study" class="text-xl font-bold">00:00:00</h2>
                 </div>
             </div>
@@ -250,8 +248,10 @@
         
         let currentTotalStudySeconds = 0; // 총 공부 시간 (초)
         
-        // (추가) 실시간 상태 업데이트용
         let liveStatusUpdateInterval = null; 
+        
+        // (추가) 친구들 실시간 타이머 저장 객체
+        let friendsTimers = {};
 
         // 기본 과목
         const defaultSubjects = {
@@ -423,15 +423,28 @@
             setupStudyListeners(); // 총 시간 리스너 포함
         }
         
+        /**
+         * (추가) 친구 타이머 정리
+         */
+        function cleanupFriendsTimers() {
+            for (const uid in friendsTimers) {
+                clearInterval(friendsTimers[uid]);
+            }
+            friendsTimers = {};
+        }
+
         function cleanupListeners() {
             if (friendsListener) friendsListener();
             if (todayTimelineListener) todayTimelineListener();
             if (totalTodayStudyListener) totalTodayStudyListener();
-            if (liveStatusUpdateInterval) clearInterval(liveStatusUpdateInterval); // (추가)
+            if (liveStatusUpdateInterval) clearInterval(liveStatusUpdateInterval);
+            
+            cleanupFriendsTimers(); // (추가) 친구 타이머 정리
+            
             friendsListener = null;
             todayTimelineListener = null;
             totalTodayStudyListener = null;
-            liveStatusUpdateInterval = null; // (추가)
+            liveStatusUpdateInterval = null; 
         }
 
 
@@ -606,7 +619,7 @@
                 showStudyScreen();
                 runMyStudyTimer(); // 총 시간 타이머 시작
                 
-                // 3. (추가) live_status 즉시 업데이트
+                // 3. live_status 즉시 업데이트
                 await updateLiveStatus(currentTotalStudySeconds);
 
             } catch (error) {
@@ -626,7 +639,7 @@
             lastStudyEndTime = studyEndTime; 
             const studyDurationSeconds = Math.floor((studyEndTime.getTime() - studyStartTime.getTime()) / 1000);
 
-            // 1. (수정) 모든 인터벌 중지
+            // 1. 모든 인터벌 중지
             if (studyTimerInterval) clearInterval(studyTimerInterval);
             if (liveStatusUpdateInterval) clearInterval(liveStatusUpdateInterval);
             studyTimerInterval = null;
@@ -658,7 +671,7 @@
                     userId: userId
                 }, { merge: true });
                 
-                // 4. (추가) live_status를 'offline'으로 업데이트
+                // 4. live_status를 'offline'으로 업데이트
                 const liveRef = doc(db, "live_status", userId);
                 await setDoc(liveRef, {
                     status: "offline",
@@ -677,11 +690,11 @@
         }
 
         /**
-         * (수정) 내 공부 타이머 (총 시간 + 세션 시간)
+         * 내 공부 타이머 (총 시간 + 세션 시간)
          */
         function runMyStudyTimer() {
             if (studyTimerInterval) clearInterval(studyTimerInterval);
-            if (liveStatusUpdateInterval) clearInterval(liveStatusUpdateInterval); // (추가)
+            if (liveStatusUpdateInterval) clearInterval(liveStatusUpdateInterval); 
 
             const sessionStartTotalSeconds = currentTotalStudySeconds;
 
@@ -698,19 +711,18 @@
                 }
             }, 1000);
 
-            // (추가) 5초마다 Firestore live_status 업데이트
+            // 5초마다 Firestore live_status 업데이트
             liveStatusUpdateInterval = setInterval(() => {
                 if (!studyStartTime) return;
                 const now = new Date();
                 const sessionSeconds = Math.floor((now.getTime() - studyStartTime.getTime()) / 1000);
                 const newTotalSeconds = sessionStartTotalSeconds + sessionSeconds;
-                // 비동기로 DB 업데이트 (실패해도 타이머는 계속 감)
                 updateLiveStatus(newTotalSeconds); 
             }, 5000); // 5초
         }
 
         /**
-         * (추가) 내 실시간 상태를 Firestore에 업데이트 (5초마다)
+         * 내 실시간 상태를 Firestore에 업데이트 (5초마다)
          * @param {number} totalSeconds - 현재 총 공부 시간(초)
          */
         async function updateLiveStatus(totalSeconds) {
@@ -719,7 +731,7 @@
             try {
                 await setDoc(liveRef, {
                     displayName: currentUser.displayName,
-                    subjectName: currentSubject, // (추가)
+                    subjectName: currentSubject, 
                     status: "studying",
                     subjectColor: subjectColors[currentSubject],
                     liveTotalSeconds: totalSeconds,
@@ -737,24 +749,25 @@
         function setupStudyListeners() {
             if (friendsListener || totalTodayStudyListener) return; 
 
-            // A. (수정) 친구 현황 (live_status 컬렉션)
-            // 'live_status' 컬렉션 전체를 실시간으로 구독
+            // A. 친구 현황 (live_status 컬렉션)
             const q = query(collection(db, "live_status"));
             friendsListener = onSnapshot(q, (snapshot) => {
                 const friends = [];
                 const now = Timestamp.now();
                 snapshot.forEach(doc => {
-                    if (doc.id !== userId) { // 내가 아닌 유저만
+                    if (doc.id !== userId) { 
                         const data = doc.data();
                         
-                        // (추가) 30초 이상 업데이트 없으면 오프라인 간주
+                        // (수정) doc.id를 uid로 저장
+                        data.uid = doc.id; 
+
                         if (data.lastUpdated) {
                             const secondsSinceUpdate = now.seconds - data.lastUpdated.seconds;
                             if (secondsSinceUpdate > 30) {
                                 data.status = "offline";
                             }
                         } else {
-                            data.status = "offline"; // lastUpdated 필드가 없으면 오프라인
+                            data.status = "offline"; 
                         }
                         
                         friends.push(data);
@@ -775,7 +788,6 @@
                 currentTotalStudySeconds = totalSeconds;
                 totalTodayStudyTimeEl.textContent = formatTime(totalSeconds);
                 
-                // studyTimerInterval이 돌고 있지 않을 때(즉, 공부 중이 아닐 때)만 DB 시간으로 설정
                 if (!studyTimerInterval && totalTodayStudyTimeInStudyEl) { 
                     totalTodayStudyTimeInStudyEl.textContent = formatTime(totalSeconds);
                 }
@@ -783,35 +795,57 @@
         }
 
         /**
-         * (수정) 친구 공부 현황 그리드를 렌더링합니다. (총 시간 + 오프라인 상태)
-         * @param {Array} friends - live_status 데이터 배열
+         * (수정) 친구 공부 현황 그리드를 렌더링합니다. (총 시간 + 오프라인 상태 + 실시간 타이머)
+         * @param {Array} friends - live_status 데이터 배열 (uid 포함)
          */
         function renderFriendsGrid(friends) {
-            // (수정) liveTotalSeconds (순공 시간) 기준으로 정렬
+            // 1. 기존 타이머 모두 정리
+            cleanupFriendsTimers();
+            
+            // 2. 순공 시간 기준으로 정렬
             friends.sort((a, b) => (b.liveTotalSeconds || 0) - (a.liveTotalSeconds || 0));
             
             friendsStudyGrid.innerHTML = ''; 
             
-            friends.slice(0, 40).forEach(friend => {
-                // (수정) DB에서 직접 liveTotalSeconds를 가져옴
+            // 3. (수정) .slice(0, 40) 제거 -> 모든 사용자 표시
+            friends.forEach(friend => {
                 const durationSeconds = friend.liveTotalSeconds || 0;
                 const isStudying = friend.status === 'studying';
                 const subjectColor = friend.subjectColor || '#FFFFFF';
                 
                 const friendDiv = document.createElement('div');
                 friendDiv.className = 'bg-gray-800 p-3 rounded-lg shadow-md text-center border-2';
+                friendDiv.style.borderColor = isStudying ? subjectColor : '#4B5563'; 
                 
-                // (수정) 상태에 따라 테두리 색 변경 (회색 또는 과목색)
-                friendDiv.style.borderColor = isStudying ? subjectColor : '#4B5563'; // 아닐 땐 gray-600
-                
+                // (수정) 타이머 엘리먼트에 고유 ID 부여
                 friendDiv.innerHTML = `
                     <div class="text-sm font-semibold truncate" style="color: ${isStudying ? subjectColor : '#9CA3AF'}">
                         ${isStudying ? (friend.subjectName || '공부 중') : '오프라인'}
                     </div>
                     <div class="text-xs text-gray-400 truncate mb-1">${friend.displayName}</div>
-                    <div class="text-lg font-bold">${formatTime(durationSeconds)}</div>
+                    <div id="friend-time-${friend.uid}" class="text-lg font-bold">${formatTime(durationSeconds)}</div>
                 `;
                 friendsStudyGrid.appendChild(friendDiv);
+
+                // 4. (추가) 공부 중인 친구만 실시간 타이머 시작
+                if (isStudying) {
+                    const startSeconds = durationSeconds;
+                    // lastUpdated 기준으로 타이머 시작
+                    const startTime = friend.lastUpdated ? friend.lastUpdated.toDate().getTime() : Date.now(); 
+                    
+                    friendsTimers[friend.uid] = setInterval(() => {
+                        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                        const currentTotal = startSeconds + elapsed;
+                        const timerEl = document.getElementById(`friend-time-${friend.uid}`);
+                        if (timerEl) {
+                            timerEl.textContent = formatTime(currentTotal);
+                        } else {
+                            // DOM에서 사라지면 타이머 정리
+                            clearInterval(friendsTimers[friend.uid]);
+                            delete friendsTimers[friend.uid];
+                        }
+                    }, 1000);
+                }
             });
         }
         
