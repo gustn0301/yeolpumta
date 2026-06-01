@@ -1,948 +1,1697 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>대건고 열품타</title>
-    
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Google Fonts (Noto Sans KR) -->
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>대건 열품타</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f14;
+    --bg2: #16161f;
+    --bg3: #1e1e2a;
+    --card: #1a1a25;
+    --card2: #22222f;
+    --border: #2a2a3a;
+    --text: #f0f0f8;
+    --text2: #9090b0;
+    --text3: #5a5a7a;
+    --accent: #c8a84b;
+    --accent2: #e8c870;
+    --korean: #f4a0a0;
+    --math: #f4e0a0;
+    --social: #a0d4a0;
+    --science: #a0c4f4;
+    --english: #d4a0f4;
+    --korean-bg: rgba(244,160,160,0.15);
+    --math-bg: rgba(244,224,160,0.15);
+    --social-bg: rgba(160,212,160,0.15);
+    --science-bg: rgba(160,196,244,0.15);
+    --english-bg: rgba(212,160,244,0.15);
+    --radius: 14px;
+    --radius-sm: 8px;
+    --shadow: 0 4px 24px rgba(0,0,0,0.4);
+  }
 
-    <!-- Favicon (Orange Flame/Clock) -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔥</text></svg>">
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
-    <style>
-        body {
-            font-family: 'Noto Sans KR', sans-serif;
-            background-color: #f8f9fa;
-            -webkit-user-select: none; /* Mobile app feel */
-            user-select: none;
-        }
-        
-        /* Custom Scrollbar for Timeline */
-        .timeline-scroll::-webkit-scrollbar {
-            width: 4px;
-        }
-        .timeline-scroll::-webkit-scrollbar-thumb {
-            background-color: #cbd5e1;
-            border-radius: 4px;
-        }
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow: hidden;
+    user-select: none;
+  }
 
-        /* Pastel Colors for Subjects */
-        .bg-subject-korean { background-color: #fca5a5; } /* Red-200ish */
-        .bg-subject-math { background-color: #fde047; } /* Yellow-200ish */
-        .bg-subject-social { background-color: #86efac; } /* Green-200ish */
-        .bg-subject-science { background-color: #93c5fd; } /* Blue-200ish */
-        .bg-subject-english { background-color: #d8b4fe; } /* Purple-200ish */
+  /* ─── SCREENS ─── */
+  .screen { display: none; width: 100vw; height: 100vh; }
+  .screen.active { display: flex; }
 
-        .text-subject-korean { color: #dc2626; }
-        .text-subject-math { color: #ca8a04; }
-        .text-subject-social { color: #16a34a; }
-        .text-subject-science { color: #2563eb; }
-        .text-subject-english { color: #9333ea; }
+  /* ─── SPLASH ─── */
+  #splash {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(ellipse at center, #1a1a2e 0%, #0f0f14 70%);
+  }
+  .splash-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px;
+    letter-spacing: 3px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 8px;
+  }
+  .splash-sub {
+    font-size: 13px;
+    color: var(--text2);
+    letter-spacing: 4px;
+    margin-bottom: 60px;
+  }
+  .splash-spinner {
+    width: 36px; height: 36px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* App container to simulate mobile view on desktop if needed, otherwise full */
-        #app-container {
-            max-width: 600px;
-            margin: 0 auto;
-            min-height: 100vh;
-            background-color: white;
-            box-shadow: 0 0 15px rgba(0,0,0,0.05);
-            position: relative;
-            overflow: hidden;
-        }
+  /* ─── NICKNAME SETUP ─── */
+  #nicknameSetup {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(ellipse at 50% 30%, #1a1a2e 0%, #0f0f14 70%);
+    padding: 24px;
+  }
+  .nick-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 36px 28px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: var(--shadow);
+  }
+  .nick-title {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    text-align: center;
+  }
+  .nick-desc {
+    font-size: 13px;
+    color: var(--text2);
+    text-align: center;
+    margin-bottom: 28px;
+    line-height: 1.6;
+  }
+  .nick-input {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 16px;
+    padding: 14px 16px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .nick-input:focus { border-color: var(--accent); }
+  .nick-error {
+    font-size: 12px;
+    color: #f47070;
+    margin-top: 8px;
+    min-height: 18px;
+  }
+  .nick-btn {
+    width: 100%;
+    margin-top: 20px;
+    padding: 15px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none;
+    border-radius: var(--radius-sm);
+    color: #0f0f14;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+  }
+  .nick-btn:hover { opacity: 0.9; }
+  .nick-btn:active { transform: scale(0.98); }
 
-        .screen {
-            display: none;
-            height: 100vh;
-            width: 100%;
-            flex-direction: column;
-            position: absolute;
-            top: 0;
-            left: 0;
-            background: white;
-            z-index: 10;
-        }
+  /* ─── MAIN APP ─── */
+  #app {
+    flex-direction: column;
+    position: relative;
+  }
 
-        .screen.active {
-            display: flex;
-        }
+  /* ─── TAB PAGES ─── */
+  .tab-page {
+    display: none;
+    flex: 1;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .tab-page.active { display: flex; }
 
-        /* Bottom Navigation */
-        .bottom-nav {
-            height: 60px;
-            border-top: 1px solid #e2e8f0;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            background: white;
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            z-index: 50;
-        }
-        
-        .nav-item {
-            color: #94a3b8;
-            font-size: 0.8rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            cursor: pointer;
-        }
-        
-        .nav-item.active {
-            color: #f97316; /* Orange-500 */
-        }
+  /* ─── BOTTOM NAV ─── */
+  .bottom-nav {
+    display: flex;
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+    height: 64px;
+    flex-shrink: 0;
+    z-index: 100;
+  }
+  .nav-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text3);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    transition: color 0.2s;
+  }
+  .nav-btn.active { color: var(--accent); }
+  .nav-btn svg { width: 22px; height: 22px; }
 
-        /* Modal Overlay */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.5);
-            z-index: 100;
-            justify-content: center;
-            align-items: center;
-        }
-        .modal-overlay.active { display: flex; }
+  /* ─── HOME TAB ─── */
+  #homeTab {
+    overflow: hidden;
+  }
+  .home-grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto 1fr auto;
+    gap: 10px;
+    padding: 12px;
+    overflow: hidden;
+  }
+  /* Row 1: dday + profile */
+  .dday-card {
+    grid-column: 1; grid-row: 1;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .dday-card:hover { border-color: var(--accent); }
+  .dday-label { font-size: 10px; color: var(--text2); margin-bottom: 3px; letter-spacing: 1px; text-transform: uppercase; }
+  .dday-name { font-size: 13px; font-weight: 600; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .dday-count { font-family: 'Bebas Neue', sans-serif; font-size: 32px; color: var(--accent2); line-height: 1; }
 
-        /* Timeline Marker */
-        .current-time-line {
-            position: absolute;
-            left: 0;
-            right: 0;
-            border-top: 2px solid #ef4444;
-            z-index: 20;
-            pointer-events: none;
-        }
-        .current-time-line::before {
-            content: '';
-            position: absolute;
-            left: -5px;
-            top: -5px;
-            width: 8px;
-            height: 8px;
-            background: #ef4444;
-            border-radius: 50%;
-        }
-    </style>
+  .profile-card {
+    grid-column: 2; grid-row: 1;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: border-color 0.2s;
+  }
+  .profile-card:hover { border-color: var(--accent); }
+  .profile-avatar {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 700;
+    color: #0f0f14;
+    flex-shrink: 0;
+  }
+  .profile-info { overflow: hidden; }
+  .profile-nick { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .profile-sub { font-size: 10px; color: var(--text2); }
+
+  /* Row 2: timetable + subject */
+  .timetable-card {
+    grid-column: 1; grid-row: 2;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    position: relative;
+  }
+  .tt-header {
+    padding: 8px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text2);
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .tt-scroll {
+    overflow-y: auto;
+    height: calc(100% - 34px);
+    position: relative;
+    scrollbar-width: none;
+  }
+  .tt-scroll::-webkit-scrollbar { display: none; }
+  .tt-body {
+    position: relative;
+    min-height: 100%;
+  }
+  .tt-slot {
+    display: flex;
+    align-items: stretch;
+    border-bottom: 1px solid var(--border);
+    min-height: 28px;
+  }
+  .tt-time {
+    font-size: 9px;
+    color: var(--text3);
+    width: 32px;
+    padding: 6px 4px 6px 8px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: flex-start;
+    padding-top: 5px;
+  }
+  .tt-bar-area {
+    flex: 1;
+    position: relative;
+    border-left: 1px solid var(--border);
+  }
+  .tt-block {
+    position: absolute;
+    left: 0; right: 0;
+    border-radius: 3px;
+    opacity: 0.85;
+    display: flex;
+    align-items: center;
+    padding-left: 5px;
+    font-size: 9px;
+    font-weight: 600;
+    overflow: hidden;
+    z-index: 1;
+  }
+  .tt-current-line {
+    position: absolute;
+    left: 0; right: 0;
+    height: 2px;
+    background: #ff4444;
+    z-index: 10;
+    pointer-events: none;
+  }
+  .tt-current-line::before {
+    content: '';
+    position: absolute;
+    left: -3px;
+    top: -4px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #ff4444;
+  }
+
+  .subject-card {
+    grid-column: 2; grid-row: 2;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .subj-header {
+    padding: 8px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text2);
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border);
+  }
+  .subj-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    scrollbar-width: none;
+  }
+  .subj-list::-webkit-scrollbar { display: none; }
+  .subj-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    border: 1.5px solid transparent;
+    background: var(--bg3);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: 'Noto Sans KR', sans-serif;
+  }
+  .subj-btn:hover { background: var(--card2); }
+  .subj-dot {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .subj-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    flex: 1;
+  }
+  .subj-btn.selected { border-color: currentColor; }
+  .subj-btn.selected .subj-name { font-weight: 700; }
+
+  /* Row 3: start button */
+  .start-btn-wrap {
+    grid-column: 1 / -1; grid-row: 3;
+    padding: 4px 0 2px;
+  }
+  .start-btn {
+    width: 100%;
+    padding: 16px;
+    border: none;
+    border-radius: var(--radius);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.25s;
+    background: var(--bg3);
+    color: var(--text3);
+    border: 1.5px solid var(--border);
+  }
+  .start-btn.ready {
+    color: #0f0f14;
+    border-color: transparent;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    transform: translateY(0);
+  }
+  .start-btn.ready:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,0.4); }
+  .start-btn.ready:active { transform: translateY(0); }
+
+  /* ─── STUDY SCREEN ─── */
+  #studyScreen {
+    flex-direction: column;
+    background: var(--bg);
+    z-index: 200;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+  }
+  .study-header {
+    padding: 14px 20px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .study-subject-badge {
+    font-size: 15px;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 20px;
+  }
+  .study-timer {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px;
+    letter-spacing: 3px;
+    text-align: center;
+    padding: 8px 0 4px;
+    flex-shrink: 0;
+  }
+  .study-stop-btn {
+    margin: 0 20px;
+    padding: 14px;
+    border: none;
+    border-radius: var(--radius);
+    background: #2a2a3a;
+    color: var(--text2);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+  .study-stop-btn:hover { background: #3a2a2a; color: #f47070; }
+  .study-rank-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text2);
+    letter-spacing: 1px;
+    padding: 10px 20px 6px;
+    flex-shrink: 0;
+  }
+  .study-rank-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 16px 16px;
+    scrollbar-width: none;
+  }
+  .study-rank-list::-webkit-scrollbar { display: none; }
+  .rank-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: var(--radius);
+    margin-bottom: 6px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    transition: all 0.3s;
+  }
+  .rank-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    color: var(--text3);
+    width: 28px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+  .rank-item.rank-1 .rank-num { color: #ffd700; }
+  .rank-item.rank-2 .rank-num { color: #c0c0c0; }
+  .rank-item.rank-3 .rank-num { color: #cd7f32; }
+  .rank-avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    color: #0f0f14;
+    flex-shrink: 0;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+  }
+  .rank-info { flex: 1; overflow: hidden; }
+  .rank-name { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .rank-time { font-size: 11px; color: var(--text2); margin-top: 2px; }
+  .rank-me-badge {
+    font-size: 9px;
+    padding: 2px 6px;
+    border-radius: 10px;
+    background: var(--accent);
+    color: #0f0f14;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .rank-subject-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* ─── GROUP TAB ─── */
+  #groupTab { overflow: hidden; }
+  .tab-header {
+    padding: 16px 16px 10px;
+    font-size: 18px;
+    font-weight: 700;
+    flex-shrink: 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .group-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    scrollbar-width: none;
+  }
+  .group-list::-webkit-scrollbar { display: none; }
+  .group-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .group-item:hover { border-color: var(--accent); }
+  .group-icon {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    background: var(--bg3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .group-info { flex: 1; overflow: hidden; }
+  .group-name { font-size: 14px; font-weight: 600; }
+  .group-meta { font-size: 11px; color: var(--text2); margin-top: 2px; }
+  .fab {
+    position: absolute;
+    bottom: 76px;
+    right: 16px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none;
+    border-radius: 14px;
+    color: #0f0f14;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 12px 18px;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(200,168,75,0.4);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+    z-index: 50;
+  }
+  .fab:hover { transform: translateY(-2px); }
+  .fab-invite {
+    bottom: 140px;
+    background: linear-gradient(135deg, #70a0f4, #90c0ff);
+    box-shadow: 0 4px 20px rgba(112,160,244,0.4);
+  }
+  .empty-state {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--text3);
+    gap: 12px;
+    padding: 40px;
+  }
+  .empty-icon { font-size: 48px; }
+  .empty-text { font-size: 14px; text-align: center; line-height: 1.6; }
+
+  /* ─── SETTINGS TAB ─── */
+  #settingsTab { overflow: hidden; }
+  .settings-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px 16px;
+    scrollbar-width: none;
+  }
+  .settings-list::-webkit-scrollbar { display: none; }
+  .settings-section {
+    margin-bottom: 20px;
+  }
+  .settings-section-title {
+    font-size: 11px;
+    color: var(--text3);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 0 4px;
+    margin-bottom: 8px;
+  }
+  .settings-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 6px;
+    transition: border-color 0.2s;
+  }
+  .settings-item:hover { border-color: var(--accent); }
+  .settings-item-icon { font-size: 20px; width: 28px; text-align: center; }
+  .settings-item-label { flex: 1; font-size: 14px; font-weight: 500; }
+  .settings-item-value { font-size: 12px; color: var(--text2); }
+  .settings-item-arrow { color: var(--text3); font-size: 12px; }
+
+  /* ─── MODALS ─── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 300;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-sheet {
+    background: var(--bg2);
+    border-radius: 20px 20px 0 0;
+    width: 100%;
+    max-width: 480px;
+    padding: 20px 20px 36px;
+    border: 1px solid var(--border);
+    border-bottom: none;
+    animation: slideUp 0.25s ease;
+  }
+  @keyframes slideUp {
+    from { transform: translateY(100%); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  .modal-handle {
+    width: 36px; height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    margin: 0 auto 20px;
+  }
+  .modal-title { font-size: 17px; font-weight: 700; margin-bottom: 16px; }
+  .modal-input {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 16px;
+    padding: 13px 15px;
+    outline: none;
+    transition: border-color 0.2s;
+    margin-bottom: 6px;
+  }
+  .modal-input:focus { border-color: var(--accent); }
+  .modal-error { font-size: 12px; color: #f47070; min-height: 18px; margin-bottom: 14px; }
+  .modal-btn {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #0f0f14;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    margin-bottom: 8px;
+  }
+  .modal-btn:hover { opacity: 0.9; }
+  .modal-btn-cancel {
+    background: var(--bg3);
+    color: var(--text2);
+    border: 1px solid var(--border);
+    margin-bottom: 0;
+  }
+  .modal-date-input {
+    type: date;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 16px;
+    padding: 13px 15px;
+    width: 100%;
+    outline: none;
+    margin-bottom: 6px;
+    transition: border-color 0.2s;
+  }
+  .modal-date-input:focus { border-color: var(--accent); }
+
+  /* ─── GROUP DETAIL ─── */
+  #groupDetail {
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .group-detail-header {
+    padding: 14px 16px 10px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .back-btn {
+    background: none;
+    border: none;
+    color: var(--text2);
+    cursor: pointer;
+    font-size: 20px;
+    padding: 4px;
+  }
+  .group-member-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px 16px;
+    scrollbar-width: none;
+  }
+  .group-member-list::-webkit-scrollbar { display: none; }
+  .member-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 6px;
+  }
+  .member-avatar {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    font-weight: 700;
+    color: #0f0f14;
+  }
+  .member-name { font-size: 14px; font-weight: 500; }
+  .member-role { font-size: 10px; color: var(--text2); margin-top: 2px; }
+  .member-time { font-size: 12px; color: var(--text2); margin-left: auto; }
+
+  /* ─── TOAST ─── */
+  .toast {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-80px);
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 500;
+    z-index: 1000;
+    transition: transform 0.3s ease;
+    white-space: nowrap;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    opacity: 0.5;
+  }
+
+  .scrollbar-hide { scrollbar-width: none; }
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+</style>
 </head>
 <body>
 
-<div id="app-container">
-    
-    <!-- 1. LOGIN SCREEN -->
-    <div id="login-screen" class="screen active justify-center items-center bg-gray-900">
-        <div class="text-center text-white">
-            <div class="text-6xl mb-4">🔥</div>
-            <h1 class="text-3xl font-bold mb-2">대건 열품타</h1>
-            <p class="text-gray-400 mb-10">대건고등학교 학생들의 열정 타이머</p>
-            <button id="google-login-btn" class="bg-white text-gray-700 px-6 py-3 rounded-full shadow-lg font-medium hover:bg-gray-100 transition flex items-center gap-2 mx-auto">
-                <i class="fab fa-google text-red-500"></i> 구글 계정으로 시작하기
-            </button>
+<!-- SPLASH -->
+<div class="screen active" id="splash">
+  <div class="splash-logo">대건 열품타</div>
+  <div class="splash-sub">DAEJEON DAEGON HIGH SCHOOL</div>
+  <div class="splash-spinner"></div>
+</div>
+
+<!-- NICKNAME SETUP -->
+<div class="screen" id="nicknameSetup">
+  <div class="nick-card">
+    <div class="nick-title">📚 닉네임 설정</div>
+    <div class="nick-desc">대건 열품타에 처음 오셨군요!<br>사용할 닉네임을 설정해주세요.</div>
+    <input class="nick-input" id="nickInput" type="text" placeholder="닉네임을 입력하세요" maxlength="12">
+    <div class="nick-error" id="nickError"></div>
+    <button class="nick-btn" id="nickConfirmBtn" onclick="confirmNickname()">시작하기</button>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div class="screen" id="app">
+
+  <!-- HOME TAB -->
+  <div class="tab-page active" id="homeTab">
+    <div class="home-grid">
+      <!-- D-day -->
+      <div class="dday-card" onclick="openDdayModal()">
+        <div class="dday-label">📅 D-DAY</div>
+        <div class="dday-name" id="ddayName">수능 D-day</div>
+        <div class="dday-count" id="ddayCount">D-365</div>
+      </div>
+
+      <!-- Profile -->
+      <div class="profile-card" onclick="openProfileModal()">
+        <div class="profile-avatar" id="profileAvatar">A</div>
+        <div class="profile-info">
+          <div class="profile-nick" id="profileNick">닉네임</div>
+          <div class="profile-sub">프로필 수정 ›</div>
         </div>
-    </div>
+      </div>
 
-    <!-- 2. NICKNAME SETUP SCREEN -->
-    <div id="nickname-screen" class="screen justify-center items-center p-6">
-        <div class="w-full max-w-sm">
-            <h2 class="text-2xl font-bold mb-6 text-gray-800">닉네임 설정</h2>
-            <p class="text-sm text-gray-500 mb-2">대건 열품타에서 사용할 닉네임을 정해주세요.</p>
-            <input type="text" id="nickname-input" placeholder="닉네임 (2~8자)" class="w-full border-b-2 border-orange-500 p-2 outline-none text-lg mb-4">
-            <p id="nickname-error" class="text-red-500 text-sm mb-6 hidden"></p>
-            <button id="nickname-confirm-btn" class="w-full bg-orange-500 text-white py-3 rounded-lg font-bold shadow hover:bg-orange-600">
-                시작하기
-            </button>
+      <!-- Timetable -->
+      <div class="timetable-card">
+        <div class="tt-header">
+          <span>📋 오늘의 시간표</span>
+          <span id="ttCurrentTime" style="font-size:10px;color:var(--accent)"></span>
         </div>
-    </div>
-
-    <!-- 3. MAIN APP (Home, Group, Settings) -->
-    <div id="main-app" class="screen">
-        
-        <!-- HEADER (Shared) -->
-        <header class="h-14 flex items-center justify-between px-4 bg-white border-b z-20">
-            <div class="font-bold text-lg text-orange-500">대건 열품타</div>
-            <div class="flex items-center gap-3">
-                <button id="dday-display" class="text-xs bg-orange-100 text-orange-600 px-2 py-1 rounded-md font-bold cursor-pointer">
-                    D-Day 설정
-                </button>
-                <div id="header-profile" class="w-8 h-8 rounded-full bg-gray-200 overflow-hidden cursor-pointer border border-gray-300">
-                    <img id="header-profile-img" src="" class="w-full h-full object-cover">
-                </div>
-            </div>
-        </header>
-
-        <!-- VIEW: HOME -->
-        <div id="view-home" class="flex-1 flex overflow-hidden relative">
-            
-            <!-- LEFT: TIMELINE -->
-            <div class="w-1/3 h-full border-r bg-gray-50 overflow-y-auto timeline-scroll relative" id="timeline-container">
-                <!-- Grid Lines (00~23) -->
-                <div id="timeline-grid" class="relative h-[1440px]"> 
-                    <!-- Generated by JS -->
-                </div>
-                <!-- Red Line for Current Time -->
-                <div id="current-time-indicator" class="current-time-line hidden"></div>
-                <!-- Study Blocks -->
-                <div id="timeline-blocks"></div>
-            </div>
-
-            <!-- RIGHT: CONTROLS -->
-            <div class="w-2/3 h-full flex flex-col p-4 bg-white relative">
-                
-                <!-- D-Day (Large) -->
-                <div id="dday-large" class="mb-6 cursor-pointer">
-                    <h3 class="text-gray-400 text-xs">목표일까지</h3>
-                    <div class="flex items-baseline gap-2">
-                        <span id="dday-count" class="text-3xl font-bold text-gray-800">D-?</span>
-                        <span id="dday-title" class="text-sm text-gray-600">터치하여 설정</span>
-                    </div>
-                </div>
-
-                <!-- Subjects Grid -->
-                <div class="flex-1">
-                    <h3 class="text-gray-400 text-xs mb-2">과목 선택</h3>
-                    <div class="grid grid-cols-2 gap-3" id="subject-grid">
-                        <button class="subject-btn p-3 rounded-xl border border-gray-100 shadow-sm flex flex-col items-center justify-center gap-1 transition-all" data-subject="korean" data-color="bg-subject-korean">
-                            <i class="fas fa-book text-gray-400"></i>
-                            <span class="text-sm font-medium">국어</span>
-                        </button>
-                        <button class="subject-btn p-3 rounded-xl border border-gray-100 shadow-sm flex flex-col items-center justify-center gap-1 transition-all" data-subject="math" data-color="bg-subject-math">
-                            <i class="fas fa-calculator text-gray-400"></i>
-                            <span class="text-sm font-medium">수학</span>
-                        </button>
-                        <button class="subject-btn p-3 rounded-xl border border-gray-100 shadow-sm flex flex-col items-center justify-center gap-1 transition-all" data-subject="social" data-color="bg-subject-social">
-                            <i class="fas fa-globe-asia text-gray-400"></i>
-                            <span class="text-sm font-medium">사회</span>
-                        </button>
-                        <button class="subject-btn p-3 rounded-xl border border-gray-100 shadow-sm flex flex-col items-center justify-center gap-1 transition-all" data-subject="science" data-color="bg-subject-science">
-                            <i class="fas fa-flask text-gray-400"></i>
-                            <span class="text-sm font-medium">과학</span>
-                        </button>
-                        <button class="subject-btn col-span-2 p-3 rounded-xl border border-gray-100 shadow-sm flex flex-col items-center justify-center gap-1 transition-all" data-subject="english" data-color="bg-subject-english">
-                            <i class="fas fa-font text-gray-400"></i>
-                            <span class="text-sm font-medium">영어</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Start Button (Bottom Center of Right Panel) -->
-                <div class="mt-auto pt-4 flex justify-center">
-                    <button id="start-study-btn" class="w-full py-4 rounded-2xl bg-gray-200 text-gray-400 font-bold shadow-md transition-all duration-300" disabled>
-                        과목을 선택하세요
-                    </button>
-                </div>
-            </div>
+        <div class="tt-scroll" id="ttScroll">
+          <div class="tt-body" id="ttBody"></div>
         </div>
+      </div>
 
-        <!-- VIEW: GROUP -->
-        <div id="view-group" class="flex-1 flex flex-col hidden overflow-hidden bg-gray-50">
-            <div class="p-4 overflow-y-auto flex-1" id="group-list-container">
-                <!-- Group List Items -->
-            </div>
-            <!-- FAB -->
-            <button id="create-group-fab" class="absolute bottom-20 right-4 bg-orange-500 text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-2xl hover:bg-orange-600 z-40">
-                <i class="fas fa-plus"></i>
-            </button>
-        </div>
+      <!-- Subject Select -->
+      <div class="subject-card">
+        <div class="subj-header">✏️ 공부할 과목</div>
+        <div class="subj-list" id="subjectList"></div>
+      </div>
 
-        <!-- VIEW: SETTINGS -->
-        <div id="view-settings" class="flex-1 flex flex-col hidden p-4 bg-gray-50">
-            <div class="bg-white rounded-xl shadow-sm p-4 mb-4 flex items-center gap-4">
-                <img id="settings-profile-img" src="" class="w-16 h-16 rounded-full object-cover">
-                <div>
-                    <h2 id="settings-nickname" class="text-xl font-bold">닉네임</h2>
-                    <p id="settings-email" class="text-xs text-gray-500">email@example.com</p>
-                </div>
-            </div>
-            
-            <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-                <button id="settings-change-nick" class="w-full text-left p-4 border-b hover:bg-gray-50 flex justify-between">
-                    <span>닉네임 변경</span>
-                    <i class="fas fa-chevron-right text-gray-300"></i>
-                </button>
-                <button id="settings-logout" class="w-full text-left p-4 text-red-500 hover:bg-gray-50">
-                    로그아웃
-                </button>
-            </div>
-            <div class="mt-8 text-center text-xs text-gray-400">
-                대건고등학교 열품타 v1.0
-            </div>
-        </div>
-
-        <!-- Bottom Navigation -->
-        <nav class="bottom-nav">
-            <div class="nav-item active" data-target="view-home">
-                <i class="fas fa-home text-xl mb-1"></i>
-                <span>홈</span>
-            </div>
-            <div class="nav-item" data-target="view-group">
-                <i class="fas fa-users text-xl mb-1"></i>
-                <span>그룹</span>
-            </div>
-            <div class="nav-item" data-target="view-settings">
-                <i class="fas fa-cog text-xl mb-1"></i>
-                <span>설정</span>
-            </div>
-        </nav>
-    </div>
-
-    <!-- 4. STUDY SCREEN -->
-    <div id="study-screen" class="screen bg-gray-900 text-white justify-center items-center z-50">
-        <div class="absolute top-6 left-6 text-sm text-gray-400">
-            <i class="fas fa-wifi text-green-500 mr-2"></i> LIVE
-        </div>
-        
-        <div class="text-center mb-10">
-            <div id="study-subject-badge" class="inline-block px-3 py-1 rounded-full text-sm font-bold mb-4 bg-gray-700 text-gray-300">
-                과목
-            </div>
-            <div id="study-timer" class="text-6xl font-mono font-bold tracking-wider mb-2">00:00:00</div>
-            <p class="text-gray-400 text-sm">현재 공부 중</p>
-        </div>
-
-        <button id="stop-study-btn" class="mb-12 w-20 h-20 rounded-full bg-red-500 text-white text-2xl shadow-lg shadow-red-500/50 flex items-center justify-center hover:scale-105 transition">
-            <i class="fas fa-stop"></i>
+      <!-- Start Button -->
+      <div class="start-btn-wrap">
+        <button class="start-btn" id="startBtn" onclick="startStudy()" disabled>
+          과목을 선택하세요
         </button>
-
-        <!-- Live Ranking -->
-        <div class="w-full max-w-md px-6">
-            <h3 class="text-xs text-gray-500 mb-2 uppercase tracking-wide">실시간 대건고 랭킹</h3>
-            <div id="ranking-list" class="space-y-3">
-                <!-- Ranking Items Generated by JS -->
-            </div>
-        </div>
+      </div>
     </div>
+  </div>
 
+  <!-- GROUP TAB -->
+  <div class="tab-page" id="groupTab">
+    <div class="tab-header">👥 그룹</div>
+    <div class="group-list" id="groupList">
+      <div class="empty-state" id="groupEmpty">
+        <div class="empty-icon">🏫</div>
+        <div class="empty-text">아직 그룹이 없어요.<br>그룹을 만들거나 참여해보세요!</div>
+      </div>
+    </div>
+    <button class="fab" onclick="openCreateGroupModal()">＋ 그룹 추가</button>
+  </div>
+
+  <!-- GROUP DETAIL -->
+  <div class="tab-page" id="groupDetail">
+    <div class="group-detail-header">
+      <button class="back-btn" onclick="closeGroupDetail()">←</button>
+      <div>
+        <div style="font-size:16px;font-weight:700;" id="groupDetailName"></div>
+        <div style="font-size:11px;color:var(--text2);" id="groupDetailMeta"></div>
+      </div>
+    </div>
+    <div class="group-member-list" id="groupMemberList"></div>
+    <button class="fab fab-invite" id="inviteFab" style="display:none;" onclick="openInviteModal()">
+      👤 친구 초대
+    </button>
+  </div>
+
+  <!-- SETTINGS TAB -->
+  <div class="tab-page" id="settingsTab">
+    <div class="tab-header">⚙️ 설정</div>
+    <div class="settings-list">
+      <div class="settings-section">
+        <div class="settings-section-title">계정</div>
+        <div class="settings-item" onclick="openProfileModal()">
+          <div class="settings-item-icon">👤</div>
+          <div class="settings-item-label">닉네임 변경</div>
+          <div class="settings-item-value" id="settingsNick"></div>
+          <div class="settings-item-arrow">›</div>
+        </div>
+      </div>
+      <div class="settings-section">
+        <div class="settings-section-title">학교</div>
+        <div class="settings-item">
+          <div class="settings-item-icon">🏫</div>
+          <div class="settings-item-label">학교</div>
+          <div class="settings-item-value">대건고등학교</div>
+        </div>
+      </div>
+      <div class="settings-section">
+        <div class="settings-section-title">정보</div>
+        <div class="settings-item">
+          <div class="settings-item-icon">📱</div>
+          <div class="settings-item-label">버전</div>
+          <div class="settings-item-value">1.0.0</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <button class="nav-btn active" id="nav-home" onclick="switchTab('home')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+        <polyline points="9,22 9,12 15,12 15,22"/>
+      </svg>
+      홈
+    </button>
+    <button class="nav-btn" id="nav-group" onclick="switchTab('group')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/>
+        <path d="M16 3.13a4 4 0 010 7.75"/><path d="M21 21v-2a4 4 0 00-3-3.87"/>
+      </svg>
+      그룹
+    </button>
+    <button class="nav-btn" id="nav-settings" onclick="switchTab('settings')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06A1.65 1.65 0 0015 19.4a1.65 1.65 0 00-1.65 1.5V21a2 2 0 01-4 0v-.09A1.65 1.65 0 008 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 003.85 15a1.65 1.65 0 00-1.5-1.65H2a2 2 0 010-4h.09A1.65 1.65 0 004.6 8a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 3.85a1.65 1.65 0 001.65-1.5V2a2 2 0 014 0v.09A1.65 1.65 0 0016 4.6a1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0020.15 9a1.65 1.65 0 001.5 1.65H22a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1.35z"/>
+      </svg>
+      설정
+    </button>
+  </div>
+</div>
+
+<!-- STUDY SCREEN -->
+<div class="screen" id="studyScreen">
+  <div class="study-header">
+    <div class="study-subject-badge" id="studySubjectBadge">국어</div>
+    <div style="font-size:12px;color:var(--text2);" id="studyDate"></div>
+  </div>
+  <div class="study-timer" id="studyTimer">00:00:00</div>
+  <button class="study-stop-btn" onclick="stopStudy()">⏹ 공부 종료</button>
+  <div class="study-rank-title">🏆 실시간 공부 랭킹</div>
+  <div class="study-rank-list" id="studyRankList"></div>
 </div>
 
 <!-- MODALS -->
+<!-- D-day Modal -->
+<div class="modal-overlay" id="ddayModal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">📅 D-Day 설정</div>
+    <input class="modal-input" id="ddayNameInput" type="text" placeholder="D-Day 이름 (예: 수능)" maxlength="20">
+    <input class="modal-date-input" id="ddayDateInput" type="date">
+    <div class="modal-error" id="ddayError"></div>
+    <button class="modal-btn" onclick="saveDday()">저장</button>
+    <button class="modal-btn modal-btn-cancel" onclick="closeModal('ddayModal')">취소</button>
+  </div>
+</div>
 
-<!-- D-Day Modal -->
-<div id="modal-dday" class="modal-overlay">
-    <div class="bg-white rounded-xl p-6 w-80 shadow-2xl">
-        <h3 class="text-lg font-bold mb-4">D-Day 설정</h3>
-        <input type="text" id="dday-input-title" placeholder="시험 이름 (예: 기말고사)" class="w-full border p-2 rounded mb-3">
-        <input type="date" id="dday-input-date" class="w-full border p-2 rounded mb-4">
-        <div class="flex gap-2">
-            <button class="flex-1 bg-gray-200 py-2 rounded text-gray-700" onclick="closeModal('modal-dday')">취소</button>
-            <button id="save-dday-btn" class="flex-1 bg-orange-500 py-2 rounded text-white font-bold">저장</button>
-        </div>
-    </div>
+<!-- Profile Modal -->
+<div class="modal-overlay" id="profileModal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">👤 닉네임 변경</div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:14px;">30일에 한 번 변경할 수 있습니다.</div>
+    <input class="modal-input" id="profileNickInput" type="text" placeholder="새 닉네임 입력" maxlength="12">
+    <div class="modal-error" id="profileError"></div>
+    <button class="modal-btn" onclick="saveNickname()">변경하기</button>
+    <button class="modal-btn modal-btn-cancel" onclick="closeModal('profileModal')">취소</button>
+  </div>
 </div>
 
 <!-- Create Group Modal -->
-<div id="modal-create-group" class="modal-overlay">
-    <div class="bg-white rounded-xl p-6 w-80 shadow-2xl">
-        <h3 class="text-lg font-bold mb-4">새 그룹 만들기</h3>
-        <input type="text" id="group-name-input" placeholder="그룹 이름" class="w-full border p-2 rounded mb-4">
-        <div class="flex gap-2">
-            <button class="flex-1 bg-gray-200 py-2 rounded text-gray-700" onclick="closeModal('modal-create-group')">취소</button>
-            <button id="confirm-create-group-btn" class="flex-1 bg-orange-500 py-2 rounded text-white font-bold">생성</button>
-        </div>
-    </div>
+<div class="modal-overlay" id="createGroupModal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">👥 그룹 만들기</div>
+    <input class="modal-input" id="groupNameInput" type="text" placeholder="그룹 이름" maxlength="20"
+      onkeydown="if(event.key==='Enter') createGroup()">
+    <div class="modal-error" id="groupCreateError"></div>
+    <button class="modal-btn" onclick="createGroup()">그룹 생성</button>
+    <button class="modal-btn modal-btn-cancel" onclick="closeModal('createGroupModal')">취소</button>
+  </div>
 </div>
 
-<!-- Invite Friend Modal -->
-<div id="modal-invite" class="modal-overlay">
-    <div class="bg-white rounded-xl p-6 w-80 shadow-2xl">
-        <h3 class="text-lg font-bold mb-2">친구 초대하기</h3>
-        <p class="text-xs text-gray-500 mb-4">친구의 정확한 닉네임을 입력하세요.</p>
-        <div class="flex gap-2 mb-2">
-            <input type="text" id="invite-input-nick" placeholder="친구 닉네임" class="flex-1 border p-2 rounded">
-            <button id="invite-search-btn" class="bg-gray-800 text-white px-3 rounded"><i class="fas fa-search"></i></button>
-        </div>
-        <div id="invite-result" class="text-sm py-2 text-center text-gray-600 min-h-[1.5rem]"></div>
-        <div class="flex gap-2 mt-2">
-            <button class="flex-1 bg-gray-200 py-2 rounded text-gray-700" onclick="closeModal('modal-invite')">닫기</button>
-        </div>
-    </div>
+<!-- Invite Modal -->
+<div class="modal-overlay" id="inviteModal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">👤 친구 초대</div>
+    <input class="modal-input" id="inviteNickInput" type="text" placeholder="초대할 친구의 닉네임">
+    <div class="modal-error" id="inviteError"></div>
+    <button class="modal-btn" onclick="inviteFriend()">초대하기</button>
+    <button class="modal-btn modal-btn-cancel" onclick="closeModal('inviteModal')">취소</button>
+  </div>
 </div>
 
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- FIREBASE + APP SCRIPT -->
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, collection, doc, getDoc, setDoc, updateDoc, onSnapshot, query, where, getDocs, addDoc, arrayUnion, serverTimestamp, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+import {
+  getAuth, signInAnonymously, onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+import {
+  getFirestore, doc, getDoc, setDoc, getDocs,
+  collection, query, where, orderBy, onSnapshot,
+  serverTimestamp, updateDoc, deleteDoc, addDoc, arrayUnion
+} from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
-    // --- CONFIGURATION ---
-    const firebaseConfig = {
-        apiKey: "AIzaSyAi2JnoYTKkaRf9NYbeeA3xkZ5jiT7DB-8",
-        authDomain: "dg-yeolpumta.firebaseapp.com",
-        projectId: "dg-yeolpumta",
-        storageBucket: "dg-yeolpumta.firebasestorage.app",
-        messagingSenderId: "575142322137",
-        appId: "1:575142322137:web:c97d72b7934ff2584d03c8"
-    };
+const firebaseConfig = {
+  apiKey: "AIzaSyAOEr3obGdMpSG0RQzUhWUGou7tn_idcxo",
+  authDomain: "fruitslayer-online.firebaseapp.com",
+  projectId: "fruitslayer-online",
+  storageBucket: "fruitslayer-online.firebasestorage.app",
+  messagingSenderId: "396029026245",
+  appId: "1:396029026245:web:419c020a42bda7e87bf5ac"
+};
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-    // --- STATE ---
-    let currentUser = null;
-    let currentUserData = null;
-    let selectedSubject = null;
-    let timerInterval = null;
-    let studyStartTime = null;
-    let selectedGroupId = null; // For invitation logic
-    
-    // Profanity Filter (Simple List)
-    const badWords = ["바보", "멍청이", "시발", "병신", "개새끼", "쓰레기", "존나", "미친"]; // 예시입니다.
+// ─── STATE ───
+let currentUser = null;
+let userProfile = null;
+let selectedSubject = null;
+let studyStartTime = null;
+let studyTimerInterval = null;
+let studySessionId = null;
+let rankUnsubscribe = null;
+let timetableBlocks = []; // {subject, start(min from 6am), end, color, name}
+let currentGroupId = null;
+let currentGroupData = null;
 
-    // Color Mapping
-    const subjectColors = {
-        'korean': { bg: 'bg-subject-korean', text: 'text-subject-korean', name: '국어', css: '#fca5a5' },
-        'math': { bg: 'bg-subject-math', text: 'text-subject-math', name: '수학', css: '#fde047' },
-        'social': { bg: 'bg-subject-social', text: 'text-subject-social', name: '사회', css: '#86efac' },
-        'science': { bg: 'bg-subject-science', text: 'text-subject-science', name: '과학', css: '#93c5fd' },
-        'english': { bg: 'bg-subject-english', text: 'text-subject-english', name: '영어', css: '#d8b4fe' }
-    };
+const SUBJECTS = [
+  { id: 'korean', name: '국어', color: '#f4a0a0', bg: 'rgba(244,160,160,0.15)' },
+  { id: 'math',   name: '수학', color: '#f4e0a0', bg: 'rgba(244,224,160,0.15)' },
+  { id: 'social', name: '사회', color: '#a0d4a0', bg: 'rgba(160,212,160,0.15)' },
+  { id: 'science',name: '과학', color: '#a0c4f4', bg: 'rgba(160,196,244,0.15)' },
+  { id: 'english',name: '영어', color: '#d4a0f4', bg: 'rgba(212,160,244,0.15)' },
+];
 
-    // --- DOM ELEMENTS ---
-    const screens = {
-        login: document.getElementById('login-screen'),
-        nickname: document.getElementById('nickname-screen'),
-        main: document.getElementById('main-app'),
-        study: document.getElementById('study-screen')
-    };
+const BAD_WORDS = ['욕','씨발','개새','병신','지랄','새끼','ㅅㅂ','ㅂㅅ','fuck','shit','bitch','asshole','damn'];
 
-    // --- AUTHENTICATION ---
-    document.getElementById('google-login-btn').addEventListener('click', async () => {
-        const provider = new GoogleAuthProvider();
-        try {
-            await signInWithPopup(auth, provider);
-        } catch (error) {
-            console.error("Login failed", error);
-            alert("로그인에 실패했습니다.");
-        }
+function hasBadWord(str) {
+  const lower = str.toLowerCase();
+  return BAD_WORDS.some(w => lower.includes(w));
+}
+
+function showToast(msg, duration = 2000) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), duration);
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById(id);
+  if (el) el.classList.add('active');
+}
+
+// ─── AUTH ───
+async function init() {
+  try {
+    await signInAnonymously(auth);
+  } catch(e) {
+    console.error(e);
+    showToast('로그인 오류: ' + e.message);
+  }
+}
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) return;
+  currentUser = user;
+  const ref = doc(db, 'users', user.uid);
+  const snap = await getDoc(ref);
+  if (!snap.exists()) {
+    showScreen('nicknameSetup');
+  } else {
+    userProfile = snap.data();
+    showScreen('app');
+    initApp();
+  }
+});
+
+// ─── NICKNAME SETUP ───
+window.confirmNickname = async function() {
+  const val = document.getElementById('nickInput').value.trim();
+  const errEl = document.getElementById('nickError');
+  errEl.textContent = '';
+
+  if (!val || val.length < 2) { errEl.textContent = '닉네임은 2자 이상이어야 합니다.'; return; }
+  if (val.length > 12) { errEl.textContent = '닉네임은 12자 이하여야 합니다.'; return; }
+  if (hasBadWord(val)) { errEl.textContent = '부적절한 언어가 포함되어 있습니다.'; return; }
+
+  const q = query(collection(db, 'users'), where('nickname', '==', val));
+  const qs = await getDocs(q);
+  if (!qs.empty) { errEl.textContent = '이미 사용 중인 닉네임입니다.'; return; }
+
+  const data = {
+    nickname: val,
+    uid: currentUser.uid,
+    createdAt: serverTimestamp(),
+    lastNicknameChange: null,
+    dday: { name: '수능', date: getDefaultSuneungDate() },
+    todayStudyMs: 0
+  };
+  await setDoc(doc(db, 'users', currentUser.uid), data);
+  userProfile = data;
+  showScreen('app');
+  initApp();
+};
+
+document.getElementById('nickInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') window.confirmNickname();
+});
+
+function getDefaultSuneungDate() {
+  const d = new Date();
+  d.setFullYear(d.getFullYear() + 1);
+  d.setMonth(10); d.setDate(14);
+  return d.toISOString().split('T')[0];
+}
+
+// ─── APP INIT ───
+function initApp() {
+  renderSubjects();
+  renderTimetable();
+  updateDday();
+  updateProfileCard();
+  loadGroups();
+  document.getElementById('settingsNick').textContent = userProfile.nickname || '';
+  setInterval(updateTimetableCurrentLine, 30000);
+  setInterval(updateDday, 60000);
+  setInterval(updateCurrentTimeClock, 1000);
+}
+
+// ─── TABS ───
+window.switchTab = function(tab) {
+  document.querySelectorAll('.tab-page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('nav-' + tab).classList.add('active');
+
+  if (tab === 'group') {
+    if (currentGroupId) {
+      document.getElementById('groupDetail').classList.add('active');
+    } else {
+      document.getElementById('groupTab').classList.add('active');
+    }
+  } else {
+    document.getElementById(tab + 'Tab').classList.add('active');
+  }
+};
+
+// ─── DDAY ───
+function updateDday() {
+  if (!userProfile) return;
+  const dday = userProfile.dday || {};
+  const name = dday.name || '수능';
+  const dateStr = dday.date || getDefaultSuneungDate();
+  const target = new Date(dateStr + 'T00:00:00');
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  const diff = Math.ceil((target - today) / 86400000);
+  document.getElementById('ddayName').textContent = name;
+  document.getElementById('ddayCount').textContent = diff > 0 ? `D-${diff}` : diff === 0 ? 'D-Day' : `D+${Math.abs(diff)}`;
+}
+
+window.openDdayModal = function() {
+  const dday = userProfile?.dday || {};
+  document.getElementById('ddayNameInput').value = dday.name || '';
+  document.getElementById('ddayDateInput').value = dday.date || getDefaultSuneungDate();
+  document.getElementById('ddayError').textContent = '';
+  openModal('ddayModal');
+};
+
+window.saveDday = async function() {
+  const name = document.getElementById('ddayNameInput').value.trim();
+  const date = document.getElementById('ddayDateInput').value;
+  const errEl = document.getElementById('ddayError');
+  if (!name) { errEl.textContent = 'D-Day 이름을 입력하세요.'; return; }
+  if (!date) { errEl.textContent = '날짜를 선택하세요.'; return; }
+  await updateDoc(doc(db, 'users', currentUser.uid), { dday: { name, date } });
+  userProfile.dday = { name, date };
+  updateDday();
+  closeModal('ddayModal');
+  showToast('D-Day가 저장되었습니다!');
+};
+
+// ─── PROFILE ───
+function updateProfileCard() {
+  const nick = userProfile?.nickname || '?';
+  document.getElementById('profileNick').textContent = nick;
+  document.getElementById('profileAvatar').textContent = nick[0] || '?';
+  document.getElementById('settingsNick').textContent = nick;
+}
+
+window.openProfileModal = function() {
+  document.getElementById('profileNickInput').value = '';
+  document.getElementById('profileError').textContent = '';
+  // Check cooldown
+  const last = userProfile?.lastNicknameChange;
+  if (last) {
+    const lastDate = last.toDate ? last.toDate() : new Date(last);
+    const diff = (Date.now() - lastDate.getTime()) / 86400000;
+    if (diff < 30) {
+      const remain = Math.ceil(30 - diff);
+      document.getElementById('profileError').textContent = `닉네임은 ${remain}일 후에 변경할 수 있습니다.`;
+    }
+  }
+  openModal('profileModal');
+};
+
+window.saveNickname = async function() {
+  const val = document.getElementById('profileNickInput').value.trim();
+  const errEl = document.getElementById('profileError');
+
+  const last = userProfile?.lastNicknameChange;
+  if (last) {
+    const lastDate = last.toDate ? last.toDate() : new Date(last);
+    const diff = (Date.now() - lastDate.getTime()) / 86400000;
+    if (diff < 30) {
+      const remain = Math.ceil(30 - diff);
+      errEl.textContent = `닉네임은 ${remain}일 후에 변경할 수 있습니다.`;
+      return;
+    }
+  }
+
+  if (!val || val.length < 2) { errEl.textContent = '닉네임은 2자 이상이어야 합니다.'; return; }
+  if (val.length > 12) { errEl.textContent = '닉네임은 12자 이하여야 합니다.'; return; }
+  if (hasBadWord(val)) { errEl.textContent = '부적절한 언어가 포함되어 있습니다.'; return; }
+
+  const q = query(collection(db, 'users'), where('nickname', '==', val));
+  const qs = await getDocs(q);
+  if (!qs.empty && qs.docs[0].id !== currentUser.uid) {
+    errEl.textContent = '이미 사용 중인 닉네임입니다.'; return;
+  }
+
+  await updateDoc(doc(db, 'users', currentUser.uid), {
+    nickname: val,
+    lastNicknameChange: serverTimestamp()
+  });
+  userProfile.nickname = val;
+  userProfile.lastNicknameChange = new Date();
+  updateProfileCard();
+  closeModal('profileModal');
+  showToast('닉네임이 변경되었습니다!');
+};
+
+// ─── SUBJECTS ───
+function renderSubjects() {
+  const list = document.getElementById('subjectList');
+  list.innerHTML = '';
+  SUBJECTS.forEach(s => {
+    const btn = document.createElement('button');
+    btn.className = 'subj-btn';
+    btn.dataset.id = s.id;
+    btn.style.setProperty('--subj-color', s.color);
+    btn.innerHTML = `
+      <div class="subj-dot" style="background:${s.color}"></div>
+      <span class="subj-name">${s.name}</span>
+    `;
+    btn.onclick = () => selectSubject(s);
+    list.appendChild(btn);
+  });
+}
+
+function selectSubject(s) {
+  selectedSubject = s;
+  document.querySelectorAll('.subj-btn').forEach(b => {
+    b.classList.toggle('selected', b.dataset.id === s.id);
+    if (b.dataset.id === s.id) {
+      b.style.borderColor = s.color;
+      b.style.background = s.bg;
+    } else {
+      b.style.borderColor = 'transparent';
+      b.style.background = 'var(--bg3)';
+    }
+  });
+  const btn = document.getElementById('startBtn');
+  btn.disabled = false;
+  btn.classList.add('ready');
+  btn.style.background = `linear-gradient(135deg, ${s.color}, ${s.color}cc)`;
+  btn.textContent = `${s.name} 공부 시작하기`;
+}
+
+// ─── TIMETABLE ───
+const HOURS = Array.from({length: 19}, (_, i) => i + 6); // 6am ~ 12am
+const HOUR_HEIGHT = 40; // px per hour
+
+function renderTimetable() {
+  const body = document.getElementById('ttBody');
+  body.innerHTML = '';
+  body.style.height = (HOURS.length * HOUR_HEIGHT) + 'px';
+
+  HOURS.forEach((h, i) => {
+    const slot = document.createElement('div');
+    slot.className = 'tt-slot';
+    slot.style.position = 'absolute';
+    slot.style.top = (i * HOUR_HEIGHT) + 'px';
+    slot.style.left = '0'; slot.style.right = '0';
+    slot.style.height = HOUR_HEIGHT + 'px';
+    slot.innerHTML = `
+      <div class="tt-time">${h < 10 ? '0'+h : h}:00</div>
+      <div class="tt-bar-area" data-hour="${h}"></div>
+    `;
+    body.appendChild(slot);
+  });
+
+  renderTimetableBlocks();
+  updateTimetableCurrentLine();
+  scrollTimetableToNow();
+}
+
+function renderTimetableBlocks() {
+  // Remove old blocks
+  document.querySelectorAll('.tt-block').forEach(b => b.remove());
+  document.querySelectorAll('.tt-current-line').forEach(b => b.remove());
+
+  const body = document.getElementById('ttBody');
+  timetableBlocks.forEach(block => {
+    const top = minuteToY(block.start);
+    const height = minuteToY(block.end) - top;
+    if (height < 4) return;
+    const el = document.createElement('div');
+    el.className = 'tt-block';
+    el.style.top = top + 'px';
+    el.style.height = height + 'px';
+    el.style.background = block.color;
+    el.style.color = '#0f0f14';
+    el.textContent = block.name;
+    body.appendChild(el);
+  });
+}
+
+function minuteToY(minuteFrom6am) {
+  return (minuteFrom6am / 60) * HOUR_HEIGHT;
+}
+
+function updateTimetableCurrentLine() {
+  document.querySelectorAll('.tt-current-line').forEach(e => e.remove());
+  const now = new Date();
+  const minFrom6 = (now.getHours() - 6) * 60 + now.getMinutes();
+  if (minFrom6 < 0 || minFrom6 > HOURS.length * 60) return;
+  const y = minuteToY(minFrom6);
+  const line = document.createElement('div');
+  line.className = 'tt-current-line';
+  line.style.top = y + 'px';
+  document.getElementById('ttBody').appendChild(line);
+}
+
+function scrollTimetableToNow() {
+  const now = new Date();
+  const minFrom6 = (now.getHours() - 6) * 60 + now.getMinutes();
+  const y = minuteToY(minFrom6);
+  const scroll = document.getElementById('ttScroll');
+  const offset = Math.max(0, y - scroll.clientHeight / 2);
+  scroll.scrollTop = offset;
+}
+
+function updateCurrentTimeClock() {
+  const now = new Date();
+  const h = now.getHours().toString().padStart(2, '0');
+  const m = now.getMinutes().toString().padStart(2, '0');
+  document.getElementById('ttCurrentTime').textContent = `${h}:${m}`;
+  updateTimetableCurrentLine();
+}
+
+// ─── STUDY ───
+window.startStudy = function() {
+  if (!selectedSubject) return;
+  studyStartTime = Date.now();
+  document.getElementById('studySubjectBadge').textContent = selectedSubject.name;
+  document.getElementById('studySubjectBadge').style.background = selectedSubject.bg;
+  document.getElementById('studySubjectBadge').style.color = selectedSubject.color;
+  document.getElementById('studySubjectBadge').style.border = `1px solid ${selectedSubject.color}44`;
+  const now = new Date();
+  document.getElementById('studyDate').textContent =
+    `${now.getMonth()+1}월 ${now.getDate()}일 ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')} 시작`;
+
+  document.getElementById('studyScreen').classList.add('active');
+
+  studyTimerInterval = setInterval(updateStudyTimer, 1000);
+
+  // Firestore session
+  addDoc(collection(db, 'studySessions'), {
+    uid: currentUser.uid,
+    nickname: userProfile?.nickname || '익명',
+    subject: selectedSubject.id,
+    subjectName: selectedSubject.name,
+    subjectColor: selectedSubject.color,
+    startTime: serverTimestamp(),
+    elapsedMs: 0,
+    active: true
+  }).then(ref => {
+    studySessionId = ref.id;
+    subscribeRanking();
+  });
+};
+
+function updateStudyTimer() {
+  const elapsed = Date.now() - studyStartTime;
+  document.getElementById('studyTimer').textContent = formatMs(elapsed);
+
+  if (studySessionId) {
+    updateDoc(doc(db, 'studySessions', studySessionId), { elapsedMs: elapsed });
+  }
+}
+
+window.stopStudy = async function() {
+  clearInterval(studyTimerInterval);
+  if (rankUnsubscribe) { rankUnsubscribe(); rankUnsubscribe = null; }
+
+  const elapsed = Date.now() - studyStartTime;
+  const startMin = new Date(studyStartTime);
+  const endMin = new Date();
+  const startMinFrom6 = (startMin.getHours() - 6) * 60 + startMin.getMinutes();
+  const endMinFrom6 = (endMin.getHours() - 6) * 60 + endMin.getMinutes();
+
+  // Add to timetable
+  if (startMinFrom6 >= 0 && endMinFrom6 > startMinFrom6) {
+    timetableBlocks.push({
+      start: startMinFrom6,
+      end: endMinFrom6,
+      color: selectedSubject.color,
+      name: selectedSubject.name
     });
+    renderTimetableBlocks();
+    updateTimetableCurrentLine();
+  }
 
-    onAuthStateChanged(auth, async (user) => {
-        if (user) {
-            currentUser = user;
-            await checkUserProfile(user.uid);
-        } else {
-            currentUser = null;
-            currentUserData = null;
-            showScreen('login');
-        }
+  if (studySessionId) {
+    await updateDoc(doc(db, 'studySessions', studySessionId), {
+      elapsedMs: elapsed,
+      active: false,
+      endTime: serverTimestamp()
     });
+  }
 
-    async function checkUserProfile(uid) {
-        const userRef = doc(db, "users", uid);
-        const userSnap = await getDoc(userRef);
+  document.getElementById('studyScreen').classList.remove('active');
+  studySessionId = null;
+  showToast(`공부 완료! ${formatMs(elapsed)} 기록 저장 ✓`);
+};
 
-        if (userSnap.exists()) {
-            currentUserData = userSnap.data();
-            // Check if currently studying (session recovery)
-            if (currentUserData.isStudying) {
-                // Recover session logic could go here, for now just reset
-                await updateDoc(userRef, { isStudying: false });
-            }
-            setupApp();
-            showScreen('main');
-        } else {
-            // New user
-            showScreen('nickname');
-        }
-    }
+function subscribeRanking() {
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  const q = query(
+    collection(db, 'studySessions'),
+    where('active', '==', true),
+    orderBy('elapsedMs', 'desc')
+  );
+  rankUnsubscribe = onSnapshot(q, snap => {
+    renderRanking(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+  });
+}
 
-    // --- NICKNAME LOGIC ---
-    document.getElementById('nickname-confirm-btn').addEventListener('click', handleNicknameSubmit);
-    
-    // Reuse for Profile Change
-    document.getElementById('settings-change-nick').addEventListener('click', () => {
-        // Check 30 day limit
-        const lastUpdate = currentUserData.lastNicknameUpdate ? currentUserData.lastNicknameUpdate.toDate() : new Date(0);
-        const now = new Date();
-        const diffDays = Math.floor((now - lastUpdate) / (1000 * 60 * 60 * 24));
-        
-        if (diffDays < 30) {
-            alert(`닉네임은 30일에 한 번만 변경할 수 있습니다.\n남은 기간: ${30 - diffDays}일`);
-            return;
-        }
-        
-        // Show nickname screen in update mode
-        screens.main.classList.remove('active');
-        screens.nickname.classList.add('active');
-    });
+function renderRanking(sessions) {
+  const list = document.getElementById('studyRankList');
+  list.innerHTML = '';
+  if (!sessions.length) {
+    list.innerHTML = '<div style="text-align:center;color:var(--text3);padding:30px;font-size:13px;">현재 공부 중인 친구가 없어요 😴</div>';
+    return;
+  }
+  sessions.forEach((s, i) => {
+    const isMe = s.uid === currentUser?.uid;
+    const item = document.createElement('div');
+    item.className = `rank-item ${i < 3 ? 'rank-' + (i+1) : ''}`;
+    if (isMe) item.style.borderColor = s.subjectColor || 'var(--accent)';
+    item.innerHTML = `
+      <div class="rank-num">${i+1}</div>
+      <div class="rank-avatar" style="background:linear-gradient(135deg,${s.subjectColor||'var(--accent)'},${s.subjectColor||'var(--accent2)'}88)">${(s.nickname||'?')[0]}</div>
+      <div class="rank-info">
+        <div class="rank-name">${s.nickname || '익명'}</div>
+        <div class="rank-time">${formatMs(s.elapsedMs || 0)}</div>
+      </div>
+      <div class="rank-subject-dot" style="background:${s.subjectColor||'#888'}"></div>
+      ${isMe ? '<div class="rank-me-badge">나</div>' : ''}
+    `;
+    list.appendChild(item);
+  });
+}
 
-    async function handleNicknameSubmit() {
-        const input = document.getElementById('nickname-input');
-        const errorMsg = document.getElementById('nickname-error');
-        const nickname = input.value.trim();
+function formatMs(ms) {
+  const s = Math.floor(ms / 1000);
+  const h = Math.floor(s / 3600).toString().padStart(2,'0');
+  const m = Math.floor((s % 3600) / 60).toString().padStart(2,'0');
+  const sec = (s % 60).toString().padStart(2,'0');
+  return `${h}:${m}:${sec}`;
+}
 
-        errorMsg.classList.add('hidden');
+// ─── GROUPS ───
+let groupsCache = [];
 
-        // Validation
-        if (nickname.length < 2 || nickname.length > 8) {
-            showNickError("2~8글자로 입력해주세요.");
-            return;
-        }
-        if (badWords.some(word => nickname.includes(word))) {
-            showNickError("부적절한 단어가 포함되어 있습니다.");
-            return;
-        }
+async function loadGroups() {
+  if (!currentUser) return;
+  const q = query(collection(db, 'groups'), where('members', 'array-contains', currentUser.uid));
+  onSnapshot(q, snap => {
+    groupsCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderGroups();
+  });
+}
 
-        // Duplication Check
-        const q = query(collection(db, "users"), where("nickname", "==", nickname));
-        const querySnapshot = await getDocs(q);
-        if (!querySnapshot.empty) {
-            showNickError("이미 존재하는 닉네임입니다.");
-            return;
-        }
+function renderGroups() {
+  const list = document.getElementById('groupList');
+  list.innerHTML = '';
+  const empty = document.getElementById('groupEmpty');
 
-        // Save User
-        try {
-            const userData = {
-                nickname: nickname,
-                email: currentUser.email,
-                photoURL: currentUser.photoURL,
-                totalStudyTime: currentUserData ? currentUserData.totalStudyTime : 0, // Keep time if updating
-                lastNicknameUpdate: serverTimestamp(),
-                ddayTitle: currentUserData ? currentUserData.ddayTitle : "시험",
-                ddayDate: currentUserData ? currentUserData.ddayDate : null,
-                isStudying: false
-            };
+  if (!groupsCache.length) {
+    empty.style.display = 'flex';
+    return;
+  }
+  empty.style.display = 'none';
 
-            await setDoc(doc(db, "users", currentUser.uid), userData, { merge: true });
-            
-            currentUserData = { ...currentUserData, ...userData }; // Local update
-            setupApp();
-            showScreen('main');
-            input.value = "";
-        } catch (e) {
-            console.error(e);
-            showNickError("오류가 발생했습니다.");
-        }
-    }
+  groupsCache.forEach(g => {
+    const item = document.createElement('div');
+    item.className = 'group-item';
+    item.onclick = () => openGroupDetail(g);
+    item.innerHTML = `
+      <div class="group-icon">📚</div>
+      <div class="group-info">
+        <div class="group-name">${g.name}</div>
+        <div class="group-meta">${g.memberCount || 1}명 · ${g.ownerNickname || ''}이(가) 만든 그룹</div>
+      </div>
+      <div style="color:var(--text3);font-size:16px;">›</div>
+    `;
+    list.appendChild(item);
+  });
+}
 
-    function showNickError(msg) {
-        const el = document.getElementById('nickname-error');
-        el.innerText = msg;
-        el.classList.remove('hidden');
-    }
+window.openCreateGroupModal = function() {
+  document.getElementById('groupNameInput').value = '';
+  document.getElementById('groupCreateError').textContent = '';
+  openModal('createGroupModal');
+};
 
-    // --- APP UI SETUP ---
-    function setupApp() {
-        // Profile Info
-        document.getElementById('header-profile-img').src = currentUser.photoURL;
-        document.getElementById('settings-profile-img').src = currentUser.photoURL;
-        document.getElementById('settings-nickname').innerText = currentUserData.nickname;
-        document.getElementById('settings-email').innerText = currentUser.email;
+window.createGroup = async function() {
+  const name = document.getElementById('groupNameInput').value.trim();
+  const errEl = document.getElementById('groupCreateError');
+  if (!name) { errEl.textContent = '그룹 이름을 입력하세요.'; return; }
+  if (name.length > 20) { errEl.textContent = '그룹 이름은 20자 이하여야 합니다.'; return; }
 
-        // D-Day
-        renderDDay();
+  await addDoc(collection(db, 'groups'), {
+    name,
+    owner: currentUser.uid,
+    ownerNickname: userProfile?.nickname || '익명',
+    members: [currentUser.uid],
+    memberNicknames: [userProfile?.nickname || '익명'],
+    memberCount: 1,
+    createdAt: serverTimestamp()
+  });
+  closeModal('createGroupModal');
+  showToast(`'${name}' 그룹이 생성되었습니다!`);
+  switchTab('group');
+};
 
-        // Timeline Setup
-        initTimeline();
-        loadStudyLogs();
+function openGroupDetail(g) {
+  currentGroupId = g.id;
+  currentGroupData = g;
+  document.getElementById('groupDetailName').textContent = g.name;
+  document.getElementById('groupDetailMeta').textContent = `${g.memberCount || 1}명`;
 
-        // Listeners
-        setupTabNavigation();
-        loadGroups();
-    }
+  const isOwner = g.owner === currentUser.uid;
+  document.getElementById('inviteFab').style.display = isOwner ? 'flex' : 'none';
 
-    // --- TIMELINE ---
-    function initTimeline() {
-        const grid = document.getElementById('timeline-grid');
-        grid.innerHTML = '';
-        
-        for (let i = 0; i < 24; i++) {
-            const div = document.createElement('div');
-            div.className = "absolute w-full border-t border-gray-200 text-xs text-gray-400 pl-1";
-            div.style.top = `${(i / 24) * 100}%`;
-            div.style.height = `${(1/24) * 100}%`;
-            div.innerText = `${i}:00`;
-            grid.appendChild(div);
-        }
+  renderGroupMembers(g);
 
-        // Red Line Updater
-        updateTimeLine();
-        setInterval(updateTimeLine, 60000);
-    }
+  document.querySelectorAll('.tab-page').forEach(p => p.classList.remove('active'));
+  document.getElementById('groupDetail').classList.add('active');
+}
 
-    function updateTimeLine() {
-        const now = new Date();
-        const minutes = now.getHours() * 60 + now.getMinutes();
-        const percent = (minutes / 1440) * 100;
-        
-        const line = document.getElementById('current-time-indicator');
-        line.style.top = `${percent}%`;
-        line.classList.remove('hidden');
-    }
+function renderGroupMembers(g) {
+  const list = document.getElementById('groupMemberList');
+  list.innerHTML = '';
+  const nicks = g.memberNicknames || [];
+  const uids = g.members || [];
+  nicks.forEach((nick, i) => {
+    const uid = uids[i] || '';
+    const isOwner = uid === g.owner;
+    const isMe = uid === currentUser?.uid;
+    const item = document.createElement('div');
+    item.className = 'member-item';
+    item.innerHTML = `
+      <div class="member-avatar">${nick[0] || '?'}</div>
+      <div>
+        <div class="member-name">${nick}${isMe ? ' (나)' : ''}</div>
+        <div class="member-role">${isOwner ? '👑 방장' : '멤버'}</div>
+      </div>
+    `;
+    list.appendChild(item);
+  });
+}
 
-    function renderStudyBlock(subject, startTime, endTime) {
-        const startMin = startTime.getHours() * 60 + startTime.getMinutes();
-        const endMin = endTime.getHours() * 60 + endTime.getMinutes();
-        const duration = endMin - startMin;
-        
-        if (duration <= 0) return;
+window.closeGroupDetail = function() {
+  currentGroupId = null;
+  currentGroupData = null;
+  document.querySelectorAll('.tab-page').forEach(p => p.classList.remove('active'));
+  document.getElementById('groupTab').classList.add('active');
+};
 
-        const container = document.getElementById('timeline-blocks');
-        const block = document.createElement('div');
-        const colorClass = subjectColors[subject] ? subjectColors[subject].bg : 'bg-gray-300';
-        
-        block.className = `absolute left-8 right-0 ${colorClass} opacity-80 border-l-2 border-white`;
-        block.style.top = `${(startMin / 1440) * 100}%`;
-        block.style.height = `${(duration / 1440) * 100}%`;
-        
-        container.appendChild(block);
-    }
+window.openInviteModal = function() {
+  document.getElementById('inviteNickInput').value = '';
+  document.getElementById('inviteError').textContent = '';
+  openModal('inviteModal');
+};
 
-    async function loadStudyLogs() {
-        // Basic: Fetch logs for today (simplified for demo: fetch last 20 logs)
-        // In real app: query by date range
-        const logsRef = collection(db, "study_logs");
-        const q = query(
-            logsRef, 
-            where("uid", "==", currentUser.uid),
-            orderBy("startTime", "desc"),
-            limit(20)
-        );
+window.inviteFriend = async function() {
+  const nick = document.getElementById('inviteNickInput').value.trim();
+  const errEl = document.getElementById('inviteError');
+  if (!nick) { errEl.textContent = '닉네임을 입력하세요.'; return; }
 
-        const snapshot = await getDocs(q);
-        document.getElementById('timeline-blocks').innerHTML = ''; // Clear
+  const q = query(collection(db, 'users'), where('nickname', '==', nick));
+  const qs = await getDocs(q);
+  if (qs.empty) { errEl.textContent = '해당 닉네임의 유저를 찾을 수 없습니다.'; return; }
 
-        const today = new Date().toDateString();
+  const friendDoc = qs.docs[0];
+  const friendUid = friendDoc.id;
+  const friendData = friendDoc.data();
 
-        snapshot.forEach(doc => {
-            const data = doc.data();
-            const start = data.startTime.toDate();
-            const end = data.endTime.toDate();
-            
-            // Only show today's logs
-            if (start.toDateString() === today) {
-                renderStudyBlock(data.subject, start, end);
-            }
-        });
-    }
+  if (!currentGroupId) { errEl.textContent = '그룹 정보를 찾을 수 없습니다.'; return; }
 
-    // --- SUBJECT SELECTION ---
-    const subjectBtns = document.querySelectorAll('.subject-btn');
-    const startBtn = document.getElementById('start-study-btn');
+  const gData = currentGroupData;
+  if (gData.members?.includes(friendUid)) {
+    errEl.textContent = '이미 그룹에 있는 멤버입니다.'; return;
+  }
 
-    subjectBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            // Reset others
-            subjectBtns.forEach(b => {
-                b.classList.remove('ring-2', 'ring-orange-400', 'bg-opacity-100');
-                b.classList.add('bg-white');
-                const color = b.getAttribute('data-color');
-                b.classList.remove(color);
-            });
+  await updateDoc(doc(db, 'groups', currentGroupId), {
+    members: arrayUnion(friendUid),
+    memberNicknames: arrayUnion(friendData.nickname),
+    memberCount: (gData.memberCount || 1) + 1
+  });
 
-            // Select this one
-            const subject = btn.getAttribute('data-subject');
-            const colorInfo = subjectColors[subject];
-            
-            btn.classList.remove('bg-white');
-            btn.classList.add(colorInfo.bg, 'ring-2', 'ring-orange-400');
-            
-            selectedSubject = subject;
-            
-            // Update Start Button
-            startBtn.disabled = false;
-            startBtn.innerText = `${colorInfo.name} 공부 시작하기`;
-            startBtn.className = `w-full py-4 rounded-2xl font-bold shadow-md transition-all duration-300 text-white ${colorInfo.bg.replace('bg-', 'bg-').replace('200', '500')}`; // Use darker shade for button
-            
-            // Tailwind doesn't have -500 for custom subject classes, hardcoding button colors mapping
-            const btnColorMap = {
-                'korean': 'bg-red-400',
-                'math': 'bg-yellow-400',
-                'social': 'bg-green-400',
-                'science': 'bg-blue-400',
-                'english': 'bg-purple-400'
-            };
-            startBtn.className = `w-full py-4 rounded-2xl font-bold shadow-md transition-all duration-300 text-white ${btnColorMap[subject]} hover:opacity-90`;
-        });
-    });
+  closeModal('inviteModal');
+  showToast(`${nick}님을 그룹에 초대했습니다!`);
 
-    // --- STUDY MODE ---
-    startBtn.addEventListener('click', async () => {
-        if (!selectedSubject) return;
-        
-        studyStartTime = new Date();
-        
-        // Update Firestore status
-        await updateDoc(doc(db, "users", currentUser.uid), {
-            isStudying: true,
-            currentSubject: selectedSubject
-        });
+  // Refresh
+  const snap = await getDoc(doc(db, 'groups', currentGroupId));
+  currentGroupData = { id: currentGroupId, ...snap.data() };
+  document.getElementById('groupDetailMeta').textContent = `${currentGroupData.memberCount || 1}명`;
+  renderGroupMembers(currentGroupData);
+};
 
-        // UI Transition
-        showScreen('study');
-        
-        const subjInfo = subjectColors[selectedSubject];
-        document.getElementById('study-subject-badge').innerText = subjInfo.name;
-        document.getElementById('study-subject-badge').style.color = subjInfo.css;
+// ─── MODAL HELPERS ───
+window.openModal = function(id) {
+  document.getElementById(id).classList.add('open');
+};
+window.closeModal = function(id) {
+  document.getElementById(id).classList.remove('open');
+};
+document.querySelectorAll('.modal-overlay').forEach(el => {
+  el.addEventListener('click', e => {
+    if (e.target === el) el.classList.remove('open');
+  });
+});
 
-        // Timer
-        let seconds = 0;
-        timerInterval = setInterval(() => {
-            seconds++;
-            const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
-            const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
-            const s = (seconds % 60).toString().padStart(2, '0');
-            document.getElementById('study-timer').innerText = `${h}:${m}:${s}`;
-        }, 1000);
-
-        // Start Ranking Listener
-        startRankingListener();
-    });
-
-    document.getElementById('stop-study-btn').addEventListener('click', async () => {
-        clearInterval(timerInterval);
-        const endTime = new Date();
-        const durationSec = Math.floor((endTime - studyStartTime) / 1000); // seconds
-
-        // Stop UI
-        showScreen('main');
-        
-        // Update Firestore
-        // 1. Add Log
-        await addDoc(collection(db, "study_logs"), {
-            uid: currentUser.uid,
-            subject: selectedSubject,
-            startTime: studyStartTime,
-            endTime: endTime,
-            duration: durationSec
-        });
-
-        // 2. Update User Total Time & Status
-        await updateDoc(doc(db, "users", currentUser.uid), {
-            isStudying: false,
-            currentSubject: null,
-            totalStudyTime: (currentUserData.totalStudyTime || 0) + durationSec
-        });
-        
-        currentUserData.totalStudyTime += durationSec;
-        
-        // Refresh Timeline
-        loadStudyLogs();
-        stopRankingListener();
-    });
-
-    let rankingUnsub = null;
-    function startRankingListener() {
-        const q = query(collection(db, "users"), orderBy("totalStudyTime", "desc"), limit(5));
-        rankingUnsub = onSnapshot(q, (snapshot) => {
-            const list = document.getElementById('ranking-list');
-            list.innerHTML = '';
-            
-            snapshot.forEach((doc, index) => {
-                const u = doc.data();
-                const totalSec = u.totalStudyTime + (u.isStudying ? 0 : 0); // Simplified (real-time increment is complex)
-                
-                const h = Math.floor(totalSec / 3600);
-                const m = Math.floor((totalSec % 3600) / 60);
-                
-                const div = document.createElement('div');
-                div.className = "flex items-center bg-gray-800 p-3 rounded-lg";
-                div.innerHTML = `
-                    <div class="text-orange-500 font-bold w-6 text-center mr-3 text-lg">${index + 1}</div>
-                    <img src="${u.photoURL}" class="w-8 h-8 rounded-full mr-3">
-                    <div class="flex-1">
-                        <div class="text-sm font-medium text-white">${u.nickname}</div>
-                        <div class="text-xs text-gray-400">${u.isStudying ? '<span class="text-green-400">공부 중</span>' : '쉬는 중'}</div>
-                    </div>
-                    <div class="text-white font-mono text-sm">${h}시간 ${m}분</div>
-                `;
-                list.appendChild(div);
-            });
-        });
-    }
-
-    function stopRankingListener() {
-        if (rankingUnsub) rankingUnsub();
-    }
-
-    // --- D-DAY ---
-    document.getElementById('dday-display').addEventListener('click', () => openModal('modal-dday'));
-    document.getElementById('dday-large').addEventListener('click', () => openModal('modal-dday'));
-
-    function renderDDay() {
-        const titleEl = document.getElementById('dday-title');
-        const countEl = document.getElementById('dday-count');
-        
-        if (!currentUserData.ddayDate) {
-            countEl.innerText = "D-Day";
-            titleEl.innerText = "터치하여 설정하세요";
-            return;
-        }
-
-        const target = new Date(currentUserData.ddayDate);
-        const today = new Date();
-        target.setHours(0,0,0,0);
-        today.setHours(0,0,0,0);
-        
-        const diff = target - today;
-        const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
-        
-        let text = "";
-        if (days > 0) text = `D-${days}`;
-        else if (days === 0) text = "D-Day";
-        else text = `D+${Math.abs(days)}`;
-
-        countEl.innerText = text;
-        titleEl.innerText = currentUserData.ddayTitle;
-    }
-
-    document.getElementById('save-dday-btn').addEventListener('click', async () => {
-        const title = document.getElementById('dday-input-title').value;
-        const date = document.getElementById('dday-input-date').value;
-        
-        if (!title || !date) return alert("내용을 입력해주세요");
-
-        await updateDoc(doc(db, "users", currentUser.uid), {
-            ddayTitle: title,
-            ddayDate: date
-        });
-
-        currentUserData.ddayTitle = title;
-        currentUserData.ddayDate = date;
-        renderDDay();
-        closeModal('modal-dday');
-    });
-
-    // --- GROUPS ---
-    function loadGroups() {
-        const q = query(collection(db, "groups"), where("members", "array-contains", currentUser.uid));
-        
-        onSnapshot(q, (snapshot) => {
-            const container = document.getElementById('group-list-container');
-            container.innerHTML = '';
-            
-            if (snapshot.empty) {
-                container.innerHTML = '<div class="text-center text-gray-400 mt-10">가입된 그룹이 없습니다.<br>+ 버튼을 눌러 그룹을 만들어보세요.</div>';
-                return;
-            }
-
-            snapshot.forEach(gDoc => {
-                const g = gDoc.data();
-                const div = document.createElement('div');
-                div.className = "bg-white p-4 rounded-xl shadow-sm mb-3";
-                
-                // Invite Button (Only for Leader)
-                let inviteHtml = '';
-                if (g.leaderUid === currentUser.uid) {
-                    inviteHtml = `<button class="invite-btn text-xs bg-gray-100 px-2 py-1 rounded text-gray-600 hover:bg-gray-200" data-gid="${gDoc.id}"><i class="fas fa-user-plus"></i> 친구 초대</button>`;
-                }
-
-                div.innerHTML = `
-                    <div class="flex justify-between items-start mb-2">
-                        <h3 class="font-bold text-lg text-gray-800">${g.name}</h3>
-                        ${inviteHtml}
-                    </div>
-                    <div class="flex items-center gap-2 text-sm text-gray-500">
-                        <i class="fas fa-user"></i> ${g.members.length}명 참여중
-                    </div>
-                `;
-                container.appendChild(div);
-            });
-
-            // Add Invite Listeners
-            document.querySelectorAll('.invite-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    selectedGroupId = e.target.closest('button').dataset.gid;
-                    openModal('modal-invite');
-                });
-            });
-        });
-    }
-
-    document.getElementById('create-group-fab').addEventListener('click', () => openModal('modal-create-group'));
-
-    document.getElementById('confirm-create-group-btn').addEventListener('click', createGroup);
-    document.getElementById('group-name-input').addEventListener('keypress', (e) => {
-        if(e.key === 'Enter') createGroup();
-    });
-
-    async function createGroup() {
-        const name = document.getElementById('group-name-input').value;
-        if (!name) return;
-
-        await addDoc(collection(db, "groups"), {
-            name: name,
-            leaderUid: currentUser.uid,
-            members: [currentUser.uid],
-            createdAt: serverTimestamp()
-        });
-        
-        closeModal('modal-create-group');
-        document.getElementById('group-name-input').value = "";
-    }
-
-    // Invite Logic
-    document.getElementById('invite-search-btn').addEventListener('click', async () => {
-        const nick = document.getElementById('invite-input-nick').value;
-        const resDiv = document.getElementById('invite-result');
-        
-        const q = query(collection(db, "users"), where("nickname", "==", nick));
-        const snapshot = await getDocs(q);
-        
-        if (snapshot.empty) {
-            resDiv.innerHTML = "<span class='text-red-500'>사용자를 찾을 수 없습니다.</span>";
-        } else {
-            const userDoc = snapshot.docs[0];
-            const uid = userDoc.id;
-            
-            // Add to group
-            await updateDoc(doc(db, "groups", selectedGroupId), {
-                members: arrayUnion(uid)
-            });
-            
-            resDiv.innerHTML = "<span class='text-green-500'>초대되었습니다!</span>";
-        }
-    });
-
-    // --- NAVIGATION & UTILS ---
-    function setupTabNavigation() {
-        const navItems = document.querySelectorAll('.nav-item');
-        navItems.forEach(item => {
-            item.addEventListener('click', () => {
-                const targetId = item.getAttribute('data-target');
-                
-                // UI Toggle
-                document.querySelectorAll('#main-app > div[id^="view-"]').forEach(v => v.classList.add('hidden'));
-                document.getElementById(targetId).classList.remove('hidden');
-                
-                // Nav Active State
-                navItems.forEach(n => n.classList.remove('active'));
-                item.classList.add('active');
-            });
-        });
-        
-        // Settings Logout
-        document.getElementById('settings-logout').addEventListener('click', () => {
-            signOut(auth);
-            location.reload();
-        });
-    }
-
-    function showScreen(name) {
-        Object.values(screens).forEach(el => el.classList.remove('active'));
-        screens[name].classList.add('active');
-    }
-
-    // Modal Helpers
-    window.openModal = (id) => document.getElementById(id).classList.add('active');
-    window.closeModal = (id) => {
-        document.getElementById(id).classList.remove('active');
-        // Clear inputs
-        document.querySelectorAll(`#${id} input`).forEach(i => i.value = '');
-        const res = document.getElementById('invite-result');
-        if(res) res.innerHTML = '';
-    }
-
+// ─── BOOT ───
+init();
 </script>
-
 </body>
 </html>
