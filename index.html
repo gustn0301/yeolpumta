@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>대건 열품타</title>
+<!-- Favicon: SVG 인라인 -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%230f0f14'/><rect width='64' height='64' rx='14' fill='url(%23g)' opacity='0.15'/><defs><linearGradient id='g' x1='0' y1='0' x2='64' y2='64' gradientUnits='userSpaceOnUse'><stop offset='0' stop-color='%23c8a84b'/><stop offset='1' stop-color='%23e8c870'/></linearGradient></defs><text x='32' y='44' font-family='serif' font-size='36' font-weight='900' fill='%23c8a84b' text-anchor='middle'>열</text><line x1='10' y1='52' x2='54' y2='52' stroke='%23c8a84b' stroke-width='3' stroke-linecap='round' opacity='0.6'/></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800&family=Bebas+Neue&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -18,797 +20,403 @@
     --text3: #5a5a7a;
     --accent: #c8a84b;
     --accent2: #e8c870;
-    --korean: #f4a0a0;
-    --math: #f4e0a0;
-    --social: #a0d4a0;
-    --science: #a0c4f4;
-    --english: #d4a0f4;
-    --korean-bg: rgba(244,160,160,0.15);
-    --math-bg: rgba(244,224,160,0.15);
-    --social-bg: rgba(160,212,160,0.15);
-    --science-bg: rgba(160,196,244,0.15);
-    --english-bg: rgba(212,160,244,0.15);
     --radius: 14px;
     --radius-sm: 8px;
     --shadow: 0 4px 24px rgba(0,0,0,0.4);
   }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   body {
-    font-family: 'Noto Sans KR', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    overflow: hidden;
-    user-select: none;
+    font-family:'Noto Sans KR',sans-serif;
+    background:var(--bg); color:var(--text);
+    min-height:100vh; overflow:hidden; user-select:none;
   }
 
-  /* ─── SCREENS ─── */
-  .screen { display: none; width: 100vw; height: 100vh; }
-  .screen.active { display: flex; }
+  /* ── SCREENS ── */
+  .screen { display:none; width:100vw; height:100vh; }
+  .screen.active { display:flex; }
 
-  /* ─── SPLASH ─── */
+  /* ── SPLASH ── */
   #splash {
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background: radial-gradient(ellipse at center, #1a1a2e 0%, #0f0f14 70%);
+    flex-direction:column; align-items:center; justify-content:center;
+    background:radial-gradient(ellipse at center,#1a1a2e 0%,#0f0f14 70%);
   }
   .splash-logo {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 52px;
-    letter-spacing: 3px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    margin-bottom: 8px;
+    font-family:'Bebas Neue',sans-serif; font-size:52px; letter-spacing:3px;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:8px;
   }
-  .splash-sub {
-    font-size: 13px;
-    color: var(--text2);
-    letter-spacing: 4px;
-    margin-bottom: 60px;
-  }
+  .splash-sub { font-size:13px; color:var(--text2); letter-spacing:4px; margin-bottom:60px; }
   .splash-spinner {
-    width: 36px; height: 36px;
-    border: 3px solid var(--border);
-    border-top-color: var(--accent);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
+    width:36px; height:36px; border:3px solid var(--border);
+    border-top-color:var(--accent); border-radius:50%; animation:spin .8s linear infinite;
   }
-  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes spin { to { transform:rotate(360deg); } }
 
-  /* ─── NICKNAME SETUP ─── */
+  /* ── NICKNAME SETUP ── */
   #nicknameSetup {
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background: radial-gradient(ellipse at 50% 30%, #1a1a2e 0%, #0f0f14 70%);
-    padding: 24px;
+    flex-direction:column; align-items:center; justify-content:center;
+    background:radial-gradient(ellipse at 50% 30%,#1a1a2e 0%,#0f0f14 70%); padding:24px;
   }
   .nick-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 36px 28px;
-    width: 100%;
-    max-width: 400px;
-    box-shadow: var(--shadow);
+    background:var(--card); border:1px solid var(--border); border-radius:20px;
+    padding:36px 28px; width:100%; max-width:400px; box-shadow:var(--shadow);
   }
-  .nick-title {
-    font-size: 22px;
-    font-weight: 700;
-    margin-bottom: 6px;
-    text-align: center;
-  }
-  .nick-desc {
-    font-size: 13px;
-    color: var(--text2);
-    text-align: center;
-    margin-bottom: 28px;
-    line-height: 1.6;
-  }
+  .nick-title { font-size:22px; font-weight:700; margin-bottom:6px; text-align:center; }
+  .nick-desc { font-size:13px; color:var(--text2); text-align:center; margin-bottom:28px; line-height:1.6; }
   .nick-input {
-    width: 100%;
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    color: var(--text);
-    font-family: 'Noto Sans KR', sans-serif;
-    font-size: 16px;
-    padding: 14px 16px;
-    outline: none;
-    transition: border-color 0.2s;
+    width:100%; background:var(--bg3); border:1px solid var(--border); border-radius:var(--radius-sm);
+    color:var(--text); font-family:'Noto Sans KR',sans-serif; font-size:16px; padding:14px 16px; outline:none; transition:border-color .2s;
   }
-  .nick-input:focus { border-color: var(--accent); }
-  .nick-error {
-    font-size: 12px;
-    color: #f47070;
-    margin-top: 8px;
-    min-height: 18px;
-  }
+  .nick-input:focus { border-color:var(--accent); }
+  .nick-error { font-size:12px; color:#f47070; margin-top:8px; min-height:18px; }
   .nick-btn {
-    width: 100%;
-    margin-top: 20px;
-    padding: 15px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    border: none;
-    border-radius: var(--radius-sm);
-    color: #0f0f14;
-    font-family: 'Noto Sans KR', sans-serif;
-    font-size: 15px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: opacity 0.2s, transform 0.1s;
+    width:100%; margin-top:20px; padding:15px;
+    background:linear-gradient(135deg,var(--accent),var(--accent2)); border:none;
+    border-radius:var(--radius-sm); color:#0f0f14; font-family:'Noto Sans KR',sans-serif;
+    font-size:15px; font-weight:700; cursor:pointer; transition:opacity .2s,transform .1s;
   }
-  .nick-btn:hover { opacity: 0.9; }
-  .nick-btn:active { transform: scale(0.98); }
+  .nick-btn:hover { opacity:.9; }
+  .nick-btn:active { transform:scale(.98); }
 
-  /* ─── MAIN APP ─── */
-  #app {
-    flex-direction: column;
-    position: relative;
-  }
+  /* ── MAIN APP ── */
+  #app { flex-direction:column; position:relative; }
+  .tab-page { display:none; flex:1; flex-direction:column; overflow:hidden; }
+  .tab-page.active { display:flex; }
 
-  /* ─── TAB PAGES ─── */
-  .tab-page {
-    display: none;
-    flex: 1;
-    flex-direction: column;
-    overflow: hidden;
-  }
-  .tab-page.active { display: flex; }
-
-  /* ─── BOTTOM NAV ─── */
+  /* ── BOTTOM NAV ── */
   .bottom-nav {
-    display: flex;
-    background: var(--bg2);
-    border-top: 1px solid var(--border);
-    height: 64px;
-    flex-shrink: 0;
-    z-index: 100;
+    display:flex; background:var(--bg2); border-top:1px solid var(--border);
+    height:64px; flex-shrink:0; z-index:100;
   }
   .nav-btn {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--text3);
-    font-family: 'Noto Sans KR', sans-serif;
-    font-size: 10px;
-    font-weight: 500;
-    transition: color 0.2s;
+    flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:4px; background:none; border:none; cursor:pointer; color:var(--text3);
+    font-family:'Noto Sans KR',sans-serif; font-size:10px; font-weight:500; transition:color .2s;
   }
-  .nav-btn.active { color: var(--accent); }
-  .nav-btn svg { width: 22px; height: 22px; }
+  .nav-btn.active { color:var(--accent); }
+  .nav-btn svg { width:22px; height:22px; }
 
-  /* ─── HOME TAB ─── */
-  #homeTab {
-    overflow: hidden;
-  }
+  /* ── HOME GRID ── */
+  #homeTab { overflow:hidden; }
   .home-grid {
-    flex: 1;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: auto 1fr auto;
-    gap: 10px;
-    padding: 12px;
-    overflow: hidden;
+    flex:1; display:grid;
+    grid-template-columns:1fr 1fr;
+    grid-template-rows:auto auto 1fr auto;
+    gap:10px; padding:12px; overflow:hidden;
   }
+
   /* Row 1: dday + profile */
   .dday-card {
-    grid-column: 1; grid-row: 1;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 12px 14px;
-    cursor: pointer;
-    transition: border-color 0.2s;
+    grid-column:1; grid-row:1;
+    background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
+    padding:12px 14px; cursor:pointer; transition:border-color .2s;
   }
-  .dday-card:hover { border-color: var(--accent); }
-  .dday-label { font-size: 10px; color: var(--text2); margin-bottom: 3px; letter-spacing: 1px; text-transform: uppercase; }
-  .dday-name { font-size: 13px; font-weight: 600; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .dday-count { font-family: 'Bebas Neue', sans-serif; font-size: 32px; color: var(--accent2); line-height: 1; }
+  .dday-card:hover { border-color:var(--accent); }
+  .dday-label { font-size:10px; color:var(--text2); margin-bottom:3px; letter-spacing:1px; text-transform:uppercase; }
+  .dday-name { font-size:13px; font-weight:600; margin-bottom:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .dday-count { font-family:'Bebas Neue',sans-serif; font-size:32px; color:var(--accent2); line-height:1; }
 
   .profile-card {
-    grid-column: 2; grid-row: 1;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 12px 14px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    transition: border-color 0.2s;
+    grid-column:2; grid-row:1;
+    background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
+    padding:10px 12px; cursor:pointer; display:flex; align-items:center; gap:8px; transition:border-color .2s;
   }
-  .profile-card:hover { border-color: var(--accent); }
+  .profile-card:hover { border-color:var(--accent); }
   .profile-avatar {
-    width: 38px; height: 38px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    font-weight: 700;
-    color: #0f0f14;
-    flex-shrink: 0;
+    width:36px; height:36px; border-radius:50%; flex-shrink:0;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    display:flex; align-items:center; justify-content:center;
+    font-size:15px; font-weight:700; color:#0f0f14;
   }
-  .profile-info { overflow: hidden; }
-  .profile-nick { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .profile-sub { font-size: 10px; color: var(--text2); }
+  .profile-info { overflow:hidden; flex:1; min-width:0; }
+  .profile-nick { font-size:13px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .profile-sub { font-size:9px; color:var(--text2); }
+  /* 순공시간 표시 */
+  .profile-pure-time {
+    font-size:11px; font-weight:700; color:var(--accent2); text-align:right;
+    white-space:nowrap; flex-shrink:0;
+    font-family:'Bebas Neue',sans-serif; letter-spacing:0.5px;
+  }
 
-  /* Row 2: timetable + subject */
+  /* Row 2: 모토 */
+  .motto-card {
+    grid-column:1 / -1; grid-row:2;
+    background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
+    padding:10px 14px; display:flex; align-items:center; gap:10px; cursor:pointer;
+    transition:border-color .2s; min-height:40px;
+  }
+  .motto-card:hover { border-color:var(--accent); }
+  .motto-icon { font-size:14px; flex-shrink:0; color:var(--accent); }
+  .motto-text { font-size:12px; color:var(--text2); flex:1; font-style:italic; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .motto-text.set { color:var(--text); font-style:normal; }
+  .motto-edit-hint { font-size:10px; color:var(--text3); flex-shrink:0; }
+
+  /* Row 3: timetable + subject */
   .timetable-card {
-    grid-column: 1; grid-row: 2;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    overflow: hidden;
-    position: relative;
+    grid-column:1; grid-row:3;
+    background:var(--card); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; position:relative;
   }
   .tt-header {
-    padding: 8px 12px;
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--text2);
-    letter-spacing: 0.5px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    padding:7px 12px; font-size:11px; font-weight:600; color:var(--text2); letter-spacing:.5px;
+    border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between;
   }
-  .tt-scroll {
-    overflow-y: auto;
-    height: calc(100% - 34px);
-    position: relative;
-    scrollbar-width: none;
-  }
-  .tt-scroll::-webkit-scrollbar { display: none; }
-  .tt-body {
-    position: relative;
-    min-height: 100%;
-  }
+  .tt-scroll { overflow-y:auto; height:calc(100% - 32px); position:relative; scrollbar-width:none; }
+  .tt-scroll::-webkit-scrollbar { display:none; }
+  .tt-body { position:relative; min-height:100%; }
   .tt-slot {
-    display: flex;
-    align-items: stretch;
-    border-bottom: 1px solid var(--border);
-    min-height: 28px;
+    display:flex; align-items:stretch; border-bottom:1px solid var(--border); min-height:26px;
+    position:absolute; left:0; right:0;
   }
-  .tt-time {
-    font-size: 9px;
-    color: var(--text3);
-    width: 32px;
-    padding: 6px 4px 6px 8px;
-    flex-shrink: 0;
-    display: flex;
-    align-items: flex-start;
-    padding-top: 5px;
-  }
-  .tt-bar-area {
-    flex: 1;
-    position: relative;
-    border-left: 1px solid var(--border);
-  }
+  .tt-time { font-size:9px; color:var(--text3); width:32px; padding:5px 4px 5px 8px; flex-shrink:0; display:flex; align-items:flex-start; }
+  .tt-bar-area { flex:1; position:relative; border-left:1px solid var(--border); }
   .tt-block {
-    position: absolute;
-    left: 0; right: 0;
-    border-radius: 3px;
-    opacity: 0.85;
-    display: flex;
-    align-items: center;
-    padding-left: 5px;
-    font-size: 9px;
-    font-weight: 600;
-    overflow: hidden;
-    z-index: 1;
+    position:absolute; left:0; right:0; border-radius:3px; opacity:.85;
+    display:flex; align-items:center; padding-left:5px;
+    font-size:9px; font-weight:600; overflow:hidden; z-index:1;
   }
   .tt-current-line {
-    position: absolute;
-    left: 0; right: 0;
-    height: 2px;
-    background: #ff4444;
-    z-index: 10;
-    pointer-events: none;
+    position:absolute; left:0; right:0; height:2px; background:#ff4444; z-index:10; pointer-events:none;
   }
   .tt-current-line::before {
-    content: '';
-    position: absolute;
-    left: -3px;
-    top: -4px;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: #ff4444;
+    content:''; position:absolute; left:-3px; top:-4px;
+    width:10px; height:10px; border-radius:50%; background:#ff4444;
   }
 
   .subject-card {
-    grid-column: 2; grid-row: 2;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
+    grid-column:2; grid-row:3;
+    background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
+    overflow:hidden; display:flex; flex-direction:column;
   }
-  .subj-header {
-    padding: 8px 12px;
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--text2);
-    letter-spacing: 0.5px;
-    border-bottom: 1px solid var(--border);
-  }
-  .subj-list {
-    flex: 1;
-    overflow-y: auto;
-    padding: 8px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    scrollbar-width: none;
-  }
-  .subj-list::-webkit-scrollbar { display: none; }
+  .subj-header { padding:7px 12px; font-size:11px; font-weight:600; color:var(--text2); letter-spacing:.5px; border-bottom:1px solid var(--border); }
+  .subj-list { flex:1; overflow-y:auto; padding:6px; display:flex; flex-direction:column; gap:5px; scrollbar-width:none; }
+  .subj-list::-webkit-scrollbar { display:none; }
   .subj-btn {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 12px;
-    border-radius: var(--radius-sm);
-    border: 1.5px solid transparent;
-    background: var(--bg3);
-    cursor: pointer;
-    transition: all 0.15s;
-    font-family: 'Noto Sans KR', sans-serif;
+    display:flex; align-items:center; gap:8px; padding:9px 10px;
+    border-radius:var(--radius-sm); border:1.5px solid transparent;
+    background:var(--bg3); cursor:pointer; transition:all .15s; font-family:'Noto Sans KR',sans-serif;
   }
-  .subj-btn:hover { background: var(--card2); }
-  .subj-dot {
-    width: 12px; height: 12px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-  .subj-name {
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--text);
-    flex: 1;
-  }
-  .subj-btn.selected { border-color: currentColor; }
-  .subj-btn.selected .subj-name { font-weight: 700; }
+  .subj-btn:hover { background:var(--card2); }
+  .subj-dot { width:11px; height:11px; border-radius:50%; flex-shrink:0; }
+  .subj-name { font-size:13px; font-weight:500; color:var(--text); flex:1; }
+  .subj-btn.selected .subj-name { font-weight:700; }
 
-  /* Row 3: start button */
-  .start-btn-wrap {
-    grid-column: 1 / -1; grid-row: 3;
-    padding: 4px 0 2px;
-  }
+  /* Row 4: start button */
+  .start-btn-wrap { grid-column:1 / -1; grid-row:4; padding:2px 0 2px; }
   .start-btn {
-    width: 100%;
-    padding: 16px;
-    border: none;
-    border-radius: var(--radius);
-    font-family: 'Noto Sans KR', sans-serif;
-    font-size: 16px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.25s;
-    background: var(--bg3);
-    color: var(--text3);
-    border: 1.5px solid var(--border);
+    width:100%; padding:15px; border:none; border-radius:var(--radius);
+    font-family:'Noto Sans KR',sans-serif; font-size:15px; font-weight:700; cursor:pointer; transition:all .25s;
+    background:var(--bg3); color:var(--text3); border:1.5px solid var(--border);
   }
-  .start-btn.ready {
-    color: #0f0f14;
-    border-color: transparent;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-    transform: translateY(0);
-  }
-  .start-btn.ready:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,0.4); }
-  .start-btn.ready:active { transform: translateY(0); }
+  .start-btn.ready { color:#0f0f14; border-color:transparent; box-shadow:0 4px 20px rgba(0,0,0,.3); }
+  .start-btn.ready:hover { transform:translateY(-2px); box-shadow:0 8px 28px rgba(0,0,0,.4); }
+  .start-btn.ready:active { transform:translateY(0); }
 
-  /* ─── STUDY SCREEN ─── */
+  /* ── STUDY SCREEN ── */
   #studyScreen {
-    flex-direction: column;
-    background: var(--bg);
-    z-index: 200;
-    position: fixed;
-    top: 0; left: 0;
-    width: 100vw; height: 100vh;
+    flex-direction:column; background:var(--bg); z-index:200;
+    position:fixed; top:0; left:0; width:100vw; height:100vh;
   }
   .study-header {
-    padding: 14px 20px 10px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid var(--border);
-    flex-shrink: 0;
+    padding:12px 16px 8px; display:flex; align-items:center; justify-content:space-between;
+    border-bottom:1px solid var(--border); flex-shrink:0;
   }
-  .study-subject-badge {
-    font-size: 15px;
-    font-weight: 700;
-    padding: 6px 14px;
-    border-radius: 20px;
+  .study-subject-badge { font-size:14px; font-weight:700; padding:5px 12px; border-radius:20px; }
+
+  /* 학습시간 + (순공시간) 상단 중앙 */
+  .study-time-bar {
+    text-align:center; padding:6px 0 2px; flex-shrink:0;
   }
-  .study-timer {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 52px;
-    letter-spacing: 3px;
-    text-align: center;
-    padding: 8px 0 4px;
-    flex-shrink: 0;
+  .study-session-timer {
+    font-family:'Bebas Neue',sans-serif; font-size:50px; letter-spacing:3px; line-height:1;
+    display:inline;
   }
+  .study-pure-inline {
+    font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:1px;
+    color:var(--accent2); opacity:.8; display:inline; margin-left:6px;
+  }
+  .study-timer-labels {
+    display:flex; justify-content:center; gap:24px;
+    font-size:10px; color:var(--text3); letter-spacing:.5px; padding-bottom:4px;
+  }
+
   .study-stop-btn {
-    margin: 0 20px;
-    padding: 14px;
-    border: none;
-    border-radius: var(--radius);
-    background: #2a2a3a;
-    color: var(--text2);
-    font-family: 'Noto Sans KR', sans-serif;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    flex-shrink: 0;
-    transition: all 0.2s;
+    margin:0 16px 6px; padding:12px; border:none; border-radius:var(--radius);
+    background:#2a2a3a; color:var(--text2); font-family:'Noto Sans KR',sans-serif;
+    font-size:14px; font-weight:600; cursor:pointer; flex-shrink:0; transition:all .2s;
   }
-  .study-stop-btn:hover { background: #3a2a2a; color: #f47070; }
-  .study-rank-title {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--text2);
-    letter-spacing: 1px;
-    padding: 10px 20px 6px;
-    flex-shrink: 0;
-  }
-  .study-rank-list {
-    flex: 1;
-    overflow-y: auto;
-    padding: 0 16px 16px;
-    scrollbar-width: none;
-  }
-  .study-rank-list::-webkit-scrollbar { display: none; }
+  .study-stop-btn:hover { background:#3a2a2a; color:#f47070; }
+  .study-rank-title { font-size:12px; font-weight:600; color:var(--text2); letter-spacing:1px; padding:6px 16px 4px; flex-shrink:0; }
+  .study-rank-list { flex:1; overflow-y:auto; padding:0 12px 12px; scrollbar-width:none; }
+  .study-rank-list::-webkit-scrollbar { display:none; }
+
   .rank-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 14px;
-    border-radius: var(--radius);
-    margin-bottom: 6px;
-    background: var(--card);
-    border: 1px solid var(--border);
-    transition: all 0.3s;
+    display:flex; align-items:center; gap:10px; padding:10px 12px;
+    border-radius:var(--radius); margin-bottom:6px;
+    background:var(--card); border:1px solid var(--border); transition:all .3s;
   }
   .rank-num {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 22px;
-    color: var(--text3);
-    width: 28px;
-    text-align: center;
-    flex-shrink: 0;
+    font-family:'Bebas Neue',sans-serif; font-size:20px; color:var(--text3);
+    width:24px; text-align:center; flex-shrink:0;
   }
-  .rank-item.rank-1 .rank-num { color: #ffd700; }
-  .rank-item.rank-2 .rank-num { color: #c0c0c0; }
-  .rank-item.rank-3 .rank-num { color: #cd7f32; }
+  .rank-item.rank-1 .rank-num { color:#ffd700; }
+  .rank-item.rank-2 .rank-num { color:#c0c0c0; }
+  .rank-item.rank-3 .rank-num { color:#cd7f32; }
+
+  /* 활성화 테두리 불빛 아바타 */
+  .rank-avatar-wrap { position:relative; flex-shrink:0; }
   .rank-avatar {
-    width: 36px; height: 36px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-    font-weight: 700;
-    color: #0f0f14;
-    flex-shrink: 0;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    width:36px; height:36px; border-radius:50%; display:flex; align-items:center;
+    justify-content:center; font-size:14px; font-weight:700; color:#0f0f14;
+    border:2.5px solid transparent; transition:all .4s;
   }
-  .rank-info { flex: 1; overflow: hidden; }
-  .rank-name { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .rank-time { font-size: 11px; color: var(--text2); margin-top: 2px; }
+  .rank-avatar.studying {
+    border-color:currentColor;
+    box-shadow:0 0 8px 2px currentColor, 0 0 2px 1px currentColor;
+    animation:glowPulse 2s ease-in-out infinite;
+  }
+  @keyframes glowPulse {
+    0%,100% { box-shadow:0 0 6px 1px currentColor, 0 0 2px 1px currentColor; }
+    50%      { box-shadow:0 0 14px 4px currentColor, 0 0 4px 2px currentColor; }
+  }
+
+  .rank-info { flex:1; overflow:hidden; }
+  .rank-name { font-size:13px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .rank-time { font-size:10px; color:var(--text2); margin-top:2px; }
   .rank-me-badge {
-    font-size: 9px;
-    padding: 2px 6px;
-    border-radius: 10px;
-    background: var(--accent);
-    color: #0f0f14;
-    font-weight: 700;
-    flex-shrink: 0;
-  }
-  .rank-subject-dot {
-    width: 10px; height: 10px;
-    border-radius: 50%;
-    flex-shrink: 0;
+    font-size:9px; padding:2px 6px; border-radius:10px;
+    background:var(--accent); color:#0f0f14; font-weight:700; flex-shrink:0;
   }
 
-  /* ─── GROUP TAB ─── */
-  #groupTab { overflow: hidden; }
-  .tab-header {
-    padding: 16px 16px 10px;
-    font-size: 18px;
-    font-weight: 700;
-    flex-shrink: 0;
-    border-bottom: 1px solid var(--border);
-  }
+  /* ── GROUP TAB ── */
+  #groupTab { overflow:hidden; position:relative; }
+  .tab-header { padding:14px 16px 10px; font-size:18px; font-weight:700; flex-shrink:0; border-bottom:1px solid var(--border); }
   .group-list {
-    flex: 1;
-    overflow-y: auto;
-    padding: 12px 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    scrollbar-width: none;
+    flex:1; overflow-y:auto; padding:12px 16px 80px;
+    display:flex; flex-direction:column; gap:8px; scrollbar-width:none;
   }
-  .group-list::-webkit-scrollbar { display: none; }
+  .group-list::-webkit-scrollbar { display:none; }
   .group-item {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 14px 16px;
-    cursor: pointer;
-    transition: border-color 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 12px;
+    background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
+    padding:14px 16px; cursor:pointer; transition:border-color .2s;
+    display:flex; align-items:center; gap:12px;
   }
-  .group-item:hover { border-color: var(--accent); }
+  .group-item:hover { border-color:var(--accent); }
   .group-icon {
-    width: 40px; height: 40px;
-    border-radius: 10px;
-    background: var(--bg3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-    flex-shrink: 0;
+    width:40px; height:40px; border-radius:10px; background:var(--bg3);
+    display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0;
   }
-  .group-info { flex: 1; overflow: hidden; }
-  .group-name { font-size: 14px; font-weight: 600; }
-  .group-meta { font-size: 11px; color: var(--text2); margin-top: 2px; }
+  .group-info { flex:1; overflow:hidden; }
+  .group-name { font-size:14px; font-weight:600; }
+  .group-meta { font-size:11px; color:var(--text2); margin-top:2px; }
   .fab {
-    position: absolute;
-    bottom: 76px;
-    right: 16px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    border: none;
-    border-radius: 14px;
-    color: #0f0f14;
-    font-family: 'Noto Sans KR', sans-serif;
-    font-size: 13px;
-    font-weight: 700;
-    padding: 12px 18px;
-    cursor: pointer;
-    box-shadow: 0 4px 20px rgba(200,168,75,0.4);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    transition: all 0.2s;
-    z-index: 50;
+    position:absolute; bottom:76px; right:16px;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    border:none; border-radius:14px; color:#0f0f14;
+    font-family:'Noto Sans KR',sans-serif; font-size:13px; font-weight:700;
+    padding:12px 18px; cursor:pointer; box-shadow:0 4px 20px rgba(200,168,75,.4);
+    display:flex; align-items:center; gap:6px; transition:all .2s; z-index:50;
   }
-  .fab:hover { transform: translateY(-2px); }
+  .fab:hover { transform:translateY(-2px); }
   .fab-invite {
-    bottom: 140px;
-    background: linear-gradient(135deg, #70a0f4, #90c0ff);
-    box-shadow: 0 4px 20px rgba(112,160,244,0.4);
+    bottom:80px; right:16px;
+    background:linear-gradient(135deg,#70a0f4,#90c0ff);
+    box-shadow:0 4px 20px rgba(112,160,244,.4);
   }
-  .empty-state {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    color: var(--text3);
-    gap: 12px;
-    padding: 40px;
-  }
-  .empty-icon { font-size: 48px; }
-  .empty-text { font-size: 14px; text-align: center; line-height: 1.6; }
+  .empty-state { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; color:var(--text3); gap:12px; padding:40px; }
+  .empty-icon { font-size:48px; }
+  .empty-text { font-size:14px; text-align:center; line-height:1.6; }
 
-  /* ─── SETTINGS TAB ─── */
-  #settingsTab { overflow: hidden; }
-  .settings-list {
-    flex: 1;
-    overflow-y: auto;
-    padding: 12px 16px;
-    scrollbar-width: none;
-  }
-  .settings-list::-webkit-scrollbar { display: none; }
-  .settings-section {
-    margin-bottom: 20px;
-  }
-  .settings-section-title {
-    font-size: 11px;
-    color: var(--text3);
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    padding: 0 4px;
-    margin-bottom: 8px;
-  }
+  /* ── SETTINGS TAB ── */
+  #settingsTab { overflow:hidden; }
+  .settings-list { flex:1; overflow-y:auto; padding:12px 16px; scrollbar-width:none; }
+  .settings-list::-webkit-scrollbar { display:none; }
+  .settings-section { margin-bottom:20px; }
+  .settings-section-title { font-size:11px; color:var(--text3); letter-spacing:1px; text-transform:uppercase; padding:0 4px; margin-bottom:8px; }
   .settings-item {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 14px 16px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 6px;
-    transition: border-color 0.2s;
+    background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
+    padding:14px 16px; cursor:pointer; display:flex; align-items:center;
+    gap:12px; margin-bottom:6px; transition:border-color .2s;
   }
-  .settings-item:hover { border-color: var(--accent); }
-  .settings-item-icon { font-size: 20px; width: 28px; text-align: center; }
-  .settings-item-label { flex: 1; font-size: 14px; font-weight: 500; }
-  .settings-item-value { font-size: 12px; color: var(--text2); }
-  .settings-item-arrow { color: var(--text3); font-size: 12px; }
+  .settings-item:hover { border-color:var(--accent); }
+  .settings-item-icon { font-size:20px; width:28px; text-align:center; }
+  .settings-item-label { flex:1; font-size:14px; font-weight:500; }
+  .settings-item-value { font-size:12px; color:var(--text2); }
+  .settings-item-arrow { color:var(--text3); font-size:12px; }
 
-  /* ─── MODALS ─── */
-  .modal-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.7);
-    z-index: 300;
-    align-items: flex-end;
-    justify-content: center;
-  }
-  .modal-overlay.open { display: flex; }
-  .modal-sheet {
-    background: var(--bg2);
-    border-radius: 20px 20px 0 0;
-    width: 100%;
-    max-width: 480px;
-    padding: 20px 20px 36px;
-    border: 1px solid var(--border);
-    border-bottom: none;
-    animation: slideUp 0.25s ease;
-  }
-  @keyframes slideUp {
-    from { transform: translateY(100%); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-  }
-  .modal-handle {
-    width: 36px; height: 4px;
-    background: var(--border);
-    border-radius: 2px;
-    margin: 0 auto 20px;
-  }
-  .modal-title { font-size: 17px; font-weight: 700; margin-bottom: 16px; }
-  .modal-input {
-    width: 100%;
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    color: var(--text);
-    font-family: 'Noto Sans KR', sans-serif;
-    font-size: 16px;
-    padding: 13px 15px;
-    outline: none;
-    transition: border-color 0.2s;
-    margin-bottom: 6px;
-  }
-  .modal-input:focus { border-color: var(--accent); }
-  .modal-error { font-size: 12px; color: #f47070; min-height: 18px; margin-bottom: 14px; }
-  .modal-btn {
-    width: 100%;
-    padding: 14px;
-    border: none;
-    border-radius: var(--radius-sm);
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    color: #0f0f14;
-    font-family: 'Noto Sans KR', sans-serif;
-    font-size: 15px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: opacity 0.2s;
-    margin-bottom: 8px;
-  }
-  .modal-btn:hover { opacity: 0.9; }
-  .modal-btn-cancel {
-    background: var(--bg3);
-    color: var(--text2);
-    border: 1px solid var(--border);
-    margin-bottom: 0;
-  }
-  .modal-date-input {
-    type: date;
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    color: var(--text);
-    font-family: 'Noto Sans KR', sans-serif;
-    font-size: 16px;
-    padding: 13px 15px;
-    width: 100%;
-    outline: none;
-    margin-bottom: 6px;
-    transition: border-color 0.2s;
-  }
-  .modal-date-input:focus { border-color: var(--accent); }
-
-  /* ─── GROUP DETAIL ─── */
-  #groupDetail {
-    display: none;
-    flex-direction: column;
-    overflow: hidden;
-  }
+  /* ── GROUP DETAIL ── */
+  #groupDetail { display:none; flex-direction:column; overflow:hidden; position:relative; }
   .group-detail-header {
-    padding: 14px 16px 10px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    border-bottom: 1px solid var(--border);
-    flex-shrink: 0;
+    padding:14px 16px 10px; display:flex; align-items:center;
+    gap:12px; border-bottom:1px solid var(--border); flex-shrink:0;
   }
-  .back-btn {
-    background: none;
-    border: none;
-    color: var(--text2);
-    cursor: pointer;
-    font-size: 20px;
-    padding: 4px;
-  }
-  .group-member-list {
-    flex: 1;
-    overflow-y: auto;
-    padding: 12px 16px;
-    scrollbar-width: none;
-  }
-  .group-member-list::-webkit-scrollbar { display: none; }
+  .back-btn { background:none; border:none; color:var(--text2); cursor:pointer; font-size:20px; padding:4px; }
+  .group-member-list { flex:1; overflow-y:auto; padding:12px 16px 80px; scrollbar-width:none; }
+  .group-member-list::-webkit-scrollbar { display:none; }
   .member-item {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 12px 14px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 6px;
+    background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
+    padding:12px 14px; display:flex; align-items:center; gap:12px; margin-bottom:6px;
   }
   .member-avatar {
-    width: 38px; height: 38px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 15px;
-    font-weight: 700;
-    color: #0f0f14;
+    width:38px; height:38px; border-radius:50%;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    display:flex; align-items:center; justify-content:center;
+    font-size:15px; font-weight:700; color:#0f0f14;
+    border:2.5px solid transparent; transition:all .4s;
   }
-  .member-name { font-size: 14px; font-weight: 500; }
-  .member-role { font-size: 10px; color: var(--text2); margin-top: 2px; }
-  .member-time { font-size: 12px; color: var(--text2); margin-left: auto; }
+  .member-avatar.studying {
+    border-color:currentColor;
+    box-shadow:0 0 8px 2px currentColor, 0 0 2px 1px currentColor;
+    animation:glowPulse 2s ease-in-out infinite;
+  }
+  .member-name { font-size:14px; font-weight:500; }
+  .member-role { font-size:10px; color:var(--text2); margin-top:2px; }
+  .member-puretime { font-size:11px; color:var(--accent2); margin-top:2px; font-weight:600; }
 
-  /* ─── TOAST ─── */
+  /* ── MODALS ── */
+  .modal-overlay {
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,.7);
+    z-index:300; align-items:flex-end; justify-content:center;
+  }
+  .modal-overlay.open { display:flex; }
+  .modal-sheet {
+    background:var(--bg2); border-radius:20px 20px 0 0; width:100%; max-width:480px;
+    padding:20px 20px 36px; border:1px solid var(--border); border-bottom:none;
+    animation:slideUp .25s ease;
+  }
+  @keyframes slideUp { from{transform:translateY(100%);opacity:0;} to{transform:translateY(0);opacity:1;} }
+  .modal-handle { width:36px; height:4px; background:var(--border); border-radius:2px; margin:0 auto 20px; }
+  .modal-title { font-size:17px; font-weight:700; margin-bottom:16px; }
+  .modal-input {
+    width:100%; background:var(--bg3); border:1px solid var(--border); border-radius:var(--radius-sm);
+    color:var(--text); font-family:'Noto Sans KR',sans-serif; font-size:16px; padding:13px 15px;
+    outline:none; transition:border-color .2s; margin-bottom:6px;
+  }
+  .modal-input:focus { border-color:var(--accent); }
+  .modal-error { font-size:12px; color:#f47070; min-height:18px; margin-bottom:14px; }
+  .modal-btn {
+    width:100%; padding:14px; border:none; border-radius:var(--radius-sm);
+    background:linear-gradient(135deg,var(--accent),var(--accent2)); color:#0f0f14;
+    font-family:'Noto Sans KR',sans-serif; font-size:15px; font-weight:700;
+    cursor:pointer; transition:opacity .2s; margin-bottom:8px;
+  }
+  .modal-btn:hover { opacity:.9; }
+  .modal-btn-cancel { background:var(--bg3); color:var(--text2); border:1px solid var(--border); margin-bottom:0; }
+  .modal-date-input {
+    background:var(--bg3); border:1px solid var(--border); border-radius:var(--radius-sm);
+    color:var(--text); font-family:'Noto Sans KR',sans-serif; font-size:16px; padding:13px 15px;
+    width:100%; outline:none; margin-bottom:6px; transition:border-color .2s;
+  }
+  .modal-date-input:focus { border-color:var(--accent); }
+  input[type="date"]::-webkit-calendar-picker-indicator { filter:invert(1); opacity:.5; }
+
+  /* ── TOAST ── */
   .toast {
-    position: fixed;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%) translateY(-80px);
-    background: var(--card2);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 10px 20px;
-    font-size: 13px;
-    font-weight: 500;
-    z-index: 1000;
-    transition: transform 0.3s ease;
-    white-space: nowrap;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    position:fixed; top:20px; left:50%; transform:translateX(-50%) translateY(-80px);
+    background:var(--card2); border:1px solid var(--border); border-radius:20px;
+    padding:10px 20px; font-size:13px; font-weight:500; z-index:1000;
+    transition:transform .3s ease; white-space:nowrap; box-shadow:0 4px 20px rgba(0,0,0,.5);
   }
-  .toast.show { transform: translateX(-50%) translateY(0); }
-
-  input[type="date"]::-webkit-calendar-picker-indicator {
-    filter: invert(1);
-    opacity: 0.5;
-  }
-
-  .scrollbar-hide { scrollbar-width: none; }
-  .scrollbar-hide::-webkit-scrollbar { display: none; }
+  .toast.show { transform:translateX(-50%) translateY(0); }
 </style>
 </head>
 <body>
@@ -827,7 +435,7 @@
     <div class="nick-desc">대건 열품타에 처음 오셨군요!<br>사용할 닉네임을 설정해주세요.</div>
     <input class="nick-input" id="nickInput" type="text" placeholder="닉네임을 입력하세요" maxlength="12">
     <div class="nick-error" id="nickError"></div>
-    <button class="nick-btn" id="nickConfirmBtn" onclick="confirmNickname()">시작하기</button>
+    <button class="nick-btn" onclick="confirmNickname()">시작하기</button>
   </div>
 </div>
 
@@ -837,6 +445,7 @@
   <!-- HOME TAB -->
   <div class="tab-page active" id="homeTab">
     <div class="home-grid">
+
       <!-- D-day -->
       <div class="dday-card" onclick="openDdayModal()">
         <div class="dday-label">📅 D-DAY</div>
@@ -844,13 +453,21 @@
         <div class="dday-count" id="ddayCount">D-365</div>
       </div>
 
-      <!-- Profile -->
+      <!-- Profile + 순공시간 -->
       <div class="profile-card" onclick="openProfileModal()">
         <div class="profile-avatar" id="profileAvatar">A</div>
         <div class="profile-info">
           <div class="profile-nick" id="profileNick">닉네임</div>
           <div class="profile-sub">프로필 수정 ›</div>
         </div>
+        <div class="profile-pure-time" id="profilePureTime">0h 0m</div>
+      </div>
+
+      <!-- 모토 -->
+      <div class="motto-card" onclick="openMottoModal()">
+        <span class="motto-icon">✦</span>
+        <span class="motto-text" id="mottoText">나만의 공부 모토를 적어보세요...</span>
+        <span class="motto-edit-hint">수정</span>
       </div>
 
       <!-- Timetable -->
@@ -918,6 +535,12 @@
           <div class="settings-item-value" id="settingsNick"></div>
           <div class="settings-item-arrow">›</div>
         </div>
+        <div class="settings-item" onclick="openMottoModal()">
+          <div class="settings-item-icon">✦</div>
+          <div class="settings-item-label">나의 모토</div>
+          <div class="settings-item-value" id="settingsMotto" style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
+          <div class="settings-item-arrow">›</div>
+        </div>
       </div>
       <div class="settings-section">
         <div class="settings-section-title">학교</div>
@@ -932,7 +555,7 @@
         <div class="settings-item">
           <div class="settings-item-icon">📱</div>
           <div class="settings-item-label">버전</div>
-          <div class="settings-item-value">1.0.0</div>
+          <div class="settings-item-value">1.1.0</div>
         </div>
       </div>
     </div>
@@ -944,22 +567,19 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
         <polyline points="9,22 9,12 15,12 15,22"/>
-      </svg>
-      홈
+      </svg>홈
     </button>
     <button class="nav-btn" id="nav-group" onclick="switchTab('group')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/>
         <path d="M16 3.13a4 4 0 010 7.75"/><path d="M21 21v-2a4 4 0 00-3-3.87"/>
-      </svg>
-      그룹
+      </svg>그룹
     </button>
     <button class="nav-btn" id="nav-settings" onclick="switchTab('settings')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <circle cx="12" cy="12" r="3"/>
         <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06A1.65 1.65 0 0015 19.4a1.65 1.65 0 00-1.65 1.5V21a2 2 0 01-4 0v-.09A1.65 1.65 0 008 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 003.85 15a1.65 1.65 0 00-1.5-1.65H2a2 2 0 010-4h.09A1.65 1.65 0 004.6 8a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 3.85a1.65 1.65 0 001.65-1.5V2a2 2 0 014 0v.09A1.65 1.65 0 0016 4.6a1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0020.15 9a1.65 1.65 0 001.5 1.65H22a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1.35z"/>
-      </svg>
-      설정
+      </svg>설정
     </button>
   </div>
 </div>
@@ -968,9 +588,17 @@
 <div class="screen" id="studyScreen">
   <div class="study-header">
     <div class="study-subject-badge" id="studySubjectBadge">국어</div>
-    <div style="font-size:12px;color:var(--text2);" id="studyDate"></div>
+    <div style="font-size:11px;color:var(--text2);" id="studyDate"></div>
   </div>
-  <div class="study-timer" id="studyTimer">00:00:00</div>
+  <!-- 학습시간 (순공시간) -->
+  <div class="study-time-bar">
+    <span class="study-session-timer" id="studySessionTimer">00:00:00</span>
+    <span class="study-pure-inline" id="studyPureInline">(0h 0m)</span>
+  </div>
+  <div class="study-timer-labels">
+    <span>⏱ 학습시간</span>
+    <span style="color:var(--accent2);">✦ 순공시간</span>
+  </div>
   <button class="study-stop-btn" onclick="stopStudy()">⏹ 공부 종료</button>
   <div class="study-rank-title">🏆 실시간 공부 랭킹</div>
   <div class="study-rank-list" id="studyRankList"></div>
@@ -990,7 +618,7 @@
   </div>
 </div>
 
-<!-- Profile Modal -->
+<!-- Profile / Nickname Modal -->
 <div class="modal-overlay" id="profileModal">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
@@ -1000,6 +628,19 @@
     <div class="modal-error" id="profileError"></div>
     <button class="modal-btn" onclick="saveNickname()">변경하기</button>
     <button class="modal-btn modal-btn-cancel" onclick="closeModal('profileModal')">취소</button>
+  </div>
+</div>
+
+<!-- Motto Modal -->
+<div class="modal-overlay" id="mottoModal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">✦ 나의 모토</div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:14px;">공부에 대한 나만의 한마디를 적어보세요.</div>
+    <input class="modal-input" id="mottoInput" type="text" placeholder="예: 오늘 흘린 땀이 내일의 나를 만든다" maxlength="40">
+    <div class="modal-error" id="mottoError"></div>
+    <button class="modal-btn" onclick="saveMotto()">저장</button>
+    <button class="modal-btn modal-btn-cancel" onclick="closeModal('mottoModal')">취소</button>
   </div>
 </div>
 
@@ -1021,7 +662,8 @@
   <div class="modal-sheet">
     <div class="modal-handle"></div>
     <div class="modal-title">👤 친구 초대</div>
-    <input class="modal-input" id="inviteNickInput" type="text" placeholder="초대할 친구의 닉네임">
+    <input class="modal-input" id="inviteNickInput" type="text" placeholder="초대할 친구의 닉네임"
+      onkeydown="if(event.key==='Enter') inviteFriend()">
     <div class="modal-error" id="inviteError"></div>
     <button class="modal-btn" onclick="inviteFriend()">초대하기</button>
     <button class="modal-btn modal-btn-cancel" onclick="closeModal('inviteModal')">취소</button>
@@ -1031,85 +673,87 @@
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
-<!-- FIREBASE + APP SCRIPT -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-import {
-  getAuth, signInAnonymously, onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+import { getAuth, signInAnonymously, onAuthStateChanged }
+  from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
 import {
   getFirestore, doc, getDoc, setDoc, getDocs,
   collection, query, where, orderBy, onSnapshot,
-  serverTimestamp, updateDoc, deleteDoc, addDoc, arrayUnion
+  serverTimestamp, updateDoc, addDoc, arrayUnion, increment
 } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAOEr3obGdMpSG0RQzUhWUGou7tn_idcxo",
-  authDomain: "fruitslayer-online.firebaseapp.com",
-  projectId: "fruitslayer-online",
-  storageBucket: "fruitslayer-online.firebasestorage.app",
-  messagingSenderId: "396029026245",
-  appId: "1:396029026245:web:419c020a42bda7e87bf5ac"
+  apiKey:"AIzaSyAOEr3obGdMpSG0RQzUhWUGou7tn_idcxo",
+  authDomain:"fruitslayer-online.firebaseapp.com",
+  projectId:"fruitslayer-online",
+  storageBucket:"fruitslayer-online.firebasestorage.app",
+  messagingSenderId:"396029026245",
+  appId:"1:396029026245:web:419c020a42bda7e87bf5ac"
 };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+const fbApp = initializeApp(firebaseConfig);
+const auth  = getAuth(fbApp);
+const db    = getFirestore(fbApp);
 
-// ─── STATE ───
-let currentUser = null;
-let userProfile = null;
+// ── STATE ──
+let currentUser   = null;
+let userProfile   = null;
 let selectedSubject = null;
-let studyStartTime = null;
+let studyStartTime  = null;       // 학습 시작 타임스탬프 (학습시간 기준)
 let studyTimerInterval = null;
-let studySessionId = null;
+let studySessionId  = null;
 let rankUnsubscribe = null;
-let timetableBlocks = []; // {subject, start(min from 6am), end, color, name}
-let currentGroupId = null;
+let timetableBlocks = [];
+let currentGroupId   = null;
 let currentGroupData = null;
+let todayPureMs      = 0;         // 오늘 순공 누적 (ms)
+let groupsCache      = [];
 
 const SUBJECTS = [
-  { id: 'korean', name: '국어', color: '#f4a0a0', bg: 'rgba(244,160,160,0.15)' },
-  { id: 'math',   name: '수학', color: '#f4e0a0', bg: 'rgba(244,224,160,0.15)' },
-  { id: 'social', name: '사회', color: '#a0d4a0', bg: 'rgba(160,212,160,0.15)' },
-  { id: 'science',name: '과학', color: '#a0c4f4', bg: 'rgba(160,196,244,0.15)' },
-  { id: 'english',name: '영어', color: '#d4a0f4', bg: 'rgba(212,160,244,0.15)' },
+  {id:'korean', name:'국어', color:'#f4a0a0', bg:'rgba(244,160,160,0.15)'},
+  {id:'math',   name:'수학', color:'#f4e0a0', bg:'rgba(244,224,160,0.15)'},
+  {id:'social', name:'사회', color:'#a0d4a0', bg:'rgba(160,212,160,0.15)'},
+  {id:'science',name:'과학', color:'#a0c4f4', bg:'rgba(160,196,244,0.15)'},
+  {id:'english',name:'영어', color:'#d4a0f4', bg:'rgba(212,160,244,0.15)'},
 ];
+const BAD_WORDS = ['욕','씨발','개새','병신','지랄','새끼','ㅅㅂ','ㅂㅅ','fuck','shit','bitch','asshole'];
+const hasBadWord = s => BAD_WORDS.some(w => s.toLowerCase().includes(w));
 
-const BAD_WORDS = ['욕','씨발','개새','병신','지랄','새끼','ㅅㅂ','ㅂㅅ','fuck','shit','bitch','asshole','damn'];
-
-function hasBadWord(str) {
-  const lower = str.toLowerCase();
-  return BAD_WORDS.some(w => lower.includes(w));
-}
-
-function showToast(msg, duration = 2000) {
+// ── HELPERS ──
+function showToast(msg, dur=2200) {
   const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), duration);
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), dur);
 }
-
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  const el = document.getElementById(id);
-  if (el) el.classList.add('active');
+  document.getElementById(id).classList.add('active');
+}
+function formatMs(ms) {
+  const s = Math.floor(ms/1000);
+  return [Math.floor(s/3600),Math.floor((s%3600)/60),s%60]
+    .map(v=>String(v).padStart(2,'0')).join(':');
+}
+function formatMsShort(ms) {
+  const h = Math.floor(ms/3600000);
+  const m = Math.floor((ms%3600000)/60000);
+  return `${h}h ${m}m`;
+}
+function todayStr() {
+  const d=new Date(); return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
 }
 
-// ─── AUTH ───
+// ── AUTH ──
 async function init() {
-  try {
-    await signInAnonymously(auth);
-  } catch(e) {
-    console.error(e);
-    showToast('로그인 오류: ' + e.message);
-  }
+  try { await signInAnonymously(auth); }
+  catch(e) { showToast('로그인 오류: '+e.message); }
 }
 
-onAuthStateChanged(auth, async (user) => {
+onAuthStateChanged(auth, async user => {
   if (!user) return;
   currentUser = user;
-  const ref = doc(db, 'users', user.uid);
+  const ref  = doc(db,'users',user.uid);
   const snap = await getDoc(ref);
   if (!snap.exists()) {
     showScreen('nicknameSetup');
@@ -1120,314 +764,271 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
-// ─── NICKNAME SETUP ───
+// ── NICKNAME SETUP ──
 window.confirmNickname = async function() {
   const val = document.getElementById('nickInput').value.trim();
-  const errEl = document.getElementById('nickError');
-  errEl.textContent = '';
-
-  if (!val || val.length < 2) { errEl.textContent = '닉네임은 2자 이상이어야 합니다.'; return; }
-  if (val.length > 12) { errEl.textContent = '닉네임은 12자 이하여야 합니다.'; return; }
-  if (hasBadWord(val)) { errEl.textContent = '부적절한 언어가 포함되어 있습니다.'; return; }
-
-  const q = query(collection(db, 'users'), where('nickname', '==', val));
-  const qs = await getDocs(q);
-  if (!qs.empty) { errEl.textContent = '이미 사용 중인 닉네임입니다.'; return; }
+  const err = document.getElementById('nickError');
+  err.textContent = '';
+  if (val.length < 2)  { err.textContent = '닉네임은 2자 이상이어야 합니다.'; return; }
+  if (val.length > 12) { err.textContent = '닉네임은 12자 이하여야 합니다.'; return; }
+  if (hasBadWord(val)) { err.textContent = '부적절한 언어가 포함되어 있습니다.'; return; }
+  const qs = await getDocs(query(collection(db,'users'),where('nickname','==',val)));
+  if (!qs.empty)       { err.textContent = '이미 사용 중인 닉네임입니다.'; return; }
 
   const data = {
-    nickname: val,
-    uid: currentUser.uid,
-    createdAt: serverTimestamp(),
-    lastNicknameChange: null,
-    dday: { name: '수능', date: getDefaultSuneungDate() },
-    todayStudyMs: 0
+    nickname: val, uid: currentUser.uid,
+    createdAt: serverTimestamp(), lastNicknameChange: null,
+    dday: {name:'수능', date: getDefaultSuneungDate()},
+    motto: '',
+    todayPureMs: 0, todayDate: todayStr()
   };
-  await setDoc(doc(db, 'users', currentUser.uid), data);
+  await setDoc(doc(db,'users',currentUser.uid), data);
   userProfile = data;
   showScreen('app');
   initApp();
 };
-
 document.getElementById('nickInput').addEventListener('keydown', e => {
-  if (e.key === 'Enter') window.confirmNickname();
+  if (e.key==='Enter') window.confirmNickname();
 });
 
 function getDefaultSuneungDate() {
-  const d = new Date();
-  d.setFullYear(d.getFullYear() + 1);
-  d.setMonth(10); d.setDate(14);
+  const d = new Date(); d.setFullYear(d.getFullYear()+1); d.setMonth(10); d.setDate(14);
   return d.toISOString().split('T')[0];
 }
 
-// ─── APP INIT ───
+// ── APP INIT ──
 function initApp() {
+  // 날짜 변경시 순공 초기화
+  if (userProfile.todayDate !== todayStr()) {
+    updateDoc(doc(db,'users',currentUser.uid), {todayPureMs:0, todayDate: todayStr()});
+    userProfile.todayPureMs = 0; userProfile.todayDate = todayStr();
+  }
+  todayPureMs = userProfile.todayPureMs || 0;
+
   renderSubjects();
   renderTimetable();
   updateDday();
   updateProfileCard();
+  updateMotto();
   loadGroups();
   document.getElementById('settingsNick').textContent = userProfile.nickname || '';
-  setInterval(updateTimetableCurrentLine, 30000);
-  setInterval(updateDday, 60000);
   setInterval(updateCurrentTimeClock, 1000);
+  setInterval(updateDday, 60000);
 }
 
-// ─── TABS ───
+// ── TABS ──
 window.switchTab = function(tab) {
   document.querySelectorAll('.tab-page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('nav-' + tab).classList.add('active');
-
-  if (tab === 'group') {
-    if (currentGroupId) {
-      document.getElementById('groupDetail').classList.add('active');
-    } else {
-      document.getElementById('groupTab').classList.add('active');
-    }
+  document.getElementById('nav-'+tab).classList.add('active');
+  if (tab === 'group' && currentGroupId) {
+    document.getElementById('groupDetail').classList.add('active');
   } else {
-    document.getElementById(tab + 'Tab').classList.add('active');
+    document.getElementById(tab+'Tab').classList.add('active');
   }
 };
 
-// ─── DDAY ───
+// ── DDAY ──
 function updateDday() {
   if (!userProfile) return;
-  const dday = userProfile.dday || {};
-  const name = dday.name || '수능';
-  const dateStr = dday.date || getDefaultSuneungDate();
-  const target = new Date(dateStr + 'T00:00:00');
-  const today = new Date();
-  today.setHours(0,0,0,0);
-  const diff = Math.ceil((target - today) / 86400000);
-  document.getElementById('ddayName').textContent = name;
-  document.getElementById('ddayCount').textContent = diff > 0 ? `D-${diff}` : diff === 0 ? 'D-Day' : `D+${Math.abs(diff)}`;
+  const {name='수능', date=getDefaultSuneungDate()} = userProfile.dday || {};
+  const diff = Math.ceil((new Date(date+'T00:00:00') - new Date(new Date().toDateString())) / 86400000);
+  document.getElementById('ddayName').textContent  = name;
+  document.getElementById('ddayCount').textContent = diff > 0 ? `D-${diff}` : diff===0 ? 'D-Day' : `D+${Math.abs(diff)}`;
 }
-
 window.openDdayModal = function() {
-  const dday = userProfile?.dday || {};
-  document.getElementById('ddayNameInput').value = dday.name || '';
-  document.getElementById('ddayDateInput').value = dday.date || getDefaultSuneungDate();
+  const {name='',date=getDefaultSuneungDate()} = userProfile?.dday || {};
+  document.getElementById('ddayNameInput').value = name;
+  document.getElementById('ddayDateInput').value = date;
   document.getElementById('ddayError').textContent = '';
   openModal('ddayModal');
 };
-
 window.saveDday = async function() {
   const name = document.getElementById('ddayNameInput').value.trim();
   const date = document.getElementById('ddayDateInput').value;
-  const errEl = document.getElementById('ddayError');
-  if (!name) { errEl.textContent = 'D-Day 이름을 입력하세요.'; return; }
-  if (!date) { errEl.textContent = '날짜를 선택하세요.'; return; }
-  await updateDoc(doc(db, 'users', currentUser.uid), { dday: { name, date } });
-  userProfile.dday = { name, date };
-  updateDday();
-  closeModal('ddayModal');
+  const err  = document.getElementById('ddayError');
+  if (!name) { err.textContent='D-Day 이름을 입력하세요.'; return; }
+  if (!date) { err.textContent='날짜를 선택하세요.'; return; }
+  await updateDoc(doc(db,'users',currentUser.uid), {dday:{name,date}});
+  userProfile.dday = {name,date}; updateDday(); closeModal('ddayModal');
   showToast('D-Day가 저장되었습니다!');
 };
 
-// ─── PROFILE ───
+// ── PROFILE ──
 function updateProfileCard() {
   const nick = userProfile?.nickname || '?';
-  document.getElementById('profileNick').textContent = nick;
+  document.getElementById('profileNick').textContent   = nick;
   document.getElementById('profileAvatar').textContent = nick[0] || '?';
-  document.getElementById('settingsNick').textContent = nick;
+  document.getElementById('settingsNick').textContent  = nick;
+  document.getElementById('profilePureTime').textContent = formatMsShort(todayPureMs);
 }
-
 window.openProfileModal = function() {
   document.getElementById('profileNickInput').value = '';
-  document.getElementById('profileError').textContent = '';
-  // Check cooldown
+  const err = document.getElementById('profileError');
+  err.textContent = '';
   const last = userProfile?.lastNicknameChange;
   if (last) {
-    const lastDate = last.toDate ? last.toDate() : new Date(last);
-    const diff = (Date.now() - lastDate.getTime()) / 86400000;
-    if (diff < 30) {
-      const remain = Math.ceil(30 - diff);
-      document.getElementById('profileError').textContent = `닉네임은 ${remain}일 후에 변경할 수 있습니다.`;
-    }
+    const d = last.toDate ? last.toDate() : new Date(last);
+    const remain = 30 - (Date.now()-d.getTime())/86400000;
+    if (remain > 0) err.textContent = `닉네임은 ${Math.ceil(remain)}일 후에 변경할 수 있습니다.`;
   }
   openModal('profileModal');
 };
-
 window.saveNickname = async function() {
   const val = document.getElementById('profileNickInput').value.trim();
-  const errEl = document.getElementById('profileError');
-
+  const err = document.getElementById('profileError');
   const last = userProfile?.lastNicknameChange;
   if (last) {
-    const lastDate = last.toDate ? last.toDate() : new Date(last);
-    const diff = (Date.now() - lastDate.getTime()) / 86400000;
-    if (diff < 30) {
-      const remain = Math.ceil(30 - diff);
-      errEl.textContent = `닉네임은 ${remain}일 후에 변경할 수 있습니다.`;
-      return;
-    }
+    const d = last.toDate ? last.toDate() : new Date(last);
+    const remain = 30 - (Date.now()-d.getTime())/86400000;
+    if (remain > 0) { err.textContent=`닉네임은 ${Math.ceil(remain)}일 후에 변경할 수 있습니다.`; return; }
   }
-
-  if (!val || val.length < 2) { errEl.textContent = '닉네임은 2자 이상이어야 합니다.'; return; }
-  if (val.length > 12) { errEl.textContent = '닉네임은 12자 이하여야 합니다.'; return; }
-  if (hasBadWord(val)) { errEl.textContent = '부적절한 언어가 포함되어 있습니다.'; return; }
-
-  const q = query(collection(db, 'users'), where('nickname', '==', val));
-  const qs = await getDocs(q);
-  if (!qs.empty && qs.docs[0].id !== currentUser.uid) {
-    errEl.textContent = '이미 사용 중인 닉네임입니다.'; return;
-  }
-
-  await updateDoc(doc(db, 'users', currentUser.uid), {
-    nickname: val,
-    lastNicknameChange: serverTimestamp()
-  });
-  userProfile.nickname = val;
-  userProfile.lastNicknameChange = new Date();
-  updateProfileCard();
-  closeModal('profileModal');
+  if (val.length < 2)  { err.textContent='닉네임은 2자 이상이어야 합니다.'; return; }
+  if (val.length > 12) { err.textContent='닉네임은 12자 이하여야 합니다.'; return; }
+  if (hasBadWord(val)) { err.textContent='부적절한 언어가 포함되어 있습니다.'; return; }
+  const qs = await getDocs(query(collection(db,'users'),where('nickname','==',val)));
+  if (!qs.empty && qs.docs[0].id !== currentUser.uid) { err.textContent='이미 사용 중인 닉네임입니다.'; return; }
+  await updateDoc(doc(db,'users',currentUser.uid),{nickname:val, lastNicknameChange:serverTimestamp()});
+  userProfile.nickname = val; userProfile.lastNicknameChange = new Date();
+  updateProfileCard(); closeModal('profileModal');
   showToast('닉네임이 변경되었습니다!');
 };
 
-// ─── SUBJECTS ───
+// ── MOTTO ──
+function updateMotto() {
+  const motto = userProfile?.motto || '';
+  const el = document.getElementById('mottoText');
+  if (motto) {
+    el.textContent = motto; el.classList.add('set');
+  } else {
+    el.textContent = '나만의 공부 모토를 적어보세요...'; el.classList.remove('set');
+  }
+  document.getElementById('settingsMotto').textContent = motto || '미설정';
+}
+window.openMottoModal = function() {
+  document.getElementById('mottoInput').value = userProfile?.motto || '';
+  document.getElementById('mottoError').textContent = '';
+  openModal('mottoModal');
+};
+window.saveMotto = async function() {
+  const val = document.getElementById('mottoInput').value.trim();
+  const err = document.getElementById('mottoError');
+  if (val.length > 40) { err.textContent='40자 이하로 입력해주세요.'; return; }
+  await updateDoc(doc(db,'users',currentUser.uid), {motto:val});
+  userProfile.motto = val; updateMotto(); closeModal('mottoModal');
+  showToast('모토가 저장되었습니다!');
+};
+
+// ── SUBJECTS ──
 function renderSubjects() {
   const list = document.getElementById('subjectList');
   list.innerHTML = '';
   SUBJECTS.forEach(s => {
     const btn = document.createElement('button');
-    btn.className = 'subj-btn';
-    btn.dataset.id = s.id;
-    btn.style.setProperty('--subj-color', s.color);
-    btn.innerHTML = `
-      <div class="subj-dot" style="background:${s.color}"></div>
-      <span class="subj-name">${s.name}</span>
-    `;
+    btn.className = 'subj-btn'; btn.dataset.id = s.id;
+    btn.innerHTML = `<div class="subj-dot" style="background:${s.color}"></div><span class="subj-name">${s.name}</span>`;
     btn.onclick = () => selectSubject(s);
     list.appendChild(btn);
   });
 }
-
 function selectSubject(s) {
   selectedSubject = s;
   document.querySelectorAll('.subj-btn').forEach(b => {
-    b.classList.toggle('selected', b.dataset.id === s.id);
-    if (b.dataset.id === s.id) {
-      b.style.borderColor = s.color;
-      b.style.background = s.bg;
-    } else {
-      b.style.borderColor = 'transparent';
-      b.style.background = 'var(--bg3)';
-    }
+    const sel = b.dataset.id === s.id;
+    b.classList.toggle('selected', sel);
+    b.style.borderColor  = sel ? s.color : 'transparent';
+    b.style.background   = sel ? s.bg : 'var(--bg3)';
   });
   const btn = document.getElementById('startBtn');
-  btn.disabled = false;
-  btn.classList.add('ready');
-  btn.style.background = `linear-gradient(135deg, ${s.color}, ${s.color}cc)`;
+  btn.disabled = false; btn.classList.add('ready');
+  btn.style.background = `linear-gradient(135deg,${s.color},${s.color}cc)`;
   btn.textContent = `${s.name} 공부 시작하기`;
 }
 
-// ─── TIMETABLE ───
-const HOURS = Array.from({length: 19}, (_, i) => i + 6); // 6am ~ 12am
-const HOUR_HEIGHT = 40; // px per hour
+// ── TIMETABLE ──
+const HOURS = Array.from({length:19},(_,i)=>i+6);
+const HOUR_H = 38;
 
 function renderTimetable() {
   const body = document.getElementById('ttBody');
   body.innerHTML = '';
-  body.style.height = (HOURS.length * HOUR_HEIGHT) + 'px';
-
-  HOURS.forEach((h, i) => {
+  body.style.height = (HOURS.length * HOUR_H) + 'px';
+  HOURS.forEach((h,i) => {
     const slot = document.createElement('div');
     slot.className = 'tt-slot';
-    slot.style.position = 'absolute';
-    slot.style.top = (i * HOUR_HEIGHT) + 'px';
-    slot.style.left = '0'; slot.style.right = '0';
-    slot.style.height = HOUR_HEIGHT + 'px';
-    slot.innerHTML = `
-      <div class="tt-time">${h < 10 ? '0'+h : h}:00</div>
-      <div class="tt-bar-area" data-hour="${h}"></div>
-    `;
+    slot.style.cssText = `top:${i*HOUR_H}px;height:${HOUR_H}px;`;
+    slot.innerHTML = `<div class="tt-time">${String(h).padStart(2,'0')}</div><div class="tt-bar-area"></div>`;
     body.appendChild(slot);
   });
-
   renderTimetableBlocks();
   updateTimetableCurrentLine();
-  scrollTimetableToNow();
+  setTimeout(() => {
+    const now = new Date();
+    const y = ((now.getHours()-6)*60+now.getMinutes())/60*HOUR_H;
+    const sc = document.getElementById('ttScroll');
+    sc.scrollTop = Math.max(0, y - sc.clientHeight/2);
+  }, 100);
 }
-
+function minuteToY(m) { return (m/60)*HOUR_H; }
 function renderTimetableBlocks() {
-  // Remove old blocks
-  document.querySelectorAll('.tt-block').forEach(b => b.remove());
-  document.querySelectorAll('.tt-current-line').forEach(b => b.remove());
-
+  document.querySelectorAll('.tt-block').forEach(e=>e.remove());
   const body = document.getElementById('ttBody');
-  timetableBlocks.forEach(block => {
-    const top = minuteToY(block.start);
-    const height = minuteToY(block.end) - top;
-    if (height < 4) return;
+  timetableBlocks.forEach(b => {
+    const top = minuteToY(b.start);
+    const h   = minuteToY(b.end) - top;
+    if (h < 4) return;
     const el = document.createElement('div');
     el.className = 'tt-block';
-    el.style.top = top + 'px';
-    el.style.height = height + 'px';
-    el.style.background = block.color;
-    el.style.color = '#0f0f14';
-    el.textContent = block.name;
+    el.style.cssText = `top:${top}px;height:${h}px;background:${b.color};color:#0f0f14;`;
+    el.textContent = b.name;
     body.appendChild(el);
   });
 }
-
-function minuteToY(minuteFrom6am) {
-  return (minuteFrom6am / 60) * HOUR_HEIGHT;
-}
-
 function updateTimetableCurrentLine() {
-  document.querySelectorAll('.tt-current-line').forEach(e => e.remove());
+  document.querySelectorAll('.tt-current-line').forEach(e=>e.remove());
   const now = new Date();
-  const minFrom6 = (now.getHours() - 6) * 60 + now.getMinutes();
-  if (minFrom6 < 0 || minFrom6 > HOURS.length * 60) return;
-  const y = minuteToY(minFrom6);
+  const minFrom6 = (now.getHours()-6)*60+now.getMinutes();
+  if (minFrom6 < 0 || minFrom6 > HOURS.length*60) return;
   const line = document.createElement('div');
   line.className = 'tt-current-line';
-  line.style.top = y + 'px';
+  line.style.top = minuteToY(minFrom6)+'px';
   document.getElementById('ttBody').appendChild(line);
 }
-
-function scrollTimetableToNow() {
-  const now = new Date();
-  const minFrom6 = (now.getHours() - 6) * 60 + now.getMinutes();
-  const y = minuteToY(minFrom6);
-  const scroll = document.getElementById('ttScroll');
-  const offset = Math.max(0, y - scroll.clientHeight / 2);
-  scroll.scrollTop = offset;
-}
-
 function updateCurrentTimeClock() {
   const now = new Date();
-  const h = now.getHours().toString().padStart(2, '0');
-  const m = now.getMinutes().toString().padStart(2, '0');
-  document.getElementById('ttCurrentTime').textContent = `${h}:${m}`;
+  document.getElementById('ttCurrentTime').textContent =
+    `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
   updateTimetableCurrentLine();
 }
 
-// ─── STUDY ───
+// ── STUDY ──
 window.startStudy = function() {
   if (!selectedSubject) return;
   studyStartTime = Date.now();
-  document.getElementById('studySubjectBadge').textContent = selectedSubject.name;
-  document.getElementById('studySubjectBadge').style.background = selectedSubject.bg;
-  document.getElementById('studySubjectBadge').style.color = selectedSubject.color;
-  document.getElementById('studySubjectBadge').style.border = `1px solid ${selectedSubject.color}44`;
+
+  // 공부화면 꾸미기
+  const badge = document.getElementById('studySubjectBadge');
+  badge.textContent = selectedSubject.name;
+  badge.style.background = selectedSubject.bg;
+  badge.style.color       = selectedSubject.color;
+  badge.style.border      = `1px solid ${selectedSubject.color}44`;
+
   const now = new Date();
   document.getElementById('studyDate').textContent =
-    `${now.getMonth()+1}월 ${now.getDate()}일 ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')} 시작`;
+    `${now.getMonth()+1}월 ${now.getDate()}일 ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')} 시작`;
 
   document.getElementById('studyScreen').classList.add('active');
+  studyTimerInterval = setInterval(tickStudy, 1000);
 
-  studyTimerInterval = setInterval(updateStudyTimer, 1000);
-
-  // Firestore session
-  addDoc(collection(db, 'studySessions'), {
+  addDoc(collection(db,'studySessions'), {
     uid: currentUser.uid,
     nickname: userProfile?.nickname || '익명',
     subject: selectedSubject.id,
     subjectName: selectedSubject.name,
     subjectColor: selectedSubject.color,
     startTime: serverTimestamp(),
-    elapsedMs: 0,
+    elapsedMs: 0,        // 학습시간 (중단 없이 진행)
+    todayPureMs: todayPureMs, // 순공시간 스냅샷
     active: true
   }).then(ref => {
     studySessionId = ref.id;
@@ -1435,12 +1036,20 @@ window.startStudy = function() {
   });
 };
 
-function updateStudyTimer() {
-  const elapsed = Date.now() - studyStartTime;
-  document.getElementById('studyTimer').textContent = formatMs(elapsed);
+function tickStudy() {
+  const sessionMs = Date.now() - studyStartTime;  // 학습시간
+  todayPureMs += 1000;                             // 순공시간 +1초
+
+  document.getElementById('studySessionTimer').textContent = formatMs(sessionMs);
+  document.getElementById('studyPureInline').textContent   = `(${formatMsShort(todayPureMs)})`;
+  // 홈 프로필 순공도 실시간 업데이트
+  document.getElementById('profilePureTime').textContent   = formatMsShort(todayPureMs);
 
   if (studySessionId) {
-    updateDoc(doc(db, 'studySessions', studySessionId), { elapsedMs: elapsed });
+    updateDoc(doc(db,'studySessions', studySessionId), {
+      elapsedMs: sessionMs,
+      todayPureMs: todayPureMs
+    });
   }
 }
 
@@ -1448,47 +1057,36 @@ window.stopStudy = async function() {
   clearInterval(studyTimerInterval);
   if (rankUnsubscribe) { rankUnsubscribe(); rankUnsubscribe = null; }
 
-  const elapsed = Date.now() - studyStartTime;
-  const startMin = new Date(studyStartTime);
-  const endMin = new Date();
-  const startMinFrom6 = (startMin.getHours() - 6) * 60 + startMin.getMinutes();
-  const endMinFrom6 = (endMin.getHours() - 6) * 60 + endMin.getMinutes();
-
-  // Add to timetable
-  if (startMinFrom6 >= 0 && endMinFrom6 > startMinFrom6) {
-    timetableBlocks.push({
-      start: startMinFrom6,
-      end: endMinFrom6,
-      color: selectedSubject.color,
-      name: selectedSubject.name
-    });
-    renderTimetableBlocks();
-    updateTimetableCurrentLine();
+  const sessionMs = Date.now() - studyStartTime;
+  const startDt = new Date(studyStartTime);
+  const endDt   = new Date();
+  const s6 = (startDt.getHours()-6)*60 + startDt.getMinutes();
+  const e6 = (endDt.getHours()-6)*60   + endDt.getMinutes();
+  if (s6 >= 0 && e6 > s6) {
+    timetableBlocks.push({start:s6, end:e6, color:selectedSubject.color, name:selectedSubject.name});
+    renderTimetableBlocks(); updateTimetableCurrentLine();
   }
 
+  // 순공시간 저장
+  await updateDoc(doc(db,'users',currentUser.uid), {
+    todayPureMs: todayPureMs, todayDate: todayStr()
+  });
   if (studySessionId) {
-    await updateDoc(doc(db, 'studySessions', studySessionId), {
-      elapsedMs: elapsed,
-      active: false,
-      endTime: serverTimestamp()
+    await updateDoc(doc(db,'studySessions',studySessionId), {
+      elapsedMs: sessionMs, todayPureMs: todayPureMs, active:false, endTime:serverTimestamp()
     });
   }
+  userProfile.todayPureMs = todayPureMs;
 
   document.getElementById('studyScreen').classList.remove('active');
   studySessionId = null;
-  showToast(`공부 완료! ${formatMs(elapsed)} 기록 저장 ✓`);
+  showToast(`공부 완료! 학습 ${formatMs(sessionMs)} / 오늘 순공 ${formatMsShort(todayPureMs)} ✓`);
 };
 
 function subscribeRanking() {
-  const today = new Date();
-  today.setHours(0,0,0,0);
-  const q = query(
-    collection(db, 'studySessions'),
-    where('active', '==', true),
-    orderBy('elapsedMs', 'desc')
-  );
+  const q = query(collection(db,'studySessions'), where('active','==',true), orderBy('elapsedMs','desc'));
   rankUnsubscribe = onSnapshot(q, snap => {
-    renderRanking(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    renderRanking(snap.docs.map(d => ({id:d.id,...d.data()})));
   });
 }
 
@@ -1499,56 +1097,62 @@ function renderRanking(sessions) {
     list.innerHTML = '<div style="text-align:center;color:var(--text3);padding:30px;font-size:13px;">현재 공부 중인 친구가 없어요 😴</div>';
     return;
   }
-  sessions.forEach((s, i) => {
+  sessions.forEach((s,i) => {
     const isMe = s.uid === currentUser?.uid;
+    const color = s.subjectColor || '#c8a84b';
     const item = document.createElement('div');
-    item.className = `rank-item ${i < 3 ? 'rank-' + (i+1) : ''}`;
-    if (isMe) item.style.borderColor = s.subjectColor || 'var(--accent)';
+    item.className = `rank-item${i<3?' rank-'+(i+1):''}`;
+    if (isMe) item.style.borderColor = color;
+
+    // 아바타: 공부중이면 glow
+    const avatarStyle = `background:linear-gradient(135deg,${color},${color}88);color:${color};`;
+
     item.innerHTML = `
       <div class="rank-num">${i+1}</div>
-      <div class="rank-avatar" style="background:linear-gradient(135deg,${s.subjectColor||'var(--accent)'},${s.subjectColor||'var(--accent2)'}88)">${(s.nickname||'?')[0]}</div>
-      <div class="rank-info">
-        <div class="rank-name">${s.nickname || '익명'}</div>
-        <div class="rank-time">${formatMs(s.elapsedMs || 0)}</div>
+      <div class="rank-avatar-wrap">
+        <div class="rank-avatar studying" style="${avatarStyle}">${(s.nickname||'?')[0]}</div>
       </div>
-      <div class="rank-subject-dot" style="background:${s.subjectColor||'#888'}"></div>
-      ${isMe ? '<div class="rank-me-badge">나</div>' : ''}
+      <div class="rank-info">
+        <div class="rank-name">${s.nickname||'익명'}${isMe?' (나)':''}</div>
+        <div class="rank-time">
+          ⏱ ${formatMs(s.elapsedMs||0)}
+          <span style="color:var(--accent2);margin-left:8px;">✦ ${formatMsShort(s.todayPureMs||0)}</span>
+        </div>
+      </div>
+      ${isMe?'<div class="rank-me-badge">나</div>':''}
     `;
     list.appendChild(item);
   });
 }
 
-function formatMs(ms) {
-  const s = Math.floor(ms / 1000);
-  const h = Math.floor(s / 3600).toString().padStart(2,'0');
-  const m = Math.floor((s % 3600) / 60).toString().padStart(2,'0');
-  const sec = (s % 60).toString().padStart(2,'0');
-  return `${h}:${m}:${sec}`;
-}
-
-// ─── GROUPS ───
-let groupsCache = [];
-
-async function loadGroups() {
+// ── GROUPS ──
+// 그룹 불러오기: onSnapshot 실시간
+function loadGroups() {
   if (!currentUser) return;
-  const q = query(collection(db, 'groups'), where('members', 'array-contains', currentUser.uid));
+  const q = query(collection(db,'groups'), where('members','array-contains',currentUser.uid));
   onSnapshot(q, snap => {
-    groupsCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    groupsCache = snap.docs.map(d => ({id:d.id,...d.data()}));
     renderGroups();
+    // 그룹 디테일 열려있으면 멤버 새로고침
+    if (currentGroupId) {
+      const updated = groupsCache.find(g => g.id===currentGroupId);
+      if (updated) { currentGroupData = updated; renderGroupMembers(updated); }
+    }
   });
 }
 
 function renderGroups() {
-  const list = document.getElementById('groupList');
-  list.innerHTML = '';
+  const list  = document.getElementById('groupList');
   const empty = document.getElementById('groupEmpty');
-
+  // empty-state 제거하고 다시 그린다
+  list.innerHTML = '';
   if (!groupsCache.length) {
-    empty.style.display = 'flex';
+    const es = document.createElement('div');
+    es.className = 'empty-state'; es.id = 'groupEmpty';
+    es.innerHTML = '<div class="empty-icon">🏫</div><div class="empty-text">아직 그룹이 없어요.<br>그룹을 만들거나 참여해보세요!</div>';
+    list.appendChild(es);
     return;
   }
-  empty.style.display = 'none';
-
   groupsCache.forEach(g => {
     const item = document.createElement('div');
     item.className = 'group-item';
@@ -1557,7 +1161,7 @@ function renderGroups() {
       <div class="group-icon">📚</div>
       <div class="group-info">
         <div class="group-name">${g.name}</div>
-        <div class="group-meta">${g.memberCount || 1}명 · ${g.ownerNickname || ''}이(가) 만든 그룹</div>
+        <div class="group-meta">${g.memberCount||1}명 · ${g.ownerNickname||''}이(가) 만든 그룹</div>
       </div>
       <div style="color:var(--text3);font-size:16px;">›</div>
     `;
@@ -1573,64 +1177,69 @@ window.openCreateGroupModal = function() {
 
 window.createGroup = async function() {
   const name = document.getElementById('groupNameInput').value.trim();
-  const errEl = document.getElementById('groupCreateError');
-  if (!name) { errEl.textContent = '그룹 이름을 입력하세요.'; return; }
-  if (name.length > 20) { errEl.textContent = '그룹 이름은 20자 이하여야 합니다.'; return; }
-
-  await addDoc(collection(db, 'groups'), {
-    name,
-    owner: currentUser.uid,
-    ownerNickname: userProfile?.nickname || '익명',
-    members: [currentUser.uid],
-    memberNicknames: [userProfile?.nickname || '익명'],
-    memberCount: 1,
-    createdAt: serverTimestamp()
+  const err  = document.getElementById('groupCreateError');
+  if (!name)          { err.textContent='그룹 이름을 입력하세요.'; return; }
+  if (name.length>20) { err.textContent='그룹 이름은 20자 이하여야 합니다.'; return; }
+  await addDoc(collection(db,'groups'), {
+    name, owner: currentUser.uid, ownerNickname: userProfile?.nickname||'익명',
+    members: [currentUser.uid], memberNicknames: [userProfile?.nickname||'익명'],
+    memberCount:1, createdAt:serverTimestamp()
   });
   closeModal('createGroupModal');
   showToast(`'${name}' 그룹이 생성되었습니다!`);
+  // onSnapshot이 자동으로 renderGroups() 호출
   switchTab('group');
 };
 
 function openGroupDetail(g) {
-  currentGroupId = g.id;
+  currentGroupId   = g.id;
   currentGroupData = g;
   document.getElementById('groupDetailName').textContent = g.name;
-  document.getElementById('groupDetailMeta').textContent = `${g.memberCount || 1}명`;
-
-  const isOwner = g.owner === currentUser.uid;
-  document.getElementById('inviteFab').style.display = isOwner ? 'flex' : 'none';
-
+  document.getElementById('groupDetailMeta').textContent = `${g.memberCount||1}명`;
+  document.getElementById('inviteFab').style.display = (g.owner===currentUser.uid) ? 'flex' : 'none';
   renderGroupMembers(g);
-
   document.querySelectorAll('.tab-page').forEach(p => p.classList.remove('active'));
   document.getElementById('groupDetail').classList.add('active');
 }
 
-function renderGroupMembers(g) {
-  const list = document.getElementById('groupMemberList');
+async function renderGroupMembers(g) {
+  const list  = document.getElementById('groupMemberList');
   list.innerHTML = '';
   const nicks = g.memberNicknames || [];
-  const uids = g.members || [];
-  nicks.forEach((nick, i) => {
-    const uid = uids[i] || '';
+  const uids  = g.members || [];
+
+  // 활성 세션 가져오기
+  let activeSessions = {};
+  try {
+    const qs = await getDocs(query(collection(db,'studySessions'), where('active','==',true)));
+    qs.forEach(d => { activeSessions[d.data().uid] = d.data(); });
+  } catch(e) {}
+
+  nicks.forEach((nick,i) => {
+    const uid     = uids[i] || '';
     const isOwner = uid === g.owner;
-    const isMe = uid === currentUser?.uid;
+    const isMe    = uid === currentUser?.uid;
+    const session = activeSessions[uid];
+    const color   = session?.subjectColor || 'var(--accent)';
+
     const item = document.createElement('div');
     item.className = 'member-item';
+    const avatarGlow = session ? `style="color:${color};border-color:${color};box-shadow:0 0 8px 2px ${color};"` : '';
     item.innerHTML = `
-      <div class="member-avatar">${nick[0] || '?'}</div>
-      <div>
-        <div class="member-name">${nick}${isMe ? ' (나)' : ''}</div>
-        <div class="member-role">${isOwner ? '👑 방장' : '멤버'}</div>
+      <div class="member-avatar${session?' studying':''}" ${avatarGlow}>${nick[0]||'?'}</div>
+      <div style="flex:1;overflow:hidden;">
+        <div class="member-name">${nick}${isMe?' (나)':''}</div>
+        <div class="member-role">${isOwner?'👑 방장':'멤버'}${session?` · <span style="color:${color};font-size:10px;">● ${session.subjectName} 공부중</span>`:''}</div>
+        ${session?`<div class="member-puretime">순공 ${formatMsShort(session.todayPureMs||0)}</div>`:''}
       </div>
+      ${session?`<div style="font-size:11px;color:var(--text2);">${formatMs(session.elapsedMs||0)}</div>`:''}
     `;
     list.appendChild(item);
   });
 }
 
 window.closeGroupDetail = function() {
-  currentGroupId = null;
-  currentGroupData = null;
+  currentGroupId = null; currentGroupData = null;
   document.querySelectorAll('.tab-page').forEach(p => p.classList.remove('active'));
   document.getElementById('groupTab').classList.add('active');
 };
@@ -1643,54 +1252,33 @@ window.openInviteModal = function() {
 
 window.inviteFriend = async function() {
   const nick = document.getElementById('inviteNickInput').value.trim();
-  const errEl = document.getElementById('inviteError');
-  if (!nick) { errEl.textContent = '닉네임을 입력하세요.'; return; }
-
-  const q = query(collection(db, 'users'), where('nickname', '==', nick));
-  const qs = await getDocs(q);
-  if (qs.empty) { errEl.textContent = '해당 닉네임의 유저를 찾을 수 없습니다.'; return; }
-
-  const friendDoc = qs.docs[0];
-  const friendUid = friendDoc.id;
+  const err  = document.getElementById('inviteError');
+  if (!nick) { err.textContent='닉네임을 입력하세요.'; return; }
+  const qs = await getDocs(query(collection(db,'users'),where('nickname','==',nick)));
+  if (qs.empty) { err.textContent='해당 닉네임의 유저를 찾을 수 없습니다.'; return; }
+  const friendDoc  = qs.docs[0];
+  const friendUid  = friendDoc.id;
   const friendData = friendDoc.data();
-
-  if (!currentGroupId) { errEl.textContent = '그룹 정보를 찾을 수 없습니다.'; return; }
-
-  const gData = currentGroupData;
-  if (gData.members?.includes(friendUid)) {
-    errEl.textContent = '이미 그룹에 있는 멤버입니다.'; return;
-  }
-
-  await updateDoc(doc(db, 'groups', currentGroupId), {
+  if (!currentGroupId) { err.textContent='그룹 정보를 찾을 수 없습니다.'; return; }
+  if (currentGroupData.members?.includes(friendUid)) { err.textContent='이미 그룹에 있는 멤버입니다.'; return; }
+  await updateDoc(doc(db,'groups',currentGroupId), {
     members: arrayUnion(friendUid),
     memberNicknames: arrayUnion(friendData.nickname),
-    memberCount: (gData.memberCount || 1) + 1
+    memberCount: (currentGroupData.memberCount||1)+1
   });
-
   closeModal('inviteModal');
   showToast(`${nick}님을 그룹에 초대했습니다!`);
-
-  // Refresh
-  const snap = await getDoc(doc(db, 'groups', currentGroupId));
-  currentGroupData = { id: currentGroupId, ...snap.data() };
-  document.getElementById('groupDetailMeta').textContent = `${currentGroupData.memberCount || 1}명`;
-  renderGroupMembers(currentGroupData);
+  // onSnapshot이 자동으로 refreshGroupDetail 호출
 };
 
-// ─── MODAL HELPERS ───
-window.openModal = function(id) {
-  document.getElementById(id).classList.add('open');
-};
-window.closeModal = function(id) {
-  document.getElementById(id).classList.remove('open');
-};
-document.querySelectorAll('.modal-overlay').forEach(el => {
-  el.addEventListener('click', e => {
-    if (e.target === el) el.classList.remove('open');
-  });
-});
+// ── MODAL HELPERS ──
+window.openModal  = id => document.getElementById(id).classList.add('open');
+window.closeModal = id => document.getElementById(id).classList.remove('open');
+document.querySelectorAll('.modal-overlay').forEach(el =>
+  el.addEventListener('click', e => { if(e.target===el) el.classList.remove('open'); })
+);
 
-// ─── BOOT ───
+// ── BOOT ──
 init();
 </script>
 </body>
